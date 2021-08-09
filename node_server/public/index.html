@@ -1,0 +1,338 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="stylesheets/style.css">
+        <link rel="stylesheet" href="stylesheets/mediaCheck.css">
+        <link rel="stylesheet" href="stylesheets/notification.css">
+        <link rel="stylesheet" href="stylesheets/advancedSettings.css">
+        <link rel="stylesheet" href="stylesheets/attendanceList.css">
+        <link rel="stylesheet" href="stylesheets/buttonGroup.css">
+        <link rel="stylesheet" href="stylesheets/3DRecording.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+		<title>Hololearn Lecture System</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js" type="text/javascript"></script>
+	</head>
+    
+	<body>
+
+        <div class="container" style="display: block;">
+            <video class="input_video" style="display: none;" autoplay="true" muted></video>
+            <canvas class="output_canvas" width="1280px" height="720px" style="display: block;"></canvas>
+        </div>
+        <div id="inputDiv" style="display: none">
+            <input id="input" type='file' accept=".zip" multiple name="file"/>
+            <div id="replayButton" onclick="startReplay()">
+                <h3 style="margin: 0px;">Replay!</h3>
+            </div>
+        </div>
+        <div id="buttonGroup" class="buttonGroup" style="display: none;">
+            <div class="buttonInGroup" id="screenShareButton" onclick="screenShareChange()" style="display: none;">
+                <i id="screenShareIcon" style="font-size:24px; color: white;" class='fas fa-desktop'></i>
+            </div>
+            <div class="buttonInGroup" id="3DRecordButton" onclick="record3DClicked()" style="display: none;">
+                <i id="3DRecordIcon" style="font-size:24px; color: white;" class='fas fa-film'></i>
+                <i id="3DStopRecordIcon" style="font-size:24px; color: white; display: none;" class='far fa-stop-circle'></i>
+            </div>
+            <div class="buttonInGroup" id="3DReplayButton" onclick="rewatchLecture()" style="display: none;">
+                <i id="3DReplayIcon" style="font-size:24px; color: white;" class='far fa-play-circle'></i>
+            </div>
+            <div class="buttonInGroup" id="cameraButton" onclick="cameraOnOrOff()" style="display: none;">
+                <i class='fas fa-angle-up dropUpButton' onclick="changeCam(event)"></i>
+                <i id="videoIconSlash" style="font-size:24px; color: white; display: none;" class='fas fa-video-slash'></i>
+                <i id="videoIcon" style="font-size:24px; color: white;" class='fas fa-video'></i>
+            </div>
+            <div class="buttonInGroup" id="muteButton"onclick="muteClicked()">
+                <i class='fas fa-angle-up dropUpButton' onclick="changeMic(event)"></i>
+                <i id="micIconSlash" style="font-size:24px; color: white; display: none" class="fas fa-microphone-slash"></i>
+                <i id="micIcon" style="font-size:24px; color: white;" class="fas fa-microphone"></i>
+            </div>
+            <div class="buttonInGroup" id="chatButton" onclick="openOrCloseChat()">
+                <span id="newMessage" class="badge">0</span>
+                <i id="chatIcon" style="font-size:24px; color: white;" class='far fa-comment-alt'></i>
+            </div>
+            <div class="buttonInGroup" id="speakButton" onclick="speakClicked()" style="display: none;">
+                <i id="soundIcon" style="font-size:24px; color: white; display: none;" class="fas fa-volume-up"></i>
+                <i id="speakIcon" style="font-size:24px; color: white;" class="fa fa-hand-paper-o"></i>
+            </div>
+            <div class="buttonInGroup" id="usersButton" onclick="openOrCloseAttendance()" style="display: none;">
+                <i id="userIcon" style="font-size:24px; color: white;" class='fas fa-user-friends'></i>
+            </div>
+            <div class="buttonInGroup" id="endCallButton" onclick="window.location.reload();">
+                <i id="endCallIcon" style="font-size:24px; color: white;" class='fas fa-phone-slash'></i>
+            </div>
+        </div>
+        <div>
+            <div id="selectCamInLecture" style="display: none"></div>
+            <div id="selectMicInLecture" style="display: none"></div>
+            <div id="attendanceListWrapper" style="background: rgba(0, 0, 0, 0.6); display: none;">
+                <i id="nextIcon" style="font-size:18x; color: white;" class="fas fa-angle-left" onclick="previousTable()"></i>
+                <i id="previousIcon" style="font-size:18px; color: white;" class="fas fa-angle-right" onclick="nextTable()"></i>
+                <h3 id="roomDisplay" style="color: white;">Room: ?</h3>
+                <h3 id="joinButton" style="color: black; padding: 5px; border-radius: 2px;" onclick="setClassroom()">Join!</h3>
+                <br><br><br>
+                <ul id="attendanceList" class="w3-ul w3-card-4" style="width: 310px;">
+                    <li id="exampleLi" style="display: none;">
+                        <div name="infoHolder" id="infoHolder" class="w3-bar-item">
+                          <span id="nameStudent" style="background: none; color: white;" class="w3-large"></span><br>
+                          <span id="table" style="background: none; color: white;">Table: </span><br>
+                          <span id="seat" style="background: none; color: white;">Seat: </span>
+                        </div>
+                      </li>
+                </ul>
+            </div>
+        </div>
+        <div id="advancedOptionsDiv" style="display:none;">
+            <div id="modelTypeDiv">
+                <p style="text-align:left;font-size:16px;color:gray">Model Type:</p>
+                <select id="modelType" onchange="updateType()">
+                    <option name="mesh" value="M1">Non-indexed</option>
+                    <option name="index" value="M2">Index</option>
+                    <option name="point cloud" value="M3">Point cloud</option>
+                    <option name="point cloud with shaders" value="M4">Point cloud with shaders</option>
+                    <option name="hidden" value="M5">Hidden</option>
+                </select>
+            </div>
+            <div id="teacherPosDiv">
+                <p style="text-align:left;font-size:16px;color:gray">Model Position:</span></p>
+                <input type="range" min="-15" max="28" value="-6" step = "1" class="slider" id="modelPosRange" onchange="updateModelPos()">
+            </div>
+            <div class="slidecontainer" id="subSampleSlider">
+                <p style="text-align:left;font-size:16px;color:gray">subSample: <span id="subSampleVal"></span></p>
+                <input type="range" min="2" max="20" value="5" step = "1" class="slider" id="subSampleRange" onchange="updateSubSample()">     
+            </div>
+            </div>
+        </div>
+        
+        <button class="button" id="advOptBtn" onclick="toggleAdvancedOptions()" style="display:none;">Show advanced options</button>
+        <div id="notification" class="row" style="display: none;">
+            <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+              <div class="new-message-box">
+                            <div class="new-message-box-info">
+                                <div class="info-tab tip-icon-info" title="error"><i></i></div>
+                                <div class="tip-box-info">
+                                    <p id="notiText">Somebody is speaking!</p>
+                                </div>
+                            </div>
+                        </div>
+        </div>
+        </div>
+        <div id="studentTeacher">
+                <form>
+
+                    <h1>Log In</h1>
+                    <fieldset>
+                        <div id="nameInput">
+                            <legend><span class="number">1</span> What is your name?</legend>
+                            <label for="name">Name:</label>
+                            <input type="text" id="name" name="user_name">
+                        </div>
+                        <div id="tableInput">
+                            <legend><span class="number">2</span> Which table would you like to be seated?</legend>
+                            <select id="tables" onchange="tableChosen()">
+                                <option name="room" value="1">1</option>
+                                <option name="room" value="2">2</option>
+                                <option name="room" value="3">3</option>
+                                <option name="room" value="4">4</option>
+                                <option name="room" value="5">5</option>
+                            </select>
+                        </div>
+                        <div>
+                           <legend><span class="number">3</span> Are you a teacher or a student?</legend>
+                            <input type="checkbox" id="Teacher" value="teacher" name="choice" onclick="teacherClicked(this)"><label class="light">Teacher</label><br>
+                            <input type="checkbox" id="Student" value="student" name="choice" onclick="studentClicked(this)"><label class="light" >Student</label><br>
+                            <input type="checkbox" id="Recorder" value="recorder" name="choice" onclick="teacherClicked(this)"><label class="light" >Recorder</label><br>
+                            <input type="checkbox" id="3DRecorder" value="3DRecorder" name="choice" onclick="teacherClicked(this)"><label class="light" >3D Recorder</label><br>
+                            <input type="checkbox" id="3DReplay" value="3DReplay" name="choice" onclick="teacherClicked(this)"><label class="light" >3D Replay</label><br>
+                        </div>
+                        <div id="container" class="container">
+                            <h3>Where would you like to be seated?</h3>
+                            <br>
+                            <img src="images/lecture hall.png" alt="lectureHall" style="width:100%;">
+                            <div id="Seat2" value ="2" onclick="positionClicked(this)" name="position" class="text-block">
+                                <!-- 2 -->
+                                <p>2</p>
+                            </div>
+                            <div id="Seat3" value ="3" onclick="positionClicked(this)" name="position" class="text-block2">
+                                <p>3</p>
+                            </div>
+                            <div id="Seat1" value ="1" onclick="positionClicked(this)" name="position" class="text-block3">
+                                <!-- 1 -->
+                                <p>1</p>
+                            </div>
+                            <div id="Seat4" value ="4" onclick="positionClicked(this)" name="position" class="text-block4">
+                                <p>4</p>
+                            </div>
+                            <div id="Seat5" value ="5" onclick="positionClicked(this)" name="position" class="text-block5">
+                                <p>5</p>
+                            </div>
+                            <br><br><br><br>
+                        </div>
+                        
+                        <button id="logInButton"  onclick="submitAnswer()">Log In</button>
+                </form>
+
+        </div>
+
+        <h3 id="camText" style="display: none;">Select your camera</h3>
+        <select id="select" style="display: none;" onchange="cameraChosen(false, '')">
+            <option disabled selected value> -- select an option -- </option>
+        </select>
+        <h3 id="micText" style="display: none;" >Select your mic</h3>
+        <select id="selectMic" style="display: none;" onchange="micChosen(false)">
+            <option disabled selected value> -- select an option -- </option>
+        </select>
+
+        <button href="#" onclick="recordClicked()" id="recordButton" style="font-size:42px; display: none;"><span id="record"></div><i id="recordIcon" style="font-size:42px" class="fa">&#xf8d9;</i></span> Record</button>
+        <span href="#" id="rotateClassroom" ondblclick="doubleClickClassroom()" onclick="rotateClassroomClicked()"><i id="rotateClassroomIcon" style="font-size:42px" class='fas fa-arrow-right'></i></span>
+
+        <canvas id="2d" width="400" height="540" style="display: none"></canvas>
+        <canvas id="2dRem" width="400" height="540" style="display: none" y="100"></canvas>
+        <canvas id="dm" width="400" height="540" style="display: none"></canvas>
+        <video autoplay="true" id="webcam" style="display: none"></video>
+        <video autoplay="true" id="screenshare" style="position: absolute;" width="0" height="0" muted></video>
+        <canvas id="canvasWebcam" width="250" height="250" style="display: none"></canvas>
+
+        <video autoplay="true" id="videoElement" width="1024" height="512" style="display: none" controls muted></video>
+        <canvas id="canvasElement" width="5120" height="2560" style="display: none"></canvas>
+        <canvas id="photo" style="display: none"></canvas>
+        <canvas id="flatCanvas" style="display: none"></canvas>
+        <div id="students" style="display: none">
+        <canvas id="output" width="250" height="250" ></canvas>
+        </div>
+
+        <button id="connectButton"  onclick="load3DEnvironment()">Join Classroom</button>
+
+        <div id="chatbox" style="display: none">
+            <section class="msger">
+                <header class="msger-header">
+                <div class="msger-header-title">
+                    <i class="fas fa-comment-alt"></i> SimpleChat
+                </div>
+                <div class="msger-header-options">
+                    <span><i class="fas fa-cog"></i></span>
+                </div>
+                </header>
+            
+                <main class="msger-chat">
+                <div class="msg left-msg">
+                    <div
+                    class="msg-img"
+                    style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)"
+                    ></div>
+            
+                    <div class="msg-bubble">
+                    <div class="msg-info">
+                        <div class="msg-info-name">BOT</div>
+                        <div class="msg-info-time">00:00</div>
+                    </div>
+            
+                    <div class="msg-text">
+                        Hi, please be nice to each other in the chat.
+                    </div>
+                    </div>
+                </div>
+                </main>
+            
+                <form class="msger-inputarea">
+                <input type="text" class="msger-input" placeholder="Enter your message...">
+                <button type="submit" class="msger-send-btn">Send</button>
+                </form>
+            </section>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+        <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gpu.js/1.0.2/gpu.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.115/build/three.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/GLTFLoader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/OBJLoader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/MTLLoader.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+        <script src="./javascripts/threejs-loader/MTLLoader.js"></script>
+        <script src="./javascripts/threejs-scripts/OrbitControls.js"></script>
+        <script src="./javascripts/threejs-scripts/modelling.js"></script>
+        <script src="./javascripts/skinning.js"></script>
+        <script src="./javascripts/mediaCheck.js"></script>
+        <script src="./javascripts/mediaPipeTracking.js"></script>
+        <script src="main.js"></script>
+        <script src="./javascripts/chatbox.js"></script>
+        <script src="./javascripts/studentCamera.js"></script>
+        <script src="./javascripts/loginScript.js"></script>
+        <script src="./javascripts/rotateClassroom.js"></script>
+        <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.9.3/simplepeer.min.js"></script>
+        <video id='lidarVideoStream1' style="display: none;" autoplay="true" muted></video>
+        <video id='lidarVideoStream2' style="display: none;" autoplay="true" muted></video>
+        <video id='kinectVideo' style="display: none;" autoplay="true" muted>
+            <source src='kinect.webm'>
+            <source src='kinect.mp4'>
+        </video>
+        <script src="./javascripts/peers.js"></script>
+        <script src="./javascripts/attendanceList.js"></script>
+        <script src="./javascripts/mediaChange.js"></script>
+        <script src="./javascripts/3DRecorder.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js" integrity="sha512-uVSVjE7zYsGz4ag0HEzfugJ78oHCI1KhdkivjQro8ABL/PRiEO4ROwvrolYAcZnky0Fl/baWKYilQfWvESliRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js" integrity="sha512-3WaCYjK/lQuL0dVIRt1thLXr84Z/4Yppka6u40yEJT1QulYm9pCxguF6r8V84ndP5K03koI9hV1+zo/bUbgMtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script id="vs" type="x-shader/x-vertex">
+
+            uniform sampler2D depthmap;
+
+            uniform float width;
+            uniform float height;
+            uniform float nearClipping, farClipping;
+
+            uniform float pointSize;
+            uniform float zOffset;
+
+            varying vec2 vUv;
+
+            const float XtoZ = 1.11146; // tan( 1.0144686 / 2.0 ) * 2.0;
+            const float YtoZ = 0.83359; // tan( 0.7898090 / 2.0 ) * 2.0;
+
+            void main() {
+
+            vUv = vec2( position.x / width, position.y / height );
+
+            vec4 color = texture2D( depthmap, vUv );
+            float depth = ( color.r + color.g + color.b ) / 3.0;
+
+            float z = ( 1.0 - depth ) * (farClipping - nearClipping) + nearClipping;
+
+            vec4 pos = vec4(
+            ( position.x / width - 0.5 ) * z * XtoZ,
+            ( position.y / height - 0.5 ) * z * YtoZ,
+            - z + zOffset,
+            1.0);
+
+            gl_PointSize = pointSize;
+            gl_Position = projectionMatrix * modelViewMatrix * pos;
+
+            }
+
+        </script>
+        <script id="fs" type="x-shader/x-fragment">
+
+			uniform sampler2D texmap;
+
+			varying vec2 vUv;
+
+			void main() {
+
+				vec4 color = texture2D( texmap, vUv );
+				gl_FragColor = vec4( color.r, color.g, color.b, 0.2 );
+
+			}
+
+		</script>
+	</body>
+</html>

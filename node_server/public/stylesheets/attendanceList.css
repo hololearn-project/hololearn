@@ -1,0 +1,50 @@
+#attendanceList {
+  overflow: auto;
+  max-height: 500px;
+  min-height: 100px;
+}
+
+#attendanceListWrapper {
+  border-radius: 5px;
+  position: absolute;
+  width: 310px;
+  bottom: 200px;
+  left: calc((100% - 310px) / 2);
+}
+
+#nextIcon, #previousIcon {
+  position: absolute;
+  border-radius: 2px;
+  top: 20px;
+  padding: 5px;
+}
+
+#nextIcon:hover, #previousIcon:hover {
+  background: rgba(160, 160, 160, 0.7);
+}
+
+#nextIcon {
+  left: 20px;
+}
+
+#previousIcon {
+  right: 20px;
+}
+
+#nameStudent {
+  padding: 0;
+  font-size: 40px;
+}
+
+#joinButton {
+  top: 50px;
+  width: 75px;
+  position: absolute;
+  background: white;
+  left: calc((310px - 75px) / 2);
+}
+
+#joinButton:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+

@@ -1,0 +1,58 @@
+image: nikolaik/python-nodejs:python3.9-nodejs14-slim
+
+stages:
+  - style
+  - test
+  - deploy
+
+style-js:
+  stage: style
+  script:
+    - cd node_server
+    # install eslint
+    - npm i eslint eslint-config-google
+    # Run eslint
+    - node_modules/eslint/bin/eslint.js .
+style-python:
+  stage: style
+  when: manual
+  before_script:
+  - python -V
+  - apt-get update
+  - apt-get install ffmpeg libsm6 libxext6  -y
+  - cd python_app
+  - pip install -r requirements.txt
+  - cd ..
+  script:
+    - flake8 --ignore=E501,E226 --exclude cubemos python_app 
+
+test-js:
+  image: cypress/base:ubuntu19-node12.14.1
+  stage: test
+  when: manual
+  script:
+    - cd node_server
+    # install dependencies
+    - npm ci
+    # start the server in the background
+    - npm run start &
+    # run Cypress tests
+    - npx cypress run --spec "tests/cypress/webclient.test.js"
+
+test-python:
+  stage: test
+  when: manual
+  before_script:
+    - python -V
+    - apt-get update
+    - apt-get install ffmpeg libsm6 libxext6  -y
+    - cd python_app
+    - pip install -r requirements.txt
+  script:
+    - python camera_test.py
+
+deploy-prod:
+  stage: deploy
+  script:
+    - echo "Deploment to be appended"
+

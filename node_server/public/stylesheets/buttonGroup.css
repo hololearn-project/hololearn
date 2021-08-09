@@ -1,0 +1,96 @@
+.buttonGroup {
+    position: absolute;
+    bottom: 50px;
+    height: 54px;
+    width: 300px;
+    margin-left: calc((100% - 300px) / 2);
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+}
+
+.buttonInGroup{
+    /* First padding is (height of buttonGroup - fontSize icon) / 2 */
+    position: relative;
+    padding: 15px 18px;
+    height: 54px;
+    width: 60px;
+    float: left;
+    /* border-left: solid white 1px; */
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.buttonInGroup:hover {
+    background: rgba(80, 80, 80, 0.6);
+}
+
+.dropUpButton, #newMessage {
+    font-size: 12px;
+    color: white;
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    background: rgba(70, 70, 70, 0.7);
+    padding: 2px;
+    border-radius: 3px;
+    z-index: 99;
+    }
+
+.dropUpButton:hover {
+    background: rgba(120, 120, 120, 0.65);
+    border-radius: 3px;
+}
+
+#micIcon {
+    padding-left: 4px;
+}
+
+#selectMicInLecture, #selectCamInLecture {
+    position: absolute;
+    bottom: 400px;
+    left: calc((100% - 500px) / 2);
+    width: 500px;
+    background: rgba(0, 0, 0, 0.6);
+    overflow: auto;
+    color: white;
+}
+
+#selectCamInLecture {
+    width: 310px;
+    bottom: 200px;
+    height: 400px;
+    left: calc((100% - 310px) / 2);
+    
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    overflow-y: scroll; 
+}
+
+
+
+#selectCamInLecture::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+#selectMicInLecture::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+#selectMicInLecture {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    width: 310px;
+    bottom: 200px;
+    height: 200px;
+    left: calc((100% - 310px) / 2);
+    
+    -ms-overflow-style: none; /* for Internet Explorer, Edge */
+    scrollbar-width: none; /* for Firefox */
+    overflow-y: scroll; 
+}
+
+.optionInLecture:hover {
+    background: rgba(80, 80, 80, 0.6);
+}
+

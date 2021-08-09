@@ -1,0 +1,13 @@
+opencv-python
+aiortc
+python-socketio
+python-socketio[asyncio_client]
+numpy
+cython
+pyrealsense2
+requests
+pillow
+python-socketio[asyncio_client]
+mock
+pytest
+flake8

@@ -1,0 +1,6 @@
+bin/*
+config/*
+node_modules/*
+env/*
+public/javascripts/threejs-scripts/OrbitControls.js
+public/javascripts/threejs-loader/*
