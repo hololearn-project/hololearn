@@ -24,3 +24,4 @@ node_server/.vscode/settings.json
 *.xml
 *.mp4
 *.pyc
+node_server/package-lock.json
