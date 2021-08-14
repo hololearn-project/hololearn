@@ -51,7 +51,7 @@ That's it! You now have a functional system.
 
 To run locally, follow the Quickstart guide.
 
-To run on a server, you will find a guide in the `doc` folder for setting the server up.
+To run on a server, you will find a guide in the `docs` folder for setting the server up.
 
 ## structure
 
