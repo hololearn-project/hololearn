@@ -22,9 +22,6 @@ servRtcStrms.set('videostream', 'lidarVideoStream1');
 servRtcStrms.set('depthstream', 'lidarVideoStream2');
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
 
-const poseIndicies = [11, 13, 15, 12, 14, 16, 0, 24, 26, 30, 32, 23, 25, 29, 31];
-const mapping = [10, 11, 12, 33, 34, 35, 8, 59, 60, 61, 62, 55, 56, 57, 58];
-
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 let a = 0;
 let b = 0;
@@ -79,10 +76,6 @@ async function loadNet() { // this one is more efficient
 }
 
 /**
- * Loads the steve.obj model
- */
-
-/**
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
@@ -132,15 +125,6 @@ async function load3DEnvironment() {
   const loader = new THREE.GLTFLoader();
 
   /**
-   * Window resizer
-   */
-  function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  /**
    * Initializes the whole system, including the 3D environment
    */
   async function init() {
@@ -165,6 +149,7 @@ async function load3DEnvironment() {
         },
         // called while loading is progressing
         function( xhr ) {
+          console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
         },
         // called when loading has errors
         function( error ) {
@@ -175,12 +160,6 @@ async function load3DEnvironment() {
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-    // if (playback) {
-    //   setRecordedPictureSource();
-    //   setRecordedDepthSource();
-    // }
-
-    await drawSkeleton();
 
     // sets the target of the camera
     if (isTeacher) {
@@ -191,8 +170,6 @@ async function load3DEnvironment() {
           b - (b - 8) * 0.01, c - (c - 27) * 0.01 );
       controls.update();
     }
-
-    window.onresize = onWindowResize;
     // controls.addEventListener( 'dragstart', dragStartCallback );
     // controls.addEventListener( 'dragend', dragendCallback );
 
@@ -248,31 +225,17 @@ async function load3DEnvironment() {
         students[i].rotation.y = rotations[i];
       }
     }
-
-    let k;
-
-    for (k = 0; k < mapping.length; k++) {
-      console.log(k);
-      bones[mapping[k]].position.x = 3*landmarks[poseIndicies[k]].y;
-      bones[mapping[k]].position.y = 3*landmarks[poseIndicies[k]].x;
-      bones[mapping[k]].position.z = 3*landmarks[poseIndicies[k]].z;
-    }
-
     updateScreenAndWebcams(isTeacher, camera);
-
-    // if (!isTeacher)
-    animateTeacher(dctx, ctx, depth_canvas, canvas2d);
+    if (!isTeacher) animateTeacher(dctx, ctx, depth_canvas, canvas2d);
     renderer.render(scene, camera);
   };
 
   await init();
   // simpleTextureMap();
-  if (table != -3) {
-    startConnecting(isTeacher, nameUser);
-  }
+  startConnecting(isTeacher, nameUser);
 
   // set UI buttons visable if not a recorder
-  if (table >= 0) {
+  if (table != -1) {
     document.getElementById('buttonGroup').style.display = 'block';
     document.getElementById('advOptBtn').style.display = 'block';
 
@@ -281,6 +244,8 @@ async function load3DEnvironment() {
       document.getElementById('cameraButton').style.display = 'block';
       // document.getElementById('usersButton').style.display = 'none';
     } else {
+      // document.getElementById('rotateClassroom').style.display = 'block';
+      // document.getElementById('attendanceButton').style.display = 'block';
       document.getElementById('usersButton').style.display = 'block';
       document.getElementById('screenShareButton').style.display = 'block';
 
@@ -288,24 +253,9 @@ async function load3DEnvironment() {
       webcam.muted = true;
     }
   } else {
-    if (table == -1) {
-      document.getElementById('recordButton').style.display = 'block';
-    } else {
-      document.getElementById('muteButton').style.display = 'none';
-      document.getElementById('chatButton').style.display = 'none';
-      document.getElementById('buttonGroup').style.display = 'block';
-      document.getElementById('buttonGroup').style.width = '120px';
-      const left = (window.innerWidth - 120) / 2;
-      document.getElementById('buttonGroup').style.marginLeft = left + 'px';
-      if (table == -2) {
-        document.getElementById('3DRecordButton').style.display = 'block';
-      } else {
-        document.getElementById('3DReplayButton').style.display = 'block';
-      }
-    }
+    document.getElementById('recordButton').style.display = 'block';
     document.title = 'Recording HoloLearn';
   }
-
   animate();
   // simpleVerticies()
 }

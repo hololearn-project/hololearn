@@ -1,12 +1,13 @@
 # flake8: noqa
+from abc import ABC, abstractmethod
 import numpy as np
+import math
+# Import OpenCV for easy image rendering
 import cv2
 import sys
+from pathlib import Path
 import requests
 import os
-
-from abc import ABC, abstractmethod
-from pathlib import Path
 
 webcam = False
 
@@ -50,22 +51,18 @@ def kinect():
 
 
 class camera(ABC):
-
     debug = False
-  
+    edge_tracking = False
     near_plane = 500
     far_plane = 10000
-
     point = 2500
     face = (0, 0)
-    depthRange = 1000
-
     mapRes = 767
     dimX = 960
     dimY = 540
-
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
-
+    dist_image = []
+    depthRange = 1000
     @abstractmethod
     def get_frame(self) -> bytes:
         pass
@@ -352,17 +349,11 @@ class camera_wrapper(camera):
         none
         """
         self.cam = None
-        self.skeleton = True
 
         try:
-            if self.skeleton:
-                from cameras.camera_intel_skeleton import intelcamSkeleton
-                self.cam = intelcamSkeleton()
-                # self.cam.get_frame()
-            else:
-                from cameras.camera_intel import intelcam
-                self.cam = intelcam()
-                # self.cam.get_frame()
+            from cameras.camera_intel import intelcam
+            self.cam = intelcam()
+            self.cam.get_frame()
         except Exception as e:
             print(e)
             try:
@@ -375,6 +366,7 @@ class camera_wrapper(camera):
                     from cameras.camera_vga import vgacam
                     self.cam = vgacam()
                     self.cam.get_frame()
+                    print("kinected")
                 except Exception as e:
                     print(e)
 

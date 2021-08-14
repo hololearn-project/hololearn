@@ -1,4 +1,5 @@
 opencv-python
+aiohttp
 aiortc
 python-socketio
 python-socketio[asyncio_client]
@@ -8,6 +9,7 @@ pyrealsense2
 requests
 pillow
 python-socketio[asyncio_client]
+pathlib
 mock
 pytest
 flake8

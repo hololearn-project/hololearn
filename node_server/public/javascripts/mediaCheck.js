@@ -289,10 +289,12 @@ function stopMediaTrackAudio(stream) {
 function speakClicked() { // eslint-disable-line no-unused-vars
   const soundIcon = document.getElementById('soundIcon');
   const speakIcon = document.getElementById('speakIcon');
+  console.log(speakIcon.style.display);
   if (speakIcon.style.display != 'none') {
     socket.emit('request to speak');
     speakIcon.style.display = 'none';
     soundIcon.style.display = 'block';
+    console.log(soundIcon.style.display);
   } else {
     socket.emit('done speaking');
     speakIcon.style.display = 'block';
@@ -316,6 +318,7 @@ function muteClicked() { // eslint-disable-line no-unused-vars
     micSlash.style.display = 'block';
     mic.style.display = 'none';
   }
+  console.log(isTeacher);
   if (isTeacher) {
     muteUnmuteStream(localMediaStream);
   } else {
@@ -337,6 +340,7 @@ function muteUnmuteStream(stream) {
     stream.getAudioTracks()[0].muted = false;
     muted = false;
   }
+  console.log(stream);
 }
 
 /**
@@ -357,6 +361,7 @@ async function startRecording() {
  * @param {Event} event - the event that occured
  */
 function handleDataAvailable(event) {
+  console.log(event.data.size);
   if (event.data.size > 0) {
     recordedChunks.push(event.data);
     download();
@@ -405,6 +410,8 @@ function startMediaRecorder() {
   if (teacherSound != undefined && streamToRecord != undefined) {
     streamToRecord.addTrack(teacherSound);
     const options = {mimeType: 'video/webm'};
+    console.log(streamToRecord.getAudioTracks());
+    console.log(streamToRecord.getVideoTracks());
     mediaRecorder = new MediaRecorder(streamToRecord, options);
 
     mediaRecorder.ondataavailable = handleDataAvailable;

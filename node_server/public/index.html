@@ -1,12 +1,12 @@
 <html>
 	<head>
+
 		<link rel="stylesheet" href="stylesheets/style.css">
         <link rel="stylesheet" href="stylesheets/mediaCheck.css">
         <link rel="stylesheet" href="stylesheets/notification.css">
         <link rel="stylesheet" href="stylesheets/advancedSettings.css">
         <link rel="stylesheet" href="stylesheets/attendanceList.css">
         <link rel="stylesheet" href="stylesheets/buttonGroup.css">
-        <link rel="stylesheet" href="stylesheets/3DRecording.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 		<title>Hololearn Lecture System</title>
@@ -16,29 +16,10 @@
 		</style>
 	    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js" type="text/javascript"></script>
 	</head>
-    
 	<body>
-
-        <div class="container" style="display: block;">
-            <video class="input_video" style="display: none;" autoplay="true" muted></video>
-            <canvas class="output_canvas" width="1280px" height="720px" style="display: block;"></canvas>
-        </div>
-        <div id="inputDiv" style="display: none">
-            <input id="input" type='file' accept=".zip" multiple name="file"/>
-            <div id="replayButton" onclick="startReplay()">
-                <h3 style="margin: 0px;">Replay!</h3>
-            </div>
-        </div>
         <div id="buttonGroup" class="buttonGroup" style="display: none;">
             <div class="buttonInGroup" id="screenShareButton" onclick="screenShareChange()" style="display: none;">
                 <i id="screenShareIcon" style="font-size:24px; color: white;" class='fas fa-desktop'></i>
-            </div>
-            <div class="buttonInGroup" id="3DRecordButton" onclick="record3DClicked()" style="display: none;">
-                <i id="3DRecordIcon" style="font-size:24px; color: white;" class='fas fa-film'></i>
-                <i id="3DStopRecordIcon" style="font-size:24px; color: white; display: none;" class='far fa-stop-circle'></i>
-            </div>
-            <div class="buttonInGroup" id="3DReplayButton" onclick="rewatchLecture()" style="display: none;">
-                <i id="3DReplayIcon" style="font-size:24px; color: white;" class='far fa-play-circle'></i>
             </div>
             <div class="buttonInGroup" id="cameraButton" onclick="cameraOnOrOff()" style="display: none;">
                 <i class='fas fa-angle-up dropUpButton' onclick="changeCam(event)"></i>
@@ -89,11 +70,11 @@
             <div id="modelTypeDiv">
                 <p style="text-align:left;font-size:16px;color:gray">Model Type:</p>
                 <select id="modelType" onchange="updateType()">
-                    <option name="mesh" value="M1">Non-indexed</option>
-                    <option name="index" value="M2">Index</option>
-                    <option name="point cloud" value="M3">Point cloud</option>
-                    <option name="point cloud with shaders" value="M4">Point cloud with shaders</option>
-                    <option name="hidden" value="M5">Hidden</option>
+                    <option name="index" value="index">Index</option>
+                    <option name="mesh" value="mesh">Non-indexed</option>
+                    <option name="point cloud" value="point cloud">Point cloud</option>
+                    <option name="point cloud with shaders" value="point cloud with shaders">Point cloud with shaders</option>
+                    <option name="hidden" value="hidden">Hidden</option>
                 </select>
             </div>
             <div id="teacherPosDiv">
@@ -104,9 +85,7 @@
                 <p style="text-align:left;font-size:16px;color:gray">subSample: <span id="subSampleVal"></span></p>
                 <input type="range" min="2" max="20" value="5" step = "1" class="slider" id="subSampleRange" onchange="updateSubSample()">     
             </div>
-            </div>
         </div>
-        
         <button class="button" id="advOptBtn" onclick="toggleAdvancedOptions()" style="display:none;">Show advanced options</button>
         <div id="notification" class="row" style="display: none;">
             <div class="col-xs-12 col-sm-6 col-sm-offset-3">
@@ -145,8 +124,6 @@
                             <input type="checkbox" id="Teacher" value="teacher" name="choice" onclick="teacherClicked(this)"><label class="light">Teacher</label><br>
                             <input type="checkbox" id="Student" value="student" name="choice" onclick="studentClicked(this)"><label class="light" >Student</label><br>
                             <input type="checkbox" id="Recorder" value="recorder" name="choice" onclick="teacherClicked(this)"><label class="light" >Recorder</label><br>
-                            <input type="checkbox" id="3DRecorder" value="3DRecorder" name="choice" onclick="teacherClicked(this)"><label class="light" >3D Recorder</label><br>
-                            <input type="checkbox" id="3DReplay" value="3DReplay" name="choice" onclick="teacherClicked(this)"><label class="light" >3D Replay</label><br>
                         </div>
                         <div id="container" class="container">
                             <h3>Where would you like to be seated?</h3>
@@ -199,7 +176,7 @@
         <video autoplay="true" id="videoElement" width="1024" height="512" style="display: none" controls muted></video>
         <canvas id="canvasElement" width="5120" height="2560" style="display: none"></canvas>
         <canvas id="photo" style="display: none"></canvas>
-        <canvas id="flatCanvas" style="display: none"></canvas>
+
         <div id="students" style="display: none">
         <canvas id="output" width="250" height="250" ></canvas>
         </div>
@@ -244,25 +221,16 @@
             </section>
         </div>
         
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-
         <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gpu.js/1.0.2/gpu.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.115/build/three.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/GLTFLoader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/OBJLoader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/MTLLoader.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+        <script src="./javascripts/threejs-loader/OBJLoader.js"></script>
         <script src="./javascripts/threejs-loader/MTLLoader.js"></script>
         <script src="./javascripts/threejs-scripts/OrbitControls.js"></script>
         <script src="./javascripts/threejs-scripts/modelling.js"></script>
-        <script src="./javascripts/skinning.js"></script>
         <script src="./javascripts/mediaCheck.js"></script>
-        <script src="./javascripts/mediaPipeTracking.js"></script>
         <script src="main.js"></script>
         <script src="./javascripts/chatbox.js"></script>
         <script src="./javascripts/studentCamera.js"></script>
@@ -272,17 +240,9 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.9.3/simplepeer.min.js"></script>
         <video id='lidarVideoStream1' style="display: none;" autoplay="true" muted></video>
         <video id='lidarVideoStream2' style="display: none;" autoplay="true" muted></video>
-        <video id='kinectVideo' style="display: none;" autoplay="true" muted>
-            <source src='kinect.webm'>
-            <source src='kinect.mp4'>
-        </video>
         <script src="./javascripts/peers.js"></script>
         <script src="./javascripts/attendanceList.js"></script>
         <script src="./javascripts/mediaChange.js"></script>
-        <script src="./javascripts/3DRecorder.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js" integrity="sha512-uVSVjE7zYsGz4ag0HEzfugJ78oHCI1KhdkivjQro8ABL/PRiEO4ROwvrolYAcZnky0Fl/baWKYilQfWvESliRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js" integrity="sha512-3WaCYjK/lQuL0dVIRt1thLXr84Z/4Yppka6u40yEJT1QulYm9pCxguF6r8V84ndP5K03koI9hV1+zo/bUbgMtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script id="vs" type="x-shader/x-vertex">
 
             uniform sampler2D depthmap;

@@ -33,15 +33,6 @@ determines the frequency of sampling on both axes. */
 let perWidth = Math.floor(imgWidth / subSample) + 1;
 let perLength = Math.floor(imgLength / subSample) + 1;
 
-/* Video element for the picture feed */
-let pictureVideo;
-
-/* Video element for the depth feed */
-let depthVideo;
-
-/* Canvas used for flat model */
-let flatCanvas;
-
 /* The array storing the entire list of (x,y,z) triplets of
 co-ordinates in the depth image */
 let points;
@@ -56,7 +47,7 @@ let modelPresent = false;
 
 /* Specificies which method to use when constructing the 3D model
 [mesh, index, point cloud, point cloud with shaders, hidden] */
-let modelType = 'M2';
+let modelType = 'point cloud';
 
 /* X position of the model. */
 let teacherX = -6;
@@ -65,26 +56,6 @@ let teacherX = -6;
 on the webpage. */
 let advOpts = false;
 
-/* Flag for toggling between playback and live mode */
-const playback = true;
-
-/* Flag to indicate wether or not the next frame should be rendered */
-let render = true;
-
-const staticModels = ['M6', 'M5'];
-
-const dynamicModels = ['M4', 'M3', 'M1', 'M2'];
-
-
-/*
-M1 = mesh
-M2 = index
-M3 = point cloud
-M4 = flat (background removed with TensorFlow)
-M5 = point cloud with shaders
-M6 = hidden
-M7 = flat (background removed with depth)
-*/
 
 /**
  * calls several other initialization methods,
@@ -94,9 +65,6 @@ function initModel() {
   initUV();
   initIndex();
   initPoints();
-
-  pictureVideo = getPictureVideo();
-  depthVideo = getDepthVideo();
 }
 
 /**
@@ -178,7 +146,7 @@ const getUVy = (y) => (imgLength - y) / imgLength;
  * @param  {number} y The y coordinate
  * @return {number} The depth value of that pixel
  */
-const getLoc = (x, y) => (x + (y * imgWidth)) * 4;
+const getDepth = (x, y) => (x + (y * imgWidth)) * 4;
 
 
 /**
@@ -218,7 +186,8 @@ function filterIndices(vertices) {
  * vertex coordinates and corresponding uv-coordinates.
  */
 function createMeshModel(vertices) {
-  const texture = new THREE.VideoTexture(pictureVideo);
+  const vid = getPictureVideo();
+  const texture = new THREE.VideoTexture(vid);
   teacherModel.setAttribute('position',
       new THREE.BufferAttribute(vertices[0], 3));
   teacherModel.setAttribute('uv',
@@ -228,8 +197,13 @@ function createMeshModel(vertices) {
   const material = new THREE.MeshBasicMaterial({map: texture});
   const mesh = new THREE.Mesh(teacherModel, material);
 
+  if (modelPresent) {
+    const toRemove = scene.getObjectByName('toRemove');
+    scene.remove(toRemove);
+  }
+
   modelPresent = true;
-  mesh.name = 'model';
+  mesh.name = 'toRemove';
 
   scene.add(mesh);
 }
@@ -245,15 +219,21 @@ function createIndexedModel(indices) {
   teacherModel.setIndex(new THREE.BufferAttribute(indices, 1));
   teacherModel.setAttribute('position', new THREE.BufferAttribute(points, 3));
 
-  const texture = new THREE.VideoTexture(pictureVideo);
+  const vid = getPictureVideo();
+  const texture = new THREE.VideoTexture(vid);
   teacherModel.scale(0.03, 0.03, 0.05);
   teacherModel.translate(teacherX, 2, 18);
 
   const material = new THREE.MeshBasicMaterial({map: texture});
   const mesh = new THREE.Mesh(teacherModel, material);
 
+  if (modelPresent) {
+    const toRemove = scene.getObjectByName('toRemove');
+    scene.remove(toRemove);
+  }
+
   modelPresent = true;
-  mesh.name = 'model';
+  mesh.name = 'toRemove';
   scene.add(mesh);
 }
 
@@ -271,8 +251,13 @@ function createPointCloudModel() {
       {vertexColors: true, size: pointSize});
   const mesh = new THREE.Points(teacherModel, material);
 
+  if (modelPresent) {
+    const toRemove = scene.getObjectByName('toRemove');
+    scene.remove(toRemove);
+  }
+
   modelPresent = true;
-  mesh.name = 'model';
+  mesh.name = 'toRemove';
   scene.add(mesh);
 }
 
@@ -283,7 +268,10 @@ function createPointCloudModel() {
  * from the video feeds.
  */
 function createLightWeightPointCloudModel() {
-  const teacherTex = new THREE.VideoTexture(pictureVideo);
+  const depthVideo = getDepthVideo();
+  const texVideo = getPictureVideo();
+
+  const teacherTex = new THREE.VideoTexture(texVideo);
   const teacherDepth = new THREE.VideoTexture(depthVideo);
 
   teacherTex.minFilter = THREE.NearestFilter;
@@ -331,13 +319,9 @@ function createLightWeightPointCloudModel() {
   pointsModel.position.y = 10;
   pointsModel.position.z = 35 + 5;
   pointsModel.position.x = teacherX;
-
-  pointsModel.name = 'model';
-  modelPresent = true;
+  // pointsModel.rotateY(Math.PI)
+  pointsModel.name = 'toRemove';
   scene.add(pointsModel);
-
-  render = false;
-
   depthVideo.play();
 }
 
@@ -360,9 +344,9 @@ function updatePoints(dctx) {
 
   for (y = 0; y < imgLength; y+= subSample) {
     for (x = 0; x < imgWidth; x+= subSample) {
-      const z = (depthData[getLoc(x, y)] +
-      depthData[getLoc(x, y) + 1] +
-      depthData[getLoc(x, y) + 2])/3;
+      const z = (depthData[getDepth(x, y)] +
+      depthData[getDepth(x, y) + 1] +
+      depthData[getDepth(x, y) + 2])/3;
 
       points[i] = x;
       points[i + 1] = imgLength - y;
@@ -401,16 +385,16 @@ function updatePointsAndColors(dctx, ctx) {
 
   for (y = 0; y < imgLength; y += subSample) {
     for (x = 0; x < imgWidth; x += subSample) {
-      const z = (depthData[getLoc(x, y)] +
-      depthData[getLoc(x, y) + 1] +
-      depthData[getLoc(x, y) + 2]) / 3;
+      const z = (depthData[getDepth(x, y)] +
+      depthData[getDepth(x, y) + 1] +
+      depthData[getDepth(x, y) + 2]) / 3;
       points[i] = x;
       points[i + 1] = imgLength - y;
       points[i + 2] = z;
 
-      const r = colorData[getLoc(x, y)] / 255;
-      const g = colorData[getLoc(x, y) + 1] / 255;
-      const b = colorData[getLoc(x, y) + 2] / 255;
+      const r = colorData[getDepth(x, y)] / 255;
+      const g = colorData[getDepth(x, y) + 1] / 255;
+      const b = colorData[getDepth(x, y) + 2] / 255;
 
       color.setRGB(r, g, b);
 
@@ -449,21 +433,21 @@ function initTriangles(dctx) {
 
   for (x = 0; x < imgWidth - subSample; x+= subSample) {
     for (y = 0; y < imgLength - subSample - 1; y+= subSample) {
-      const tl = (depthData[getLoc(x, y)] +
-      depthData[getLoc(x, y) + 1] +
-      depthData[getLoc(x, y) + 2])/3;
+      const tl = (depthData[getDepth(x, y)] +
+      depthData[getDepth(x, y) + 1] +
+      depthData[getDepth(x, y) + 2])/3;
 
-      const tr = (depthData[getLoc(x + subSample, y)] +
-      depthData[getLoc(x + subSample, y) + 1] +
-      depthData[getLoc(x + subSample, y) + 2])/3;
+      const tr = (depthData[getDepth(x + subSample, y)] +
+      depthData[getDepth(x + subSample, y) + 1] +
+      depthData[getDepth(x + subSample, y) + 2])/3;
 
-      const bl = (depthData[getLoc(x, y + subSample)] +
-      depthData[getLoc(x, y + subSample) + 1] +
-      depthData[getLoc(x, y + subSample) + 2])/3;
+      const bl = (depthData[getDepth(x, y + subSample)] +
+      depthData[getDepth(x, y + subSample) + 1] +
+      depthData[getDepth(x, y + subSample) + 2])/3;
 
-      const br = (depthData[getLoc(x + subSample, y + subSample)] +
-      depthData[getLoc(x + subSample, y + subSample) + 1] +
-      depthData[getLoc(x + subSample, y + subSample) + 2])/3;
+      const br = (depthData[getDepth(x + subSample, y + subSample)] +
+      depthData[getDepth(x + subSample, y + subSample) + 1] +
+      depthData[getDepth(x + subSample, y + subSample) + 2])/3;
 
       if (tl > 255 - thresh || tr > 255 - thresh || br > 255 - thresh) continue;
 
@@ -558,75 +542,6 @@ function modelFromIndexes(dctx) {
 }
 
 /**
- * Creates a 2D model when no depth data is available,
- * performs backgorund removal with sensor flow.
- * @param {HTMLCanvasElement} ctx The canvas containing the picture image
- */
-function model2DNoDepth(ctx) {
-  const flatCanvas = document.getElementById('flatCanvas');
-
-  flatCanvas.imageData = removeBackground(getPictureData(ctx), ctx);
-
-  const texture = new THREE.Texture(flatCanvas);
-  const plane = new THREE.PlaneGeometry(5, 5);
-  const mesh = new THREE.Mesh(plane, new THREE.MeshPhongMaterial( {
-    color: 'white',
-    map: texture,
-    alphaTest: 0.5,
-    transparent: true,
-    side: THREE.FrontSide,
-  }));
-
-  mesh.name = 'model';
-  modelPresent = true;
-
-  scene.add(mesh);
-}
-
-/**
- * Creates a 2D model, performing background removal with
- * the depth data.
- * @param {HTMLCanvasElement} ctx The HTML context that contains
- * the picture image.
- * @param {HTMLCanvasElement} dctx The HTML context that contains
- * the depth image.
- */
-function model2DWithDepth(ctx, dctx) {
-  const depthData = getDepthData(dctx);
-  const pictureData = getPictureData(ctx);
-  const maxDist = 255;
-
-  for (let x = 0; x < imgWidth; x ++) {
-    for (let y = 0; y < imgLength; y ++) {
-      const start = getLoc(x, y);
-
-      const z = (depthData[start] +
-      depthData[start + 1] +
-      depthData[start + 2]) / 3;
-
-      if (z >= maxDist) pictureData[start + 3] = 255;
-    }
-  }
-
-  ctx.imageData = pictureData;
-
-  const texture = new THREE.Texture(ctx);
-  const plane = new THREE.PlaneGeometry(5, 5);
-  const mesh = new THREE.Mesh(plane, new THREE.MeshPhongMaterial( {
-    color: 'white',
-    map: texture,
-    alphaTest: 0.5,
-    transparent: true,
-    side: THREE.FrontSide,
-  }));
-
-  mesh.name = 'model';
-  modelPresent = true;
-
-  scene.add(mesh);
-}
-
-/**
  * creates a geometry object and adds it to the scene using
  * one of many methods, depending on the content of the type argument.
  * @param  {HTMLCanvasReference} dctx The HTML context that contains
@@ -638,69 +553,30 @@ function model2DWithDepth(ctx, dctx) {
  * @param  {HTMLCanvasElement}  imageCanvas The canvas element onto
  * which the picture image will be drawn.
  */
-function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
+function createModel(dctx, ctx, depthCanvas, imageCanvas) {
   ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
   dctx.clearRect(0, 0, depthCanvas.width, depthCanvas.height);
 
-  dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
-
-  switch (modelType) {
-    case 'M1': // mesh
-      modelFromTriangles(dctx);
-      break;
-    case 'M2': // index
-      modelFromIndexes(dctx);
-      break;
-    case 'M3': // point cloud
-      ctx.drawImage(pictureVideo, 0, 0, imgWidth, imgLength);
-      modelFromPoints(dctx, ctx);
-      break;
-    case 'M4': // flat (TensorFlow removal)
-      ctx.drawImage(pictureVideo, 0, 0, imgWidth, imgLength);
-      model2DNoDepth(ctx);
-  }
-
-  render = true;
-}
-/**
- * Will add jdoc later
- */
-function createStaticModel() {
-  switch (modelType) {
-    case 'M5': // point cloud with shaders
-      createLightWeightPointCloudModel();
-      break;
-    case 'M6': // hidden
-      hideModel();
-      break;
-    case 'M7': // flat (depth removal)
-      model2DWithDepth();
-      break;
+  const depthMap = getDepthVideo();
+  dctx.drawImage(depthMap, 0, 0, imgWidth, imgLength);
+  if (modelType === 'mesh') {
+    modelFromTriangles(dctx);
+  } else if (modelType === 'index') {
+    modelFromIndexes(dctx);
+  } else if (modelType === 'point cloud') {
+    const image = getPictureVideo();
+    ctx.drawImage(image, 0, 0, imgWidth, imgLength);
+    modelFromPoints(dctx, ctx);
+  } else if (modelType === 'point cloud with shaders' && !modelPresent) {
+    const toRemove = scene.getObjectByName('toRemove');
+    scene.remove(toRemove);
+    createLightWeightPointCloudModel();
+    modelPresent = true;
+  } else if (modelType === 'hidden') {
+    const toRemove = scene.getObjectByName('toRemove');
+    scene.remove(toRemove);
   }
 }
-
-/**
- * Removes the model from the scene and does not
- * render a new model until the type is set to a
- * visible type
- */
-function hideModel() {
-  removeModel();
-  render = false;
-}
-
-/**
- * Checks if a model is present. If it is, removes it,
- * else does nothing
- */
-function removeModel() {
-  if (modelPresent) {
-    const model = scene.getObjectByName('model');
-    scene.remove(model);
-    modelPresent = false;
-  }
-}
-
 
 /**
  * Retrieves the html video element containing the picture image.
@@ -716,42 +592,6 @@ function getPictureVideo() {
  */
 function getDepthVideo() {
   return document.getElementById('lidarVideoStream2');
-}
-
-/**
- * Retrieves the html video element containing the depth image.
- * @return the element with id=recordedPictureStream
- */
-function getRecordedPictureVideo() {
-  return document.getElementById('kinectVideo');
-}
-
-/**
- * Retrieves the html video element containing the depth image.
- * @return the element with id=recordedDepthStream
- */
-function getRecordedDepthVideo() {
-  return document.getElementById('kinectVideo');
-}
-
-/**
- * Retrieves the imageData from the picture video frame.
- * @param {HTMLCanvasElement} ctx The canvas on whihc the picture
- * is drawn.
- * @returns The imageData
- */
-function getPictureData(ctx) {
-  return ctx.getImageData(0, 0, imgWidth, imgLength).data;
-}
-
-/**
- * Retrieves the imageData from the picture video frame.
- * @param {HTMLCanvasElement} dctx The canvas on whihc the picture
- * is drawn.
- * @returns The imageData
- */
-function getDepthData(dctx) {
-  return dctx.getImageData(0, 0, imgWidth, imgLength).data;
 }
 
 /**
@@ -789,13 +629,14 @@ function okToModel() {
  * which the picture image will be drawn.
  */
 function animateTeacher(dctx, ctx, depthCanvas, imageCanvas) {
-  if (render) { // Add okToModel() == 2 back when you're done
-    removeModel();
-    if (dynamicModels.includes(modelType)) {
-      createDynamicModel(dctx, ctx, depthCanvas, imageCanvas);
-    } else if (staticModels.includes(modelType)) {
-      createStaticModel();
-    }
+  const ok = okToModel();
+
+  if (ok == 2) {
+    createModel(dctx, ctx, depthCanvas, imageCanvas);
+  } else if (modelPresent) {
+    const toRemove = scene.getObjectByName('toRemove');
+    console.log(toRemove);
+    scene.remove(toRemove);
   }
 }
 
@@ -805,16 +646,17 @@ function animateTeacher(dctx, ctx, depthCanvas, imageCanvas) {
  */
 function updateType() {
   const newType = document.getElementById('modelType').value;
-
-  teacherModel = new THREE.BufferGeometry();
-
-  initModel();
-
-  render = true;
-
   modelType = newType;
 
-  removeModel();
+  teacherModel = new THREE.BufferGeometry();
+  if (modelPresent) {
+    const toRemove = scene.getObjectByName('toRemove');
+    scene.remove(toRemove);
+  }
+
+  modelPresent = false;
+
+  initModel();
 }
 
 /**
@@ -847,7 +689,7 @@ function updateModelPos() {
   const diff = newX - teacherX;
   teacherX = -newX;
 
-  const model = scene.getObjectByName('model');
+  const model = scene.getObjectByName('toRemove');
   model.translate(diff, 0);
 }
 
@@ -949,25 +791,22 @@ function setModelType(type) {
   modelType = type;
 }
 
-
 // The following code is to be commented out when testing this file,
 // otherwise it should not be included
 
-/*
-export default {
- subSample, pointSize, thresh, imgWidth,
- imgLength, perWidth, perLength, baseIndices,
- points, modelPresent, modelType, teacherX, advOpts,
- initModel, initPoints, initUV, initIndex,
- toggleAdvancedOptions, updateSubSample, updateModelPos,
- updateType, animateTeacher, getBaseIndices,
- getUVx, getUVy, getLoc, filterIndices, createMeshModel,
- createIndexedModel, updatePoints, updatePointsAndColors,
- initTriangles, createDynamicModel, getDepthVideo,
- getScene, createPointCloudModel, modelFromTriangles, modelFromIndexes,
- getPictureVideo, setModelType, getTeacherModel,
- setTeacherModel, okToModel, getModelType, getTeacherX,
- setTeacherX, getAdvOpts, setAdvOpts,
- toggleAdvancedOptions,
-}
-*/
+// export default {
+//  subSample, pointSize, thresh, imgWidth,
+//  imgLength, perWidth, perLength, baseIndices,
+//  points, modelPresent, modelType, teacherX, advOpts,
+//  initModel, initPoints, initUV, initIndex,
+//  toggleAdvancedOptions, updateSubSample, updateModelPos,
+//  updateType, animateTeacher, getBaseIndices,
+//  getUVx, getUVy, getDepth, filterIndices, createMeshModel,
+//  createIndexedModel, updatePoints, updatePointsAndColors,
+//  initTriangles, createModel, getDepthVideo,
+//  getScene, createPointCloudModel, modelFromTriangles, modelFromIndexes,
+//  getPictureVideo, setModelType, getTeacherModel,
+//  setTeacherModel, okToModel, getModelType, getTeacherX,
+//  setTeacherX, getAdvOpts, setAdvOpts,
+//  toggleAdvancedOptions,
+// }

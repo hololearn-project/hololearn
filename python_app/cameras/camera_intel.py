@@ -57,11 +57,6 @@ class intelcam(camera):
         align_to = rs.stream.color
         self.align = rs.align(align_to)
 
-        unaligned_frames = self.pipeline.wait_for_frames()
-        frames = self.align.process(unaligned_frames)
-        depth = frames.get_depth_frame()
-        self.depth_intrinsic = depth.profile.as_video_stream_profile().intrinsics  # noqa: E501
-
     def get_frame(self):
         """
         Retrieves an image from the camera output, and calls the process_frame
@@ -114,5 +109,4 @@ class intelcam(camera):
             print("Invalid frame", file=sys.stderr)
 
         depth_image = np.asanyarray(aligned_depth_frame.get_data())
-
         return self.process_depth(depth_image)
