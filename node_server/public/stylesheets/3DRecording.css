@@ -1,0 +1,26 @@
+#input {
+  background: rgba(70, 70, 70, 0.7);
+  color: white;
+  width: 300px;
+}
+
+#inputDiv {
+  position: absolute;
+  bottom: 150px;
+  left: calc((100% - 300px) / 2);
+  width: 300px;
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+#replayButton {
+  border-radius: 5px;
+  color: white;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+#replayButton:hover {
+  background: rgba(70, 70, 70, 0.7);
+}

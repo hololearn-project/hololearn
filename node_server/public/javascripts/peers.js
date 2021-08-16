@@ -15,6 +15,20 @@ socket = io.connect(window.location.origin);
 
 socket.emit('getUsers');
 
+socket.on('teacherStreamChanged', () => {
+  if (table == -2 && recording3D) {
+    const screenshareScreen = document.getElementById('screenshare');
+    const options = {mimeType: 'video/webm'};
+    setTimeout(function() {
+      mediaRecorderScreenShareStream = new MediaRecorder(screenshareScreen.srcObject, options);
+      mediaRecorderScreenShareStream.ondataavailable = function(e) {
+        handleDataAvailable3DRecorder(e, {chunks: recordedChunksScreenShareStream, name: 'screen'});
+      };
+      mediaRecorderScreenShareStream.start();
+    }, 3000);
+  }
+});
+
 
 socket.on('users', (users) => {
   const options = document.getElementsByName('room');
@@ -37,7 +51,6 @@ socket.on('users', (users) => {
 socket.on('userSeats', (seats) => {
   for (let i = 0; i < seats.length; i++) {
     if (!seats[i].seat <= 0) {
-      console.log(seats[i]);
       const elemId = 'Seat' + seats[i].seat;
       document.getElementById(elemId).style.border = 'solid rgb(255, 0, 0)';
       const tag = document.createElement('p');
@@ -56,7 +69,6 @@ socket.on('userSeats', (seats) => {
 });
 
 socket.on('seat taken', () => {
-  console.log('seat taken!');
   alert('seat already taken');
   location.reload();
 });
@@ -71,39 +83,6 @@ socket.on('seat taken', () => {
 function startConnecting(teacher, name) {
   // const peerConfig = {iceServers: [
   //   {urls: ["stun:stun.l.google.com:19302"]}]};
-
-  /**
-   * Add screenshare to the environment
-   * @param {MediaStream} stream - the shared screen
-   */
-  function addScreenShare(stream) {
-    // video.srcObject = stream
-    // sources[0] = video
-    // ctxStreams[0] = ctx2
-    // canvasWebcams[0] = canvas
-    const screenshareScreen = document.getElementById('screenshare');
-    if (table != -1) {
-      screenshareScreen.muted = false;
-    }
-    screenshareScreen.srcObject = stream;
-
-
-    mapScreen = new THREE.VideoTexture(screenshareScreen);
-
-
-    const geometry2 = new THREE.PlaneGeometry(48, 24);
-    const me2 = new THREE.Mesh( geometry2, new THREE.MeshPhongMaterial( {
-      color: 'white',
-      map: mapScreen,
-      alphaTest: 0.5,
-      transparent: true,
-      side: THREE.DoubleSide,
-    }));
-    me2.position.set( 0, 16, 32);
-    me2.rotation.y = Math.PI;
-    scene.add( me2 );
-    objects.push( me2 );
-  }
 
   /**
    * adds a student to the environment on the right position.
@@ -249,9 +228,7 @@ function startConnecting(teacher, name) {
       if (seat == 0) {
         // teachers don't send screenshare via peer to
         // peer anymore
-        // addScreenShare(stream);
       } else {
-        console.log('adding stream');
         addVideoElement(id, stream, seat);
       }
       // make async broadcast call
@@ -372,7 +349,6 @@ function startConnecting(teacher, name) {
   });
 
   socket.on('connect to teacher', (id) => {
-    console.log('connecting to teacher');
     teacherSocket = id;
     p = {connected: false, peerObject: createNewpeer(id, -1),
       idConnectedTo: id, seat: -1};
@@ -431,7 +407,6 @@ function startConnecting(teacher, name) {
             activeconnections.get(id).peerObject.signal(data);
             resolve();
             clearInterval(interval);
-            console.log('===== INTERVAL CLEARED =====');
           }
         }
         counter++;
@@ -466,65 +441,64 @@ function startConnecting(teacher, name) {
 
   socket.on('teacher-stream-emitter-signal', (data) => {
     // Receive the video streams from a teacher
-    console.log('teacher-stream-emitter-signal received');
     teacherPeer.signal(data);
   });
 
   // Keep track of the tracks received.
   socket.on('teacher-presence', () => {
-    console.log('teacher-presence message received, consumer connect msg sent');
     socket.emit('teacher-stream-consumer-connect');
 
     // Establish new Peer connection with the server.
     teacherPeer = new SimplePeer({initiator: true});
-    console.log('---- teacher peer initialized');
-    console.log(teacherPeer);
-    console.log('---- =');
 
     teacherPeer.on('signal', (data) => {
       socket.emit('teacher-stream-consumer-signal', data);
     });
 
     teacherPeer.on('stream', (stream) => {
-      console.log('stream received from server with id: ' + stream.id);
       teacherIncomingMediaStream = stream;
       // Set video element to be the stream depending on its ID
       const sid = stream.id;
       if (servRtcStrmsLidars.includes(sid)) {
-        console.log('-> it\'s a lidar stream!');
+        if (stream.id == 'depthstream') {
+          depthStream = stream;
+        } else {
+          imageStream = stream;
+        }
         // if it's a lidar stream, figure out which one it is and
         // add to the right element
         const videoToAdd = document.getElementById(servRtcStrms.get(sid));
-        // console.log(videoToAdd);
-        // console.log(stream);
         videoToAdd.srcObject = stream;
         videoToAdd.play();
+        if (table == -2) {
+          start3DRecording();
+        }
       }
       if (servRtcStrmsScrnsh.includes(sid)) {
-        console.log('-> it\'s a screenshare stream!');
+        screenShareStream = stream;
         if (table == -1) {
           teacherSound = stream.getAudioTracks()[0];
           startMediaRecorder();
         }
         // if it's a screenshare stream, add to the right element
-        addScreenShare(stream);
+        addScreenShare(stream, false);
+
+        if (table == -2) {
+          start3DRecording();
+        }
       }
     });
 
     teacherPeer.on('track', (track, stream) => {
-      console.log('TRACK RECEIVED');
       teacherTracks.push(track);
-      console.log(track);
     });
 
     teacherPeer.on('connect', () => {
       // Connection established.
-      console.log('teacherPeer connection established');
       // if we are the teacher, we send our screenshare to
       // the server, so it can be broadcast to students
       if (teacher && localMediaStream.getAudioTracks()[0] != undefined) {
         // localMediaStream.getAudioTracks()[0].enabled = true;
-        console.log(localMediaStream.getVideoTracks()[0]);
         teacherPeer.addStream(localMediaStream);
       }
     });
@@ -536,8 +510,6 @@ function startConnecting(teacher, name) {
       // teacherPeer = null;
     });
     teacherPeer.on('close', () => {
-      console.log('user ' + socket.id +
-        ' closed the rtc conn to server, reconnecting...');
       teacherPeer.destroy();
       // socket.emit('browser-ask-to-reconnect-webrtc');
       teacherPeer = null;
@@ -553,4 +525,42 @@ function startConnecting(teacher, name) {
     table,
   });
   socket.emit('query-connections');
+}
+
+/**
+   * Adds screen sharing to the environment.
+   * @param {MediaStream} stream the stream to share.
+   * @param {boolean} replay if in a replay or not.
+   */
+function addScreenShare(stream, replay) {
+  // video.srcObject = stream
+  // sources[0] = video
+  // ctxStreams[0] = ctx2
+  // canvasWebcams[0] = canvas
+  const screenshareScreen = document.getElementById('screenshare');
+  if (table != -1) {
+    screenshareScreen.muted = false;
+  }
+  if (replay) {
+    screenshareScreen.src = stream;
+  } else {
+    screenshareScreen.srcObject = stream;
+  }
+
+
+  mapScreen = new THREE.VideoTexture(screenshareScreen);
+
+
+  const geometry2 = new THREE.PlaneGeometry(48, 24);
+  const me2 = new THREE.Mesh( geometry2, new THREE.MeshPhongMaterial( {
+    color: 'white',
+    map: mapScreen,
+    alphaTest: 0.5,
+    transparent: true,
+    side: THREE.DoubleSide,
+  }));
+  me2.position.set( 0, 16, 32);
+  me2.rotation.y = Math.PI;
+  scene.add( me2 );
+  objects.push( me2 );
 }
