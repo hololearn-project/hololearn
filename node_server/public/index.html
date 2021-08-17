@@ -103,11 +103,20 @@
                 <p style="text-align:left;font-size:16px;color:gray">subSample: <span id="subSampleVal"></span></p>
                 <input type="range" min="2" max="20" value="5" step = "1" class="slider" id="subSampleRange" onchange="updateSubSample()">     
             </div>
+            <div id ="offsets">
+                <p style="text-align:left;font-size:16px;color:gray">Size</span></p>
+                <input type="range" min="10" max="100" value="50" step = "2" class="slider" id="multRange" onchange="updateMult()">
+                <p style="text-align:left;font-size:16px;color:gray">X offset</span></p>
+                <button class="button" id="x_minus" onclick="changeXoffset(-1)">-x</button><button class="button" id="x_plus" onclick="changeXoffset(1)">+x</button>
+                <p style="text-align:left;font-size:16px;color:gray">Y offset</span></p>
+                <button class="button" id="y_minus" onclick="changeYoffset(-1)">-y</button><button class="button" id="y_plus" onclick="changeYoffset(1)">+y</button>
+                <p style="text-align:left;font-size:16px;color:gray">Z offset</span></p>
+                <button class="button" id="z_minus" onclick="changeZoffset(-1)">-z</button><button class="button" id="z_plus" onclick="changeZoffset(1)">+z</button>
+            </div>
             </div>
         </div>
         
         <button class="button" id="advOptBtn" onclick="toggleAdvancedOptions()" style="display:none;">Show advanced options</button>
-        <button class="button" id="markerBtn" onclick="updateMarker()" style="display:none;">Update marker</button>
         <div id="notification" class="row" style="display: none;">
             <div class="col-xs-12 col-sm-6 col-sm-offset-3">
               <div class="new-message-box">

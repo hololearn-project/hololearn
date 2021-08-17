@@ -1,8 +1,5 @@
 /* eslint-disable */
 var obj3D, gui, skeletonHelper, bones, skinnedMesh, skeleton, geometry, face, faceGeometry;
-var state = {
-        animateBones : false
-};
 var material = new THREE.MeshPhongMaterial( {
   skinning : true,
   color: 0x055289,
@@ -12,49 +9,62 @@ var material = new THREE.MeshPhongMaterial( {
   vertexColors: true
 } );
 
-const poseParts = ['Left Shoulder', 'Left Elbow', 'Left Wrist', 'Right Shoulder', 'Right Elbow', 'Right Wrist', 'Head', 'Right Hip', 'Right Knee', 'Right Heel', 'Right Foot',  'Left Hip', 'Left Knee', 'Left Heel', 'Left Foot']
+const textureLoader = new THREE.TextureLoader();
 
-function initGui() {
+let MULT = 40;
+let X_OFFSET = -22;
+let Y_OFFSET = 20;
+let Z_OFFSET = 22;
+let Z_CORRECTION = 20;
 
-    gui = new dat.GUI();
-
-    const bodyParts = ['Whole body', 'Left Shoulder', 'Left Elbow', 'Left Wrist', 'Right Shoulder', 'Right Elbow', 'Right Wrist', 'Upper Torso', 'Lower Torso', 'Neck', 'Head', 'Right Hip', 'Right Knee', 'Right Heel', 'Right Foot',  'Left Hip', 'Left Knee', 'Left Heel', 'Left Foot']
-    const partIndicies = [4, 10, 11, 12, 33, 34, 35, 6, 5, 7, 8, 59, 60, 61, 62, 55, 56, 57, 58]
-
-    var folder;
-
-    for ( var i = 0; i < partIndicies.length; i ++ ) {
-
-        var bone = bones[partIndicies[i]];
-
-        folder = gui.addFolder(bodyParts[i]);
-
-        folder.add( bone.position, 'x', - 10 + bone.position.x, 10 + bone.position.x );
-        folder.add( bone.position, 'y', - 10 + bone.position.y, 10 + bone.position.y );
-        folder.add( bone.position, 'z', - 10 + bone.position.z, 10 + bone.position.z );
-
-        folder.add( bone.rotation, 'x', - Math.PI * 0.5, Math.PI * 0.5 );
-        folder.add( bone.rotation, 'y', - Math.PI * 0.5, Math.PI * 0.5 );
-        folder.add( bone.rotation, 'z', - Math.PI * 0.5, Math.PI * 0.5 );
-
-        folder.add( bone.scale, 'x', 0, 2 );
-        folder.add( bone.scale, 'y', 0, 2 );
-        folder.add( bone.scale, 'z', 0, 2 );
-
-        folder.__controllers[ 0 ].name( "position.x" );
-        folder.__controllers[ 1 ].name( "position.y" );
-        folder.__controllers[ 2 ].name( "position.z" );
-
-        folder.__controllers[ 3 ].name( "rotation.x" );
-        folder.__controllers[ 4 ].name( "rotation.y" );
-        folder.__controllers[ 5 ].name( "rotation.z" );
-
-        folder.__controllers[ 6 ].name( "scale.x" );
-        folder.__controllers[ 7 ].name( "scale.y" );
-        folder.__controllers[ 8 ].name( "scale.z" );
-
-    }
+function changeXoffset(diff) {
+  X_OFFSET += diff
 }
+
+function changeYoffset(diff) {
+  Y_OFFSET += diff
+}
+
+function changeZoffset(diff) {
+  Z_OFFSET += diff
+  console.log(X_OFFSET, Y_OFFSET, Z_OFFSET);
+}
+
+function updateMult(){
+  MULT = parseInt(document.getElementById('multRange').value);
+}
+
+const gradientMaps = ( function () {
+
+  const threeTone = textureLoader.load( './assets/gradientMaps/threeTone.jpg' );
+  threeTone.minFilter = THREE.NearestFilter;
+  threeTone.magFilter = THREE.NearestFilter;
+
+  const fiveTone = textureLoader.load( './assets/gradientMaps/fiveTone.jpg' );
+  fiveTone.minFilter = THREE.NearestFilter;
+  fiveTone.magFilter = THREE.NearestFilter;
+
+  return {
+    none: null,
+    threeTone: threeTone,
+    fiveTone: fiveTone
+  };
+
+} )();
+
+const alphaMaps = ( function () {
+
+  const fibers = textureLoader.load( './assets/textures/alphaMap.jpg' );
+  fibers.wrapT = THREE.RepeatWrapping;
+  fibers.wrapS = THREE.RepeatWrapping;
+  fibers.repeat.set( 9, 1 );
+
+  return {
+    none: null,
+    fibers: fibers
+  };
+
+} )();
 
 function loadCanonicalFaceModel() {
 
@@ -72,11 +82,14 @@ function loadCanonicalFaceModel() {
 
         mesh.material.wireframe = true;
 
+        // mesh.material = material;
+
         scene.add(face);
 
         face.rotation.y += Math.PI
 
-        face.position.y += 50;
+        face.position.y += 15;
+        face.position.z -= 15;
 
         // face.scale.set(100, 100, 100)
 
@@ -84,18 +97,56 @@ function loadCanonicalFaceModel() {
 
         facePositions = faceGeometry.attributes.position.array;
 
-        let k;
+      },
+      function( xhr ) {
+        //console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+      },
+      function( err ) {
+        //console.error( 'An error happened' );
+      });
 
-        for(k = 0; k < FACE_MESH_LANDMARK_COUNT; k++) {
-          facePositions[(3*k)+2] = 0;
-        }
+}
+
+function loadCanonicalFaceModelWithTexture() {
+
+  const loader = new THREE.GLTFLoader();
+
+  loader.load(
+      './assets/models/canonical_face_with_texture.glb',
+      function( gltf ) {
+
+        face = gltf.scene
+
+        scene.add(face);
+
+        face.rotation.y += Math.PI
+
+        face.position.y += 50;
+       
+        mesh = face.children[2];
+        geometry = mesh.geometry;
+
+        // console.log(mesh);
+
+        // const toonMaterial = new THREE.MeshToonMaterial( { 
+        //   color: 0x055289,
+        //   gradientMap: gradientMaps.threeTone,
+        //   alphaMap: alphaMaps.fibers,
+        //   side: THREE.DoubleSide,
+        //   flatShading: true,
+        //   vertexColors: true } );
+
+        // mesh.material = toonMaterial;
+
+        // console.log(mesh);
+        // facePositions = faceGeometry.attributes.position.array;
 
       },
       function( xhr ) {
-        console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        //console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
       },
       function( err ) {
-        console.error( 'An error happened' );
+        //console.error( 'An error happened' );
       });
 
 }
@@ -136,10 +187,10 @@ function loadMaleModel() {
 
       },
       function( xhr ) {
-        console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+        //console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
       },
       function( err ) {
-        console.error( 'An error happened' );
+        //console.error( 'An error happened' );
       });
 
 }
