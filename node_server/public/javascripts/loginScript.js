@@ -74,7 +74,7 @@ const teacherClicked = function(checkbox) { // eslint-disable-line no-unused-var
   checkboxes.forEach((item) => {
     if (item !== checkbox) item.checked = false;
   });
-  if (checkbox.value == 'recorder') {
+  if (checkbox.value == 'recorder' || checkbox.value == '3DRecorder' || checkbox.value == '3DReplay') {
     const nameInput = document.getElementById('nameInput');
     nameInput.style.display = 'none';
     const tableInput = document.getElementById('tableInput');
@@ -169,14 +169,25 @@ const submitAnswer = async function() {
     load3DEnvironment();
     return;
   }
-  if (val == 'recorder') {
+  if (val == '3DRecorder') {
     const div = document.getElementById('studentTeacher');
     div.parentNode.removeChild(div);
     a = 0;
     b = 7;
     c = 6;
     isTeacher = false;
-    table = -1;
+    table = -2;
+    load3DEnvironment();
+    return;
+  }
+  if (val == '3DReplay') {
+    const div = document.getElementById('studentTeacher');
+    div.parentNode.removeChild(div);
+    a = 0;
+    b = 7;
+    c = 6;
+    isTeacher = false;
+    table = -3;
     load3DEnvironment();
     return;
   }

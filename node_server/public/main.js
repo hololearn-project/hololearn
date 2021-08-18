@@ -149,7 +149,6 @@ async function load3DEnvironment() {
         },
         // called while loading is progressing
         function( xhr ) {
-          console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
         },
         // called when loading has errors
         function( error ) {
@@ -160,6 +159,10 @@ async function load3DEnvironment() {
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+    // if (playback) {
+    //   setRecordedPictureSource();
+    //   setRecordedDepthSource();
+    // }
 
     // sets the target of the camera
     if (isTeacher) {
@@ -226,16 +229,20 @@ async function load3DEnvironment() {
       }
     }
     updateScreenAndWebcams(isTeacher, camera);
-    if (!isTeacher) animateTeacher(dctx, ctx, depth_canvas, canvas2d);
+
+    // if (!isTeacher)
+    animateTeacher(dctx, ctx, depth_canvas, canvas2d);
     renderer.render(scene, camera);
   };
 
   await init();
   // simpleTextureMap();
-  startConnecting(isTeacher, nameUser);
+  if (table != -3) {
+    startConnecting(isTeacher, nameUser);
+  }
 
   // set UI buttons visable if not a recorder
-  if (table != -1) {
+  if (table >= 0) {
     document.getElementById('buttonGroup').style.display = 'block';
     document.getElementById('advOptBtn').style.display = 'block';
 
@@ -244,8 +251,6 @@ async function load3DEnvironment() {
       document.getElementById('cameraButton').style.display = 'block';
       // document.getElementById('usersButton').style.display = 'none';
     } else {
-      // document.getElementById('rotateClassroom').style.display = 'block';
-      // document.getElementById('attendanceButton').style.display = 'block';
       document.getElementById('usersButton').style.display = 'block';
       document.getElementById('screenShareButton').style.display = 'block';
 
@@ -253,7 +258,21 @@ async function load3DEnvironment() {
       webcam.muted = true;
     }
   } else {
-    document.getElementById('recordButton').style.display = 'block';
+    if (table == -1) {
+      document.getElementById('recordButton').style.display = 'block';
+    } else {
+      document.getElementById('muteButton').style.display = 'none';
+      document.getElementById('chatButton').style.display = 'none';
+      document.getElementById('buttonGroup').style.display = 'block';
+      document.getElementById('buttonGroup').style.width = '120px';
+      const left = (window.innerWidth - 120) / 2;
+      document.getElementById('buttonGroup').style.marginLeft = left + 'px';
+      if (table == -2) {
+        document.getElementById('3DRecordButton').style.display = 'block';
+      } else {
+        document.getElementById('3DReplayButton').style.display = 'block';
+      }
+    }
     document.title = 'Recording HoloLearn';
   }
   animate();

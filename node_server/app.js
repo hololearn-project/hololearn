@@ -9,6 +9,43 @@ const http = require('http');
 const wrtc = require('wrtc');
 const Peer = require('simple-peer');
 
+const sqlite3 = require('sqlite3').verbose();
+
+let db = new sqlite3.Database('./user1.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE
+    , (err) => {
+      if (err) {
+        console.error(err.message);
+      } else {
+        console.log('Connected to the chinook database.');
+      }
+    });
+
+// createTable(db);
+
+// // eslint-disable-next-line valid-jsdoc
+// /**
+//  * creates table.
+//  */
+// async function createTable(db) {
+//   await db.run('DROP TABLE lectures', (err) => {
+//     if (err) {
+//       console.log('error in dropping: ' + err);
+//     }
+//   });
+
+//   await
+//   db.run(
+//  'CREATE TABLE lectures(name text, depthStreamId integer, imageStreamId integer, screenShareStreamId integer)');
+// }
+
+// db.close((err) => {
+//   if (err) {
+//     return console.error(err.message);
+//   } else {
+//     console.log('Close the database connection.');
+//   }
+// });
+
 let globalScreenShare = undefined;
 
 const indexRouter = require('./routes/index');
@@ -347,6 +384,42 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  socket.on('uploadLecture', (lectureName, depthBlob, imageBlob, screenShareBlob) => {
+    // eslint-disable-next-line no-unused-vars
+    db.all('SELECT * FROM streams', (error, rows) => {
+      // receives all the results as an array
+      const startCount = rows.length + 1;
+
+      console.log('counter at start is: ' + startCount);
+      db.run('INSERT INTO streams (id,stream) VALUES(?, ?)', [startCount + 1, depthBlob], (err) => {
+        if (err) {
+          return console.log(err.message);
+        }
+        console.log('Depth was added to the table: ${this.lastID}');
+      });
+      db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [startCount + 2, imageBlob], (err) => {
+        if (err) {
+          return console.log(err.message);
+        }
+        console.log('Image was added to the table: ${this.lastID}');
+      });
+      db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [startCount + 3, screenShareBlob], (err) => {
+        if (err) {
+          return console.log(err.message);
+        }
+        console.log('ScreenShare was added to the table: ${this.lastID}');
+      });
+
+      db.run('INSERT INTO lectures(name, depthStreamId, imageStreamId, screenShareStreamId) VALUES(?, ?, ?, ?)',
+          [lectureName, startCount + 1, startCount + 2, startCount + 3], (err) => {
+            if (err) {
+              return console.log(err.message);
+            }
+            console.log('Lecture was added to the table: ${this.lastID}');
+          });
+    });
+  });
+
   socket.on('micChange', () => {
     setTimeout(function() {
       users.forEach((user) => {
@@ -361,6 +434,7 @@ io.sockets.on('connection', (socket) => {
           user.teacherStreams.screensharestream.
               addTrack(globalScreenShare.getAudioTracks()[0]);
         }
+        io.sockets.emit('teacherStreamChanged');
       });
     }, 1200);
   });
@@ -379,6 +453,8 @@ io.sockets.on('connection', (socket) => {
               globalScreenShare.getVideoTracks()[0]);
         }
       });
+      io.sockets.emit('teacherStreamChanged');
+      console.log('change message sent');
     }, 1200);
   });
 
@@ -701,7 +777,7 @@ io.sockets.on('connection', (socket) => {
                   ' stream, sending to client...');
               const screensharestream =
                   new wrtc.MediaStream({id: 'screensharestream'});
-              teacher.teacherStreams.screensharestream.getTracks()
+              globalScreenShare.getTracks()
                   .forEach((track) => screensharestream.addTrack(track));
               user.peer.addStream(screensharestream);
               user.teacherStreams.screensharestream = screensharestream;
