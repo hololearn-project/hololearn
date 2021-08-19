@@ -384,6 +384,15 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  socket.on('getLectures', () => {
+    db.all('SELECT * FROM lectures', (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        socket.emit('allLectures', rows);
+      }
+    });
+  });
   socket.on('uploadLecture', (lectureName, depthBlob, imageBlob, screenShareBlob) => {
     // eslint-disable-next-line no-unused-vars
     db.all('SELECT * FROM streams', (error, rows) => {

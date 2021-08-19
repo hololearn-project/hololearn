@@ -188,7 +188,8 @@ function record3DClicked() {
  * Appears the file selecting tag.
  */
 function rewatchLecture() {
-  document.getElementById('inputDiv').style.display = 'block';
+  // document.getElementById('inputDiv').style.display = 'block';
+  displayLectures();
 }
 
 /**
