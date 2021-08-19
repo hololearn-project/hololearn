@@ -1,3 +1,8 @@
+let depthStreamDataBase = undefined;
+let imageStreamDataBase = undefined;
+let screenShareStreamDataBase = undefined;
+
+
 /**
  * Displays all lectures that can be watched.
  */
@@ -35,8 +40,41 @@ function displayLectures() {
  */
 function getLecture(lecture) {
   document.getElementById('selectLectureRewatch').style.display = 'none';
-  console.log('getLecture: ' + lecture.depthStreamId);
   socket.emit('getDepthStream', lecture.depthStreamId);
   socket.emit('getImageStream', lecture.imageStreamId);
   socket.emit('getScreenShareStream', lecture.screenShareStreamId);
+
+  socket.on('depthStream', (depthStream) => {
+    console.log(depthStream[0].stream);
+    depthStreamDataBase = depthStream[0].stream;
+    if (depthStreamDataBase != undefined & imageStreamDataBase != undefined & screenShareStreamDataBase != undefined) {
+      startRewatch();
+    }
+  });
+  socket.on('imageStream', (imageStream) => {
+    imageStreamDataBase = imageStream[0].stream;
+    if (depthStreamDataBase != undefined & imageStreamDataBase != undefined & screenShareStreamDataBase != undefined) {
+      startRewatch();
+    }
+  });
+  socket.on('screenShareStream', (screenShareStream) => {
+    screenShareStreamDataBase = screenShareStream[0].stream;
+    if (depthStreamDataBase != undefined & imageStreamDataBase != undefined & screenShareStreamDataBase != undefined) {
+      startRewatch();
+    }
+  });
+}
+
+/**
+ * starts the rewatching of the lecture retrieved from the database.
+ */
+function startRewatch() {
+  console.log(imageStreamDataBase);
+  document.getElementById('lidarVideoStream1').src = URL.createObjectURL(new Blob([imageStreamDataBase]));
+  document.getElementById('lidarVideoStream1').play();
+
+  document.getElementById('lidarVideoStream2').src = URL.createObjectURL(new Blob([depthStreamDataBase]));
+  document.getElementById('lidarVideoStream2').play();
+
+  addScreenShare(URL.createObjectURL(new Blob([screenShareStreamDataBase])), true);
 }

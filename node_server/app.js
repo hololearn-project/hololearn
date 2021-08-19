@@ -384,6 +384,36 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  socket.on('getDepthStream', (streamId) => {
+    db.all('SELECT * FROM streams WHERE id=' + streamId, (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        console.log(rows);
+        socket.emit('depthStream', rows);
+      }
+    });
+  });
+  socket.on('getImageStream', (streamId) => {
+    db.all('SELECT * FROM streams WHERE id=' + streamId, (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        console.log(rows);
+        socket.emit('imageStream', rows);
+      }
+    });
+  });
+  socket.on('getScreenShareStream', (streamId) => {
+    db.all('SELECT * FROM streams WHERE id=' + streamId, (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        console.log(rows);
+        socket.emit('screenShareStream', rows);
+      }
+    });
+  });
   socket.on('getLectures', () => {
     db.all('SELECT * FROM lectures', (error, rows) => {
       if (error) {
