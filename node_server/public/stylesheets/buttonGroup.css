@@ -90,6 +90,10 @@
     overflow-y: scroll; 
 }
 
+#selectLectureRewatch {
+    height: 170px;
+}
+
 .optionInLecture:hover {
     background: rgba(80, 80, 80, 0.6);
 }
