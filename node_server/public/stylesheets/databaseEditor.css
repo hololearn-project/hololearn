@@ -14,6 +14,7 @@
   padding: 5px;
   border-radius: 5px;
   background: rgba(0, 0, 0, 0.1);
+  color: black;
 
 }
 
@@ -21,7 +22,7 @@
   position: absolute;
   right: 150px;
   padding: 5px;
-  border-radius: 3px;
+  border-radius: 5px;
   font-size: 24px;
 }
 
@@ -29,7 +30,7 @@
   position: absolute;
   right: 50px;
   padding: 5px;
-  border-radius: 3px;
+  border-radius: 5px;
   font-size: 24px;
 }
 
@@ -49,6 +50,7 @@
   width: 500px;
   text-align: left;
   margin-left: 50px;
+  color: black;
 }
 
 .alertBox {
@@ -69,10 +71,30 @@
   background: rgba(255, 255, 255);
   width: 125px;
   height: 50px;
-  top: 150px;
+  bottom: 25px;
+}
+
+.confirmButton:hover {
+  background: rgba(200, 200, 200);
+  cursor: pointer;
 }
 
 .confirmButtonText {
-  width: 
-  left: ;
+  width: 125;
+  text-align: center;
+}
+
+#editBox {
+  height: 300px;
+}
+
+#nameEditInput {
+  position: absolute;
+  width: 500px;
+  height: 50px;
+  left: calc((100% - 500px) / 2);
+  text-align: center;
+  font-size: 24px;
+  border-radius: 5px;
+  top: 100px;
 }

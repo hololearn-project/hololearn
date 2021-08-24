@@ -384,6 +384,16 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  socket.on('editLecture', (lecture, newLectureName) => {
+    db.run('UPDATE lectures SET name = ? WHERE name = ?', [newLectureName, lecture.name], (err) => {
+      if (err) {
+        console.log('error on updating lecture: ' + lecture);
+      } else {
+        console.log('lecture edited');
+        socket.emit('editCompleted');
+      }
+    });
+  });
   socket.on('removeLecture', (lecture) => {
     db.run('DELETE FROM lectures WHERE name=?', [lecture.name], (err) => {
       if (err) {

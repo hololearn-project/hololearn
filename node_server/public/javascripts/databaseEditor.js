@@ -1,7 +1,18 @@
+/* eslint-disable no-unused-vars */
+let lectureToRemove = undefined;
+let loaded = false;
+
 socket.on('allLectures', (lectures) => {
-  lectures.forEach((lecture) => {
-    addCell(lecture);
-  });
+  if (!loaded) {
+    lectures.forEach((lecture) => {
+      addCell(lecture);
+      loaded = true;
+    });
+  }
+});
+
+socket.on('editCompleted', () => {
+  location.reload();
 });
 
 socket.emit('getLectures');
@@ -15,8 +26,13 @@ function addCell(lecture) {
   const newCell = document.getElementById('exampleCell').cloneNode(true);
   newCell.innerHTML += lecture.name;
   newCell.style.display = 'block';
+  newCell.childNodes[0].onclick = function() {
+    lectureToEdit = lecture;
+    document.getElementById('editBox').style.display = 'block';
+  };
   newCell.childNodes[1].onclick = function() {
-    removeLectureFromDatabase(lecture);
+    lectureToRemove = lecture;
+    document.getElementById('alertBox').style.display = 'block';
   };
 
   const newDiv = document.createElement('div');
@@ -30,11 +46,46 @@ function addCell(lecture) {
 
 // eslint-disable-next-line valid-jsdoc
 /**
- *
- * @param {lecture object} lecture the lecture to be removed
+ *  Removes lecture from database.
  */
-function removeLectureFromDatabase(lecture) {
-  socket.emit('removeLecture', lecture);
+function removeLectureFromDatabase() {
+  socket.emit('removeLecture', lectureToRemove);
+  document.getElementById('alertBox').style.display = 'none';
+  location.reload();
 }
 
+/**
+ *  Removes lecture from database.
+ */
+function editLectureFromDatabase() {
+  socket.on('allLectures', (lectures) => {
+    let unique = true;
+    lectures.forEach((onlineLecture) => {
+      if (document.getElementById('nameEditInput').value == onlineLecture.name) {
+        unique = false;
+      }
+    });
+    if (unique) {
+      socket.emit('editLecture', lectureToEdit, document.getElementById('nameEditInput').value);
+      document.getElementById('editBox').style.display = 'none';
+    } else {
+      alert('this lecture name already exists. Try something else.');
+    }
+  });
+  socket.emit('getLectures');
+}
+
+/**
+ * Hides the alertBox
+ */
+function hideAlertBox() {
+  document.getElementById('alertBox').style.display = 'none';
+}
+
+/**
+ * Hides the editBox
+ */
+function hideEditBox() {
+  document.getElementById('editBox').style.display = 'none';
+}
 
