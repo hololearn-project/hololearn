@@ -384,6 +384,33 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  socket.on('removeLecture', (lecture) => {
+    db.run('DELETE FROM lectures WHERE name=?', [lecture.name], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('Lecture was deleted');
+    });
+    db.run('DELETE FROM streams WHERE id=?', [lecture.depthStreamId], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('DepthStream deleted was deleted');
+    });
+    db.run('DELETE FROM streams WHERE id=?', [lecture.imageStreamId], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('ImageStream deleted was deleted');
+    });
+    db.run('DELETE FROM streams WHERE id=?', [lecture.screenShareStreamId], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('ScreenShareStream deleted was deleted');
+    });
+  });
+
   socket.on('getDepthStream', (streamId) => {
     db.all('SELECT * FROM streams WHERE id=' + streamId, (error, rows) => {
       if (error) {

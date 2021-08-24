@@ -50,3 +50,14 @@
   text-align: left;
   margin-left: 50px;
 }
+
+.alertBox {
+  z-index: 10;
+  position: absolute;
+  border-radius: 10px;
+  background: rgba(50, 50, 50);
+  width: 600px;
+  height: 200px;
+  left: calc((100% - 600px) / 2);
+  top: 200px;
+}

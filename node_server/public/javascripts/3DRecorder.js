@@ -137,6 +137,9 @@ function download3DRecorder(recordedChunksMethod) {
   }
 }
 
+/**
+ * uploads the lecture to the online database.
+ */
 function uploadLecture() {
   let depthBlob = undefined;
   // downloadMultipleFiles(urls);
@@ -152,9 +155,22 @@ function uploadLecture() {
     }
   });
   const lectureName = document.getElementById('recordingNameInput').value;
-  socket.emit('uploadLecture', lectureName, depthBlob, imageBlob, screenShareBlob);
-  document.getElementById('recordingNameInputDiv').style.display = 'none';
-  console.log('lecture uploaded!');
+  socket.on('allLectures', (lectures) => {
+    let unique = true;
+    lectures.forEach((onlineLecture) => {
+      if (lecture.name == onlineLecture.name) {
+        unique = false;
+      }
+    });
+    if (unique) {
+      socket.emit('uploadLecture', lectureName, depthBlob, imageBlob, screenShareBlob);
+      document.getElementById('recordingNameInputDiv').style.display = 'none';
+      console.log('lecture uploaded!');
+    } else {
+      alert('this lecture name already exists. Try something else.');
+    }
+  });
+  socket.emit('getLectures');
 }
 
 /**
