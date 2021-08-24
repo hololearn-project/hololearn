@@ -240,6 +240,9 @@ async function load3DEnvironment() {
   if (table != -3) {
     startConnecting(isTeacher, nameUser);
   }
+  document.getElementById('toggle').style.display = 'none';
+  document.getElementById('menu').style.display = 'none';
+
 
   // set UI buttons visable if not a recorder
   if (table >= 0) {
