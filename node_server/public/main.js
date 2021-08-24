@@ -274,6 +274,7 @@ async function load3DEnvironment() {
         document.getElementById('3DRecordButton').style.display = 'block';
       } else {
         document.getElementById('3DReplayButton').style.display = 'block';
+        document.getElementById('advOptBtn').style.display = 'block';
       }
     }
     document.title = 'Recording HoloLearn';
