@@ -61,3 +61,18 @@
   left: calc((100% - 600px) / 2);
   top: 200px;
 }
+
+.confirmButton {
+  z-index: 11;
+  position: absolute;
+  border-radius: 5px;
+  background: rgba(255, 255, 255);
+  width: 125px;
+  height: 50px;
+  top: 150px;
+}
+
+.confirmButtonText {
+  width: 
+  left: ;
+}
