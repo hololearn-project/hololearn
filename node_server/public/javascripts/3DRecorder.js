@@ -158,7 +158,7 @@ function uploadLecture() {
   socket.on('allLectures', (lectures) => {
     let unique = true;
     lectures.forEach((onlineLecture) => {
-      if (lecture.name == onlineLecture.name) {
+      if (lectureName == onlineLecture.name) {
         unique = false;
       }
     });
@@ -171,6 +171,7 @@ function uploadLecture() {
     }
   });
   socket.emit('getLectures');
+  console.log('lectures asked');
 }
 
 /**

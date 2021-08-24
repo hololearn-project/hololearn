@@ -45,7 +45,6 @@ function getLecture(lecture) {
   socket.emit('getScreenShareStream', lecture.screenShareStreamId);
 
   socket.on('depthStream', (depthStream) => {
-    console.log(depthStream[0].stream);
     depthStreamDataBase = depthStream[0].stream;
     if (depthStreamDataBase != undefined & imageStreamDataBase != undefined & screenShareStreamDataBase != undefined) {
       startRewatch();

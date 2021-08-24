@@ -464,7 +464,13 @@ io.sockets.on('connection', (socket) => {
     // eslint-disable-next-line no-unused-vars
     db.all('SELECT * FROM streams', (error, rows) => {
       // receives all the results as an array
-      const startCount = rows.length + 1;
+      let highest = -1;
+      rows.forEach((stream) => {
+        if (stream.id > highest) {
+          highest = stream.id;
+        }
+      });
+      const startCount = highest;
 
       console.log('counter at start is: ' + startCount);
       db.run('INSERT INTO streams (id,stream) VALUES(?, ?)', [startCount + 1, depthBlob], (err) => {
