@@ -500,6 +500,8 @@ const mapping = [173,
   305,
   75];
 
+let vertexMarker = 0;
+
 servRtcStrms.set('videostream', 'lidarVideoStream1');
 servRtcStrms.set('depthstream', 'lidarVideoStream2');
 
@@ -624,9 +626,6 @@ async function load3DEnvironment() {
       color: 0x0000ff,
       transparent: false,
     });
-
-    vertMarker = new THREE.Mesh(vertGeometry, vertMaterial);
-    scene.add(vertMarker);
 
     loader.load(
         // resource URL

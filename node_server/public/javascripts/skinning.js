@@ -1,5 +1,5 @@
 /* eslint-disable */
-var obj3D, gui, skeletonHelper, bones, skinnedMesh, skeleton, geometry, face, faceGeometry;
+var obj3D, gui, skeletonHelper, bones, skinnedMesh, skeleton, geometry, face, faceGeometry, vertMarker;
 var material = new THREE.MeshPhongMaterial( {
   skinning : true,
   color: 0x055289,
@@ -8,6 +8,12 @@ var material = new THREE.MeshPhongMaterial( {
   flatShading: true,
   vertexColors: true
 } );
+
+var vertGeometry = new THREE.BoxGeometry(5, 5, 5);
+var vertMaterial = new THREE.MeshBasicMaterial({
+  color: 0x0000ff,
+  transparent: false
+});
 
 const textureLoader = new THREE.TextureLoader();
 
@@ -115,31 +121,26 @@ function loadCanonicalFaceModelWithTexture() {
       './assets/models/canonical_face_with_texture.glb',
       function( gltf ) {
 
+        console.log(gltf)
+
         face = gltf.scene
 
         scene.add(face);
 
-        face.rotation.y += Math.PI
+        // face.rotation.y += Math.PI
 
         face.position.y += 50;
+        
+        vertMarker = new THREE.Mesh(vertGeometry, vertMaterial);
+        vertMarker.scale.set(10, 10, 10);
+        scene.add(vertMarker)
        
         mesh = face.children[2];
-        geometry = mesh.geometry;
+        mesh.material.wireframe = true;
 
-        // console.log(mesh);
+        faceGeometry = mesh.geometry
 
-        // const toonMaterial = new THREE.MeshToonMaterial( { 
-        //   color: 0x055289,
-        //   gradientMap: gradientMaps.threeTone,
-        //   alphaMap: alphaMaps.fibers,
-        //   side: THREE.DoubleSide,
-        //   flatShading: true,
-        //   vertexColors: true } );
-
-        // mesh.material = toonMaterial;
-
-        // console.log(mesh);
-        // facePositions = faceGeometry.attributes.position.array;
+        faceGeometry = mesh.geometry;
 
       },
       function( xhr ) {
@@ -193,6 +194,18 @@ function loadMaleModel() {
         //console.error( 'An error happened' );
       });
 
+}
+
+function updateVertexMarker() {
+  if (typeof faceGeometry == 'undefined') return;
+
+  facePositions = faceGeometry.attributes.position.array;
+
+  vertMarker.position.x = facePositions[(3*vertexMarker)];
+  vertMarker.position.y = facePositions[(3*vertexMarker)+1] + 50;
+  vertMarker.position.z = facePositions[(3*vertexMarker)+2];
+
+  vertexMarker++;
 }
 
 function updateSkeleton() {

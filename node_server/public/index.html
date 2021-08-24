@@ -103,6 +103,9 @@
                 <p style="text-align:left;font-size:16px;color:gray">subSample: <span id="subSampleVal"></span></p>
                 <input type="range" min="2" max="20" value="5" step = "1" class="slider" id="subSampleRange" onchange="updateSubSample()">     
             </div>
+            <div id = "vertMarker">
+                <button class="button" id="vert_adv" onclick="updateVertexMarker()">Advance marker</button>
+            </div>
             <div id ="offsets">
                 <p style="text-align:left;font-size:16px;color:gray">Size</span></p>
                 <input type="range" min="10" max="100" value="50" step = "2" class="slider" id="multRange" onchange="updateMult()">
@@ -264,7 +267,7 @@
         <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.115/build/three.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/GLTFLoader.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/OBJLoader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/FBXLoader.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/three@0.115/examples/js/loaders/MTLLoader.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
         <script src="./javascripts/threejs-loader/MTLLoader.js"></script>

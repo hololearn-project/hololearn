@@ -1,0 +1,13 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl Default_OBJ
+Ns 225.000000
+Ka 0.730496 0.730496 0.730496
+Kd 0.103604 0.800000 0.272162
+Ks 0.109929 0.109929 0.109929
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd C:\\Users\\trist\\OneDrive\\Documents\\hololearn\\node_server\\public\\assets\\textures\\canonical-face-texture-photoshop.jpg
