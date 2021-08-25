@@ -11,6 +11,7 @@ function displayLectures() {
   socket.emit('getLectures');
   socket.on('allLectures', (lectures) => {
     if (!lecturesLoaded) {
+      lecturesLoaded = true;
       lectures.forEach((lecture) => {
         const option = document.createElement('DIV');
         option.setAttribute('id', lecture.name);
