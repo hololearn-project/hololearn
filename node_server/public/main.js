@@ -27,7 +27,7 @@ let teacherTracks = [];
 
 const servRtcStrms = new Map();
 const servRtcStrmsLidars = ['videostream', 'depthstream'];
-const servRtcStrmsScrnsh = ['screensharestream'];
+const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
 const FACE_MESH_LANDMARK_COUNT = 468;

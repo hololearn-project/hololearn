@@ -2,6 +2,7 @@
 // eslint-disable-next-line no-unused-vars
 let teacherSocket = '';
 let teacherPeer = null;
+let teacherWebcam = undefined;
 const activeconnections = new Map();
 
 let lastRotation = 0;
@@ -460,12 +461,15 @@ function startConnecting(teacher, name) {
       // Set video element to be the stream depending on its ID
       const sid = stream.id;
       if (servRtcStrmsLidars.includes(sid)) {
-        if (stream.id == 'depthstream') {
-          depthStream = stream;
-        } else {
-          imageStream = stream;
+        switch (sid) {
+          case 'depthstream':
+            depthStream = stream;
+          case 'imagestream':
+            imageStream = stream;
+          case 'webcamstream':
+            teacherWebcam = stream;
         }
-        // if it's a lidar stream, figure out which one it is and
+        // if it's a teacher stream, figure out which one it is and
         // add to the right element
         const videoToAdd = document.getElementById(servRtcStrms.get(sid));
         videoToAdd.srcObject = stream;
@@ -474,7 +478,7 @@ function startConnecting(teacher, name) {
           start3DRecording();
         }
       }
-      if (servRtcStrmsScrnsh.includes(sid)) {
+      if (sid == 'screensharestream') {
         screenShareStream = stream;
         if (table == -1) {
           teacherSound = stream.getAudioTracks()[0];
@@ -486,6 +490,12 @@ function startConnecting(teacher, name) {
         if (table == -2) {
           start3DRecording();
         }
+      }
+      console.log(sid);
+      if (sid == 'webcamstream') {
+        webcamStream = stream;
+        document.getElementsByClassName('input_video')[0].srcObject = stream;
+        console.log('set it correctly');
       }
     });
 
@@ -500,6 +510,17 @@ function startConnecting(teacher, name) {
       if (teacher && localMediaStream.getAudioTracks()[0] != undefined) {
         // localMediaStream.getAudioTracks()[0].enabled = true;
         teacherPeer.addStream(localMediaStream);
+        if (navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({video: true})
+              .then(function(stream) {
+                stream.oninactive = 'webcam';
+                console.log(stream);
+                teacherPeer.addStream(stream);
+              })
+              .catch(function(err0r) {
+                console.log('Something went wrong!');
+              });
+        }
       }
     });
     teacherPeer.on('error', (err) => {
