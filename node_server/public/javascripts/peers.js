@@ -491,11 +491,12 @@ function startConnecting(teacher, name) {
           start3DRecording();
         }
       }
-      console.log(sid);
+      console.log('streamId: ' + sid);
       if (sid == 'webcamstream') {
         webcamStream = stream;
         document.getElementsByClassName('input_video')[0].srcObject = stream;
         console.log('set it correctly');
+        cameraMesh.start();
       }
     });
 

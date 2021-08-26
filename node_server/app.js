@@ -759,7 +759,7 @@ io.sockets.on('connection', (socket) => {
               user.peer.addStream(screensharestream);
               user.teacherStreams.screensharestream = screensharestream;
             }
-            if (teacher.teacherStreams.webcam != null) {
+            if (teacher.teacherStreams.webcamstream != null) {
               console.log('teacher has a webcam' +
                   ' stream, sending to client...');
               const webcamstream =

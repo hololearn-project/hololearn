@@ -37,11 +37,11 @@ minTrackingConfidence: 0.5
 });
 faceMesh.onResults(onResults);
 
-const camera = new Camera(videoElement, {
+const cameraMesh = new Camera(videoElement, {
 onFrame: async () => {
     await faceMesh.send({image: videoElement});
 },
 width: 1280,
 height: 720
 });
-camera.start();
+// cameraMesh.start();
