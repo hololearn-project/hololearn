@@ -3,6 +3,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 // three.js init variables
+let teacherWebcamOn = false;
 let positions = [];
 let width = window.innerWidth;
 let height = window.innerHeight;
@@ -559,6 +560,10 @@ async function loadNet() { // this one is more efficient
 async function load3DEnvironment() {
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
+    if (localMediaStreamWebcam != null) {
+      cameraMesh.start();
+      teacherWebcamOn = true;
+    }
   }
 
   webcam.muted = true;
@@ -696,6 +701,9 @@ async function load3DEnvironment() {
   }
 
   function updateFaceMesh() {
+    if (!teacherWebcamOn) {
+      return;
+    }
     let k;
 
     if (typeof faceGeometry == 'undefined') return;
