@@ -3,6 +3,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 // three.js init variables
+let teacherWebcamOn = false;
 let positions = [];
 let width = window.innerWidth;
 let height = window.innerHeight;
@@ -27,7 +28,7 @@ let teacherTracks = [];
 
 const servRtcStrms = new Map();
 const servRtcStrmsLidars = ['videostream', 'depthstream'];
-const servRtcStrmsScrnsh = ['screensharestream'];
+const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
 const FACE_MESH_LANDMARK_COUNT = 468;
@@ -91,6 +92,10 @@ async function loadNet() { // this one is more efficient
 async function load3DEnvironment() {
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
+    if (localMediaStreamWebcam != null) {
+      cameraMesh.start();
+      teacherWebcamOn = true;
+    }
   }
 
   webcam.muted = true;
@@ -228,6 +233,9 @@ async function load3DEnvironment() {
   }
 
   function updateFaceMesh() {
+    if (!teacherWebcamOn) {
+      return;
+    }
     let k;
 
     if (typeof faceGeometry == 'undefined') return;

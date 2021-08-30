@@ -2,6 +2,7 @@
 // eslint-disable-next-line no-unused-vars
 let teacherSocket = '';
 let teacherPeer = null;
+let teacherWebcam = undefined;
 const activeconnections = new Map();
 
 let lastRotation = 0;
@@ -460,12 +461,15 @@ function startConnecting(teacher, name) {
       // Set video element to be the stream depending on its ID
       const sid = stream.id;
       if (servRtcStrmsLidars.includes(sid)) {
-        if (stream.id == 'depthstream') {
-          depthStream = stream;
-        } else {
-          imageStream = stream;
+        switch (sid) {
+          case 'depthstream':
+            depthStream = stream;
+          case 'imagestream':
+            imageStream = stream;
+          case 'webcamstream':
+            teacherWebcam = stream;
         }
-        // if it's a lidar stream, figure out which one it is and
+        // if it's a teacher stream, figure out which one it is and
         // add to the right element
         const videoToAdd = document.getElementById(servRtcStrms.get(sid));
         videoToAdd.srcObject = stream;
@@ -474,7 +478,7 @@ function startConnecting(teacher, name) {
           start3DRecording();
         }
       }
-      if (servRtcStrmsScrnsh.includes(sid)) {
+      if (sid == 'screensharestream') {
         screenShareStream = stream;
         if (table == -1) {
           teacherSound = stream.getAudioTracks()[0];
@@ -486,6 +490,14 @@ function startConnecting(teacher, name) {
         if (table == -2) {
           start3DRecording();
         }
+      }
+      console.log('streamId: ' + sid);
+      if (sid == 'webcamstream') {
+        webcamStream = stream;
+        cameraMesh.start();
+        document.getElementById('webcamVid').srcObject = stream;
+        console.log('set it correctly');
+        teacherWebcamOn = true;
       }
     });
 
@@ -500,6 +512,13 @@ function startConnecting(teacher, name) {
       if (teacher && localMediaStream.getAudioTracks()[0] != undefined) {
         // localMediaStream.getAudioTracks()[0].enabled = true;
         teacherPeer.addStream(localMediaStream);
+      }
+      // Add the webam of the teacher for the face mesh if there is one.
+      console.log(localMediaStreamWebcam);
+      if (teacher && localMediaStreamWebcam != null) {
+        const faceStream = new MediaStream();
+        faceStream.addTrack(localMediaStreamWebcam.getVideoTracks()[0]);
+        teacherPeer.addStream(faceStream);
       }
     });
     teacherPeer.on('error', (err) => {
