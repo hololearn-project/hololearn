@@ -92,6 +92,7 @@ async function loadNet() { // this one is more efficient
 async function load3DEnvironment() {
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
+    console.log(localMediaStreamWebcam);
     if (localMediaStreamWebcam != null) {
       cameraMesh.start();
       teacherWebcamOn = true;
@@ -232,27 +233,6 @@ async function load3DEnvironment() {
     event.object.material.color.setHex(startColor);
   }
 
-  function updateFaceMesh() {
-    if (!teacherWebcamOn) {
-      return;
-    }
-    let k;
-
-    if (typeof faceGeometry == 'undefined') return;
-
-    facePositions = faceGeometry.attributes.position.array;
-
-    let z_bar = -(facialLandmarks[0][0].z*MULT + Z_OFFSET);
-
-    for (k = 0; k < FACE_MESH_LANDMARK_COUNT; k++) {
-      facePositions[(3*k)] = facialLandmarks[0][mapping[k]].x*MULT + X_OFFSET;
-      facePositions[(3*k)+1] = -facialLandmarks[0][mapping[k]].y*MULT + Y_OFFSET;
-      facePositions[(3*k)+2] = -(facialLandmarks[0][mapping[k]].z*MULT + (Z_OFFSET + Z_CORRECTION) + z_bar);
-    }
-
-    faceGeometry.attributes.position.needsUpdate = true;
-  }
-
   /**
    * Updates the environment and gets an image from it.
    */
@@ -283,7 +263,7 @@ async function load3DEnvironment() {
       }
     }
 
-    updateFaceMesh();
+    // updateFaceMesh();
 
     updateScreenAndWebcams(isTeacher, camera);
 

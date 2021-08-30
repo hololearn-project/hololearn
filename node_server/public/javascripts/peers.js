@@ -16,6 +16,13 @@ socket = io.connect(window.location.origin);
 
 socket.emit('getUsers');
 
+socket.on('faceMeshTeacher', (array) => {
+  if (!isTeacher) {
+    facialLandmarksClient = array;
+    updateFaceMesh();
+  }
+});
+
 socket.on('teacherStreamChanged', () => {
   if (table == -2 && recording3D) {
     const screenshareScreen = document.getElementById('screenshare');
@@ -492,13 +499,13 @@ function startConnecting(teacher, name) {
         }
       }
       console.log('streamId: ' + sid);
-      if (sid == 'webcamstream') {
-        webcamStream = stream;
-        cameraMesh.start();
-        document.getElementById('webcamVid').srcObject = stream;
-        console.log('set it correctly');
-        teacherWebcamOn = true;
-      }
+      // if (sid == 'webcamstream') {
+      //   webcamStream = stream;
+      //   cameraMesh.start();
+      //   document.getElementById('webcamVid').srcObject = stream;
+      //   console.log('set it correctly');
+      //   teacherWebcamOn = true;
+      // }
     });
 
     teacherPeer.on('track', (track, stream) => {
@@ -514,12 +521,12 @@ function startConnecting(teacher, name) {
         teacherPeer.addStream(localMediaStream);
       }
       // Add the webam of the teacher for the face mesh if there is one.
-      console.log(localMediaStreamWebcam);
-      if (teacher && localMediaStreamWebcam != null) {
-        const faceStream = new MediaStream();
-        faceStream.addTrack(localMediaStreamWebcam.getVideoTracks()[0]);
-        teacherPeer.addStream(faceStream);
-      }
+      // console.log(localMediaStreamWebcam);
+      // if (teacher && localMediaStreamWebcam != null) {
+      //   const faceStream = new MediaStream();
+      //   faceStream.addTrack(localMediaStreamWebcam.getVideoTracks()[0]);
+      //   teacherPeer.addStream(faceStream);
+      // }
     });
     teacherPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);

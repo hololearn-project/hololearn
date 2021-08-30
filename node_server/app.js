@@ -368,6 +368,10 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  socket.on('faceMeshArray', (array) => {
+    socket.broadcast.emit('faceMeshTeacher', array);
+  });
+
   socket.on('uploadLecture', (lectureName, depthBlob, imageBlob, screenShareBlob) => {
     // eslint-disable-next-line no-unused-vars
     let counter = 0;

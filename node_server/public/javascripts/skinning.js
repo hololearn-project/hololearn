@@ -17,12 +17,6 @@ var vertMaterial = new THREE.MeshBasicMaterial({
 
 const textureLoader = new THREE.TextureLoader();
 
-let MULT = 40;
-let X_OFFSET = -22;
-let Y_OFFSET = 20;
-let Z_OFFSET = 22;
-let Z_CORRECTION = 20;
-
 const mapping = [173,
   155,
   133,
