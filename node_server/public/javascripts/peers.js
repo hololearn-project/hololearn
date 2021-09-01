@@ -222,12 +222,17 @@ function startConnecting(teacher, name) {
     } else {
       newPeer = new SimplePeer();
     }
-    newPeer.on('signal', (data) => socket.emit('signal', id, data));
+    newPeer.on('signal', (data) => {
+      socket.emit('signal', id, data);
+      console.log('signal');
+    });
     newPeer.on('stream', (stream) => {
-      // peer is teacher and stream is screen share
-      if (seat == 0) {
-        // teachers don't send screenshare via peer to
-        // peer anymore
+      console.log('stream received');
+      // peer is projector
+      console.log(seat);
+      if (seat == -5) {
+        console.log('stream received');
+        document.getElementsByClassName('input_video')[0].srcObject = stream;
       } else {
         addVideoElement(id, stream, seat);
       }
@@ -246,7 +251,14 @@ function startConnecting(teacher, name) {
       // }
       // errorCounter = errorCounter + 1;
     });
-    if ((!isTeacher) && !(seat < 0)) {
+    // if table is -4 it is the projector or teacher
+    console.log(table);
+    console.log(typeof localMediaStreamWebcam);
+    if (table == -4 && (typeof localMediaStreamWebcam) !== 'undefined') {
+      console.log('adding stream');
+      newPeer.addStream(localMediaStreamWebcam);
+    }
+    if ((!isTeacher) && !(seat < 0) && table != -4) {
       outputStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
       newPeer.addStream(outputStream);
     }

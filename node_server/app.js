@@ -664,9 +664,10 @@ io.sockets.on('connection', (socket) => {
 
   console.log('Socket.io connection established');
   socket.on('announce', (data) => {
+    console.log(data);
     let alreadyHere = false;
     users.forEach((user) => {
-      if (user.seat == data.selectedPosition && data.table == user.table) {
+      if (user.seat == data.selectedPosition && data.table == user.table &! data.table == -4) {
         socket.emit('seat taken');
         alreadyHere = true;
         console.log('seat taken');
