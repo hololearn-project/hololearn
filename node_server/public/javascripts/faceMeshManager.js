@@ -9,11 +9,8 @@ let facialLandmarksClient;
 
 function updateFaceMesh() {
 
-    console.log("updating face mesh")
 
     if (typeof faceGeometry == 'undefined' || typeof facialLandmarksClient == 'undefined') return;
-
-    console.log("passed undefined check")
 
     facePositions = faceGeometry.attributes.position.array;
 
