@@ -22,7 +22,7 @@ function onResults(results) {
 
   // Only overwrite existing pixels.
   canvasCtx.globalCompositeOperation = 'source-out';
-  canvasCtx.fillStyle = '#00FF00';
+  canvasCtx.fillStyle = '#000000';
   canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
 
   // Only overwrite missing pixels.

@@ -232,7 +232,7 @@ function startConnecting(teacher, name) {
       console.log(seat);
       if (seat == -5) {
         console.log('stream received');
-        document.getElementsByClassName('input_video')[0].srcObject = stream;
+        // document.getElementsByClassName('input_video')[0].srcObject = stream;
       } else {
         addVideoElement(id, stream, seat);
       }
