@@ -232,9 +232,20 @@ function startConnecting(teacher, name) {
       console.log(seat);
       if (seat == -5) {
         console.log('stream received');
-        // document.getElementsByClassName('input_video')[0].srcObject = stream;
+        camera.start();
+        document.getElementsByClassName('input_video')[0].srcObject = stream;
       } else {
-        addVideoElement(id, stream, seat);
+        if (seat == -6) {
+          // peer is the projector
+          document.getElementById('projectorInput').srcObject = stream;
+          document.getElementById('projectorInput').style.display = 'block';
+          document.getElementById('projectorInput').onresize = function() {
+            const videoWidth = document.getElementById('projectorInput').width;
+            document.getElementById('projectorInput').style.left = 'calc((100% - ' + videoWidth + '%) / 2)';
+          };
+        } else {
+          addVideoElement(id, stream, seat);
+        }
       }
       // make async broadcast call
     });
