@@ -167,6 +167,7 @@ function startConnecting(teacher, name) {
 
     ctxStudent = student.getContext('2d');
     ctxs[seat] = ctxStudent;
+    setPositionalHearing(rotationNow);
   }
 
   /**
@@ -321,6 +322,7 @@ function startConnecting(teacher, name) {
   setInterval(function() {
     if (rotationNow != lastRotation && socket.connected) {
       socket.emit('rotated', selectedPosition, rotationNow);
+      setPositionalHearing(rotationNow);
       lastRotation = rotationNow;
     }
   }, 1000/10);
