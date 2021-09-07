@@ -224,15 +224,10 @@ function startConnecting(teacher, name) {
     }
     newPeer.on('signal', (data) => {
       socket.emit('signal', id, data);
-      console.log('signal');
     });
     newPeer.on('stream', (stream) => {
-      console.log('stream received');
       // peer is projector
-      console.log(seat);
       if (seat == -5) {
-        console.log('stream received');
-        camera.start();
         document.getElementsByClassName('input_video')[0].srcObject = stream;
       } else {
         if (seat == -6) {
@@ -263,8 +258,6 @@ function startConnecting(teacher, name) {
       // errorCounter = errorCounter + 1;
     });
     // if table is -4 it is the projector or teacher
-    console.log(table);
-    console.log(typeof localMediaStreamWebcam);
     if (table == -4 && (typeof localMediaStreamWebcam) !== 'undefined') {
       console.log('adding stream');
       newPeer.addStream(localMediaStreamWebcam);
