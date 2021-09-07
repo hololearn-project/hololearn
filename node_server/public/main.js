@@ -204,9 +204,6 @@ async function load3DEnvironment() {
    */
   function animate() {
     requestAnimationFrame( animate );
-    if (selectedPosition != 1) {
-      positionalHearing = false;
-    }
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;

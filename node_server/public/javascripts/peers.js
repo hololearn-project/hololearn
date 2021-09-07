@@ -167,7 +167,6 @@ function startConnecting(teacher, name) {
 
     ctxStudent = student.getContext('2d');
     ctxs[seat] = ctxStudent;
-    setPositionalHearing(rotationNow);
   }
 
   /**
@@ -223,7 +222,20 @@ function startConnecting(teacher, name) {
     } else {
       newPeer = new SimplePeer();
     }
-    newPeer.on('signal', (data) => socket.emit('signal', id, data));
+    newPeer.on('data', (data) => {
+      // got a data channel message
+      const string = utf8ArrayToStr(data);
+      splitted = string.split(' ');
+      console.log(splitted);
+      if (splitted[0] == 'mute') {
+        sources[splitted[1]].muted = true;
+      } else {
+        sources[splitted[1]].muted = false;
+      }
+    });
+    newPeer.on('signal', (data) => {
+      socket.emit('signal', id, data);
+    });
     newPeer.on('stream', (stream) => {
       // peer is teacher and stream is screen share
       if (seat == 0) {
@@ -236,6 +248,26 @@ function startConnecting(teacher, name) {
     });
     newPeer.on('connect', () => {
       console.log('Connected!');
+      if (positionalHearing) {
+        activeconnections.forEach((connection) => {
+          if (unmutedSeats.includes(connection.seat)) {
+            connection.peerObject.send(String('unmute ' + selectedPosition));
+          }
+        });
+        const mutedPositions = [1, 2, 3, 4, 5];
+        unmutedSeats.forEach((seat) => {
+          const index = mutedPositions.indexOf(seat);
+          if (index > -1) {
+            mutedPositions.splice(index, 1);
+          }
+        });
+        activeconnections.forEach((connection) => {
+          if (mutedPositions.includes(parseInt(connection.seat))) {
+            connection.peerObject.send(String('mute ' + selectedPosition));
+          }
+        });
+        setPositionalHearing(rotationNow);
+      }
     });
     newPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);

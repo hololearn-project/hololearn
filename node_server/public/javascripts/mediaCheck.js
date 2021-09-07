@@ -257,6 +257,26 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
           });
           const select = document.getElementById('selectMicInLecture');
           select.style.display = 'none';
+          if (positionalHearing) {
+            activeconnections.forEach((connection) => {
+              if (unmutedSeats.includes(connection.seat)) {
+                connection.peerObject.send(String('unmute ' + selectedPosition));
+              }
+            });
+            const mutedPositions = [1, 2, 3, 4, 5];
+            unmutedSeats.forEach((seat) => {
+              const index = mutedPositions.indexOf(seat);
+              if (index > -1) {
+                mutedPositions.splice(index, 1);
+              }
+            });
+            activeconnections.forEach((connection) => {
+              if (mutedPositions.includes(connection.seat)) {
+                connection.peerObject.send(String('mute ' + selectedPosition));
+              }
+            });
+            setPositionalHearing(rotationNow);
+          }
         }
       });
 }
