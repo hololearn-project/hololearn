@@ -236,6 +236,20 @@ async function load3DEnvironment() {
   /**
    * Updates the environment and gets an image from it.
    */
+
+  function updateLooseBody() {
+    if (typeof landmarks == 'undefined' || typeof meshes == 'undefined' || meshes.length == 0) return;
+
+    let t;
+
+    for (t = 0; t < landmarks.length; t++) {
+      let track = meshes[t];
+      track.position.x = landmarks[t].x*10 + X_OFFSET;
+      track.position.y = - landmarks[t].y*10 + Y_OFFSET;
+      track.position.z = landmarks[t].z*10 + Z_OFFSET;
+    }
+  }
+
   function animate() {
     requestAnimationFrame( animate );
 
@@ -264,6 +278,8 @@ async function load3DEnvironment() {
     }
 
     // updateFaceMesh();
+    updateSkeleton();
+    updateLooseBody();
 
     updateScreenAndWebcams(isTeacher, camera);
 

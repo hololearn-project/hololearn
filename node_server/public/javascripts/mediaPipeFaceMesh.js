@@ -13,7 +13,8 @@ function onResults(results) {
     //     results.image, 0, 0, canvasElement.width, canvasElement.height);
     if (results.multiFaceLandmarks) {
         // facialLandmarks = results.multiFaceLandmarks;
-        sendFaceMesh(results.multiFaceLandmarks);
+        // facialLandmarksClient = results.multiFaceLandmarks;
+        //sendFaceMesh(results.multiFaceLandmarks);
         // for (const landmarks of results.multiFaceLandmarks) {
         // drawConnectors(canvasCtx, landmarks, FACEMESH_TESSELATION,
         //                 {color: '#C0C0C070', lineWidth: 1});

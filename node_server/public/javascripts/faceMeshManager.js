@@ -7,6 +7,33 @@ let Z_OFFSET = 22;  // Centers the mesh in z
 let Z_CORRECTION = 20;
 let facialLandmarksClient;
 
+const landmark_mapping_1 = [
+  8,
+  10,
+  11,
+  12,
+  33,
+  34,
+  35,
+  55,
+  56,
+  59,
+  60
+]
+
+const landmark_mapping_2 = [
+  0,
+  11,
+  13,
+  15,
+  12,
+  14,
+  16,
+  23,
+  25,
+  24,
+  26]
+
 function updateFaceMesh() {
 
 
@@ -24,3 +51,23 @@ function updateFaceMesh() {
 
     faceGeometry.attributes.position.needsUpdate = true;
   }
+
+function updateSkeleton() {
+
+  let t;
+
+  // bones[11].position.x = landmarks[13].x;
+  // bones[11].position.y = landmarks[13].y;
+  // bones[11].position.z = landmarks[13].z;
+
+  // bones[8].position.x = landmarks[0].x;
+  // bones[8].position.y = landmarks[0].y;
+  // bones[8].position.z = landmarks[0].z;
+
+  for (t=0; t < landmark_mapping_1.length; t++){
+    bones[landmark_mapping_1[t]].position.x = landmarks[landmark_mapping_2[t]].x;
+    bones[landmark_mapping_1[t]].position.y = - landmarks[landmark_mapping_2[t]].y;
+    bones[landmark_mapping_1[t]].position.z = landmarks[landmark_mapping_2[t]].z;
+  }
+
+}

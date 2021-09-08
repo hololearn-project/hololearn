@@ -1,5 +1,5 @@
 /* eslint-disable */
-var obj3D, gui, skeletonHelper, bones, skinnedMesh, skeleton, geometry, face, faceGeometry, vertMarker;
+var obj3D, gui, skeletonHelper, bones, skinnedMesh, skeleton, geometry, face, faceGeometry, vertMarker, meshes;
 var material = new THREE.MeshPhongMaterial( {
   skinning : true,
   color: 0x055289,
@@ -10,7 +10,7 @@ var material = new THREE.MeshPhongMaterial( {
 } );
 
 var vertGeometry = new THREE.BoxGeometry(5, 5, 5);
-var vertMaterial = new THREE.MeshBasicMaterial({
+var basicMaterial = new THREE.MeshBasicMaterial({
   color: 0x0000ff,
   transparent: false
 });
@@ -1629,10 +1629,6 @@ function updateVertexMarker() {
   vertexMarker++;
 }
 
-function updateSkeleton() {
-
-}
-
 function drawSphere() {
 
   const circle = new THREE.SphereGeometry( 15, 32, 16 );
@@ -1663,9 +1659,35 @@ function genUVs() {
 
 }
 
+function createLooseBody() {
+
+  meshes = []
+
+  let t;
+
+  const canonTexture = textureLoader.load('./assets/textures/clown.png');
+
+  let offset = 0;
+
+  const canonMaterial = new THREE.MeshBasicMaterial({ 
+    map: canonTexture,
+    side: THREE.DoubleSide});
+
+  for(t = 0; t < 33; t++) {
+    const geo = new THREE.SphereGeometry(0.2);
+    const tracker = new THREE.Mesh(geo, canonMaterial);
+    scene.add(tracker);
+    meshes.push(tracker);
+  }
+
+
+}
+
+
 async function drawSkeleton() {
-    //loadMaleModel();
-    loadCanonicalFaceModel();
+    loadMaleModel();
+    createLooseBody();
+    // loadCanonicalFaceModel();
     // drawSphere();
 }
 
