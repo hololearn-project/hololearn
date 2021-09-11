@@ -139,7 +139,7 @@ function gotDevicesMic(mediaDevicesNew, inLecture) {
         text.appendChild(t);
         option.appendChild(text);
 
-        document.getElementById('selectMicInLecture').appendChild(option);
+        document.getElementById('micDisplay').appendChild(option);
       } else {
         const option = document.createElement('option');
         option.value = mediaDevice.deviceId;
