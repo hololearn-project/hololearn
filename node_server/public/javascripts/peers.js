@@ -226,7 +226,6 @@ function startConnecting(teacher, name) {
       // got a data channel message
       const string = utf8ArrayToStr(data);
       splitted = string.split(' ');
-      console.log(splitted);
       if (splitted[0] == 'mute') {
         sources[splitted[1]].muted = true;
       } else {

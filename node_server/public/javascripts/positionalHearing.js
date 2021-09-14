@@ -10,6 +10,20 @@ const allDirections =
 
 let unmutedSeats = [];
 
+// eslint-disable-next-line require-jsdoc
+function togglePositionalHearing() {
+  if (positionalHearing) {
+    positionalHearing = false;
+    activeconnections.forEach((connection) => {
+      connection.peerObject.send(String('unmute ' + selectedPosition));
+    });
+    unmutedSeats = [1, 2, 3, 4, 5];
+  } else {
+    positionalHearing = true;
+    setPositionalHearing(rotationNow);
+  }
+}
+
 /* eslint-disable require-jsdoc */
 function setPositionalHearing(rotation) {
   if (!positionalHearing) {

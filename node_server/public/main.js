@@ -79,6 +79,8 @@ async function loadNet() { // this one is more efficient
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
+  document.getElementById('connectButton').style.display = 'none';
+
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
   }
