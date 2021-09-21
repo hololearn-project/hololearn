@@ -12,7 +12,7 @@ let unmutedSeats = [];
 
 // eslint-disable-next-line require-jsdoc
 function togglePositionalHearing() {
-  if (positionalHearing) {
+  if (positionalHearing &! isTeacher) {
     positionalHearing = false;
     activeconnections.forEach((connection) => {
       connection.peerObject.send(String('unmute ' + selectedPosition));
@@ -26,7 +26,7 @@ function togglePositionalHearing() {
 
 /* eslint-disable require-jsdoc */
 function setPositionalHearing(rotation) {
-  if (!positionalHearing) {
+  if (!positionalHearing || isTeacher) {
     return;
   }
 
@@ -46,7 +46,7 @@ function setPositionalHearing(rotation) {
     if (!unmutedSeats.includes(newUnmutedSeats[i])) {
       // Unmute seat
       activeconnections.forEach((connection) => {
-        if (connection.seat == newUnmutedSeats[i]) {
+        if (connection.seat == newUnmutedSeats[i] && connection.seat != 0) {
           // connection.peerObject.send(['unmute', selectedPosition]);
           connection.peerObject.send(String('unmute ' + selectedPosition));
         }
@@ -58,7 +58,7 @@ function setPositionalHearing(rotation) {
     if (!newUnmutedSeats.includes(unmutedSeats[i])) {
       // Mute seat
       activeconnections.forEach((connection) => {
-        if (connection.seat == unmutedSeats[i]) {
+        if (connection.seat == unmutedSeats[i] && connection.seat != 0 &! isTeacher) {
           // connection.peerObject.send(['mute', selectedPosition]);
           connection.peerObject.send(String('mute ' + selectedPosition));
         }

@@ -226,6 +226,7 @@ function startConnecting(teacher, name) {
       // got a data channel message
       const string = utf8ArrayToStr(data);
       splitted = string.split(' ');
+      console.log(splitted);
       if (splitted[0] == 'mute') {
         sources[splitted[1]].muted = true;
       } else {
@@ -249,7 +250,7 @@ function startConnecting(teacher, name) {
       console.log('Connected!');
       if (positionalHearing) {
         activeconnections.forEach((connection) => {
-          if (unmutedSeats.includes(connection.seat)) {
+          if (unmutedSeats.includes(connection.seat) && connection.seat != 0 &! isTeacher) {
             connection.peerObject.send(String('unmute ' + selectedPosition));
           }
         });
@@ -261,7 +262,7 @@ function startConnecting(teacher, name) {
           }
         });
         activeconnections.forEach((connection) => {
-          if (mutedPositions.includes(parseInt(connection.seat))) {
+          if (mutedPositions.includes(parseInt(connection.seat)) && connection.seat != 0 &! isTeacher) {
             connection.peerObject.send(String('mute ' + selectedPosition));
           }
         });
@@ -355,6 +356,19 @@ function startConnecting(teacher, name) {
       socket.emit('rotated', selectedPosition, rotationNow);
       setPositionalHearing(rotationNow);
       lastRotation = rotationNow;
+      let x = -1 * (positions[0].a - a);
+      const y = -1 * (positions[0].b - b);
+      let z = -1 * (positions[0].c - c);
+
+      const soundVec = rotate2DVec({x: x, y: y}, rotationNow);
+
+      panner.positionX.value = soundVec.x;
+      panner.positionY.value = -1 * (positions[0].b - b);
+      panner.positionZ.value = soundVec.y;
+
+      console.log(panner.positionX);
+      console.log(panner.positionZ);
+
     }
   }, 1000/10);
 
@@ -515,10 +529,13 @@ function startConnecting(teacher, name) {
         }
         // if it's a screenshare stream, add to the right element
         addScreenShare(stream, false);
+        document.getElementById('teacherAudio').src = stream.getAudioTracks()[0];
+        document.getElementById('audioElem').play();
 
         if (table == -2) {
           start3DRecording();
         }
+        start3DAudioTeacher(0, stream);
       }
     });
 
@@ -571,8 +588,9 @@ function addScreenShare(stream, replay) {
   // ctxStreams[0] = ctx2
   // canvasWebcams[0] = canvas
   const screenshareScreen = document.getElementById('screenshare');
+  screenshareScreen.muted = true;
   if (table != -1) {
-    screenshareScreen.muted = false;
+    // screenshareScreen.muted = false;
   }
   if (replay) {
     screenshareScreen.src = stream;
