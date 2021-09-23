@@ -366,9 +366,8 @@ function startConnecting(teacher, name) {
       panner.positionY.value = -1 * (positions[0].b - b);
       panner.positionZ.value = soundVec.y;
 
-      console.log(panner.positionX);
-      console.log(panner.positionZ);
-
+      // console.log(panner.positionX);
+      // console.log(panner.positionZ);
     }
   }, 1000/10);
 

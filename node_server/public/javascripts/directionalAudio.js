@@ -1,9 +1,10 @@
 /* eslint-disable require-jsdoc */
 // const audioContext = window.AudioContext = window.AudioContext || window.webkitAudioContext;
-const aContext = new AudioContext();
-const panner = aContext.createPanner();
+let panner = undefined;
 
 async function start3DAudioTeacher(seat, stream) {
+  const aContext = new AudioContext();
+  panner = aContext.createPanner();
   panner.panningModel = 'HRTF';
   panner.distanceModel = 'inverse';
   panner.refDistance = 10;
