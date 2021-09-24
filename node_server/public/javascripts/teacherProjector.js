@@ -19,7 +19,7 @@ function startProjecting() {
   document.getElementById('select').style.display = 'none';
   document.getElementById('camText').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
-  document.getElementById('webcam').style.display = 'none';
+  // document.getElementById('webcam').style.display = 'none';
   document.getElementById('webcam').muted = true;
 
   document.getElementById('logInButton').style.display = 'none';
