@@ -36,12 +36,11 @@ const landmark_mapping_2 = [
 
 function updateFaceMesh() {
 
-
-    if (typeof faceGeometry == 'undefined' || typeof facialLandmarksClient == 'undefined') return;
+    if (typeof faceGeometry == 'undefined' || typeof facialLandmarksClient == 'undefined' || facialLandmarksClient.length == 0) return;
 
     facePositions = faceGeometry.attributes.position.array;
-
-    let z_bar = -(facialLandmarksClient[0][0].z*MULT + Z_OFFSET); // Keeps the face at the same realtive depth
+    let landmark_0 = facialLandmarksClient[0][0]
+    let z_bar = -(landmark_0.z*MULT + Z_OFFSET); // Keeps the face at the same realtive depth
 
     for (k = 0; k < FACE_MESH_LANDMARK_COUNT; k++) {
       facePositions[(3*k)] = facialLandmarksClient[0][mapping[k]].x*MULT + X_OFFSET;

@@ -1,5 +1,5 @@
 /* eslint-disable */
-var obj3D, gui, skeletonHelper, bones, skinnedMesh, skeleton, geometry, face, faceGeometry, vertMarker, meshes;
+var obj3D, gui, skeletonHelper, bones, skinnedMesh, skeleton, geometry, face, faceGeometry, vertMarker, meshes, bodyGroup;
 var material = new THREE.MeshPhongMaterial( {
   skinning : true,
   color: 0x055289,
@@ -1436,7 +1436,7 @@ function changeYoffset(diff) {
 
 function changeZoffset(diff) {
   Z_OFFSET += diff
-  console.log(X_OFFSET, Y_OFFSET, Z_OFFSET);
+  console.log("new offset:\n", X_OFFSET, Y_OFFSET, Z_OFFSET);
 }
 
 function updateMult(){
@@ -1483,8 +1483,6 @@ function loadCanonicalFaceModel() {
       './assets/models/canonical_face_model.glb',
       function( gltf ) {
 
-        // console.log(gltf)
-
         face = gltf.scene
 
         mesh = face.children[0].children[0]
@@ -1510,6 +1508,8 @@ function loadCanonicalFaceModel() {
 
         scene.add(face);
 
+        face.visible = false;
+
         face.rotation.y += Math.PI;
 
         face.position.y += 15;
@@ -1517,7 +1517,7 @@ function loadCanonicalFaceModel() {
 
         // face.scale.set(100, 100, 100)
 
-        console.log(faceGeometry);
+        console.log("face geometry loaded"); //faceGeometry
         
 
         facePositions = faceGeometry.attributes.position.array;
@@ -1540,7 +1540,6 @@ function loadCanonicalFaceModelWithTexture() {
       './assets/models/canonical_face_with_texture.glb',
       function( gltf ) {
 
-        console.log(gltf)
 
         face = gltf.scene
 
@@ -1563,7 +1562,6 @@ function loadCanonicalFaceModelWithTexture() {
 
       },
       function( xhr ) {
-        //console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
       },
       function( err ) {
         //console.error( 'An error happened' );
@@ -1579,7 +1577,6 @@ function loadMaleModel() {
       './assets/models/male.glb',
       function( gltf ) {
 
-        console.log(gltf);
 
         obj3D = gltf.scene.children[0]
         assets = obj3D.children
@@ -1669,32 +1666,26 @@ function createLooseBody() {
 
   let offset = 0;
 
+  bodyGroup = new THREE.Group();
+
   const canonMaterial = new THREE.MeshBasicMaterial({ 
     map: canonTexture,
     side: THREE.DoubleSide});
 
   for(t = 0; t < 33; t++) {
-    const geo = new THREE.SphereGeometry(0.2);
+    const geo = new THREE.SphereGeometry(0.4);
     const tracker = new THREE.Mesh(geo, canonMaterial);
-    scene.add(tracker);
+    bodyGroup.add(tracker);
     meshes.push(tracker);
   }
 
+  scene.add(bodyGroup);
 
 }
-
 
 async function drawSkeleton() {
-    loadMaleModel();
+    // loadMaleModel();
     createLooseBody();
-    // loadCanonicalFaceModel();
+    loadCanonicalFaceModel();
     // drawSphere();
 }
-
-
-
-
-
-
-
-

@@ -21,6 +21,8 @@ let a = 0;
 let b = 0;
 let c = 0;
 let objects = [];
+let faceMeshFlag = false;
+let bodyTrackFlag = false;
 
 // vars useful for receiving teacher streams
 let teacherIncomingMediaStream = null;
@@ -92,7 +94,7 @@ async function loadNet() { // this one is more efficient
 async function load3DEnvironment() {
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
-    console.log(localMediaStreamWebcam);
+    // console.log(localMediaStreamWebcam);
     if (localMediaStreamWebcam != null) {
       cameraMesh.start();
       teacherWebcamOn = true;
@@ -277,9 +279,12 @@ async function load3DEnvironment() {
       }
     }
 
-    // updateFaceMesh();
-    updateSkeleton();
-    updateLooseBody();
+    if (faceMeshFlag) {
+      updateFaceMesh();
+    } else if (bodyTrackFlag) {
+      updateLooseBody();
+    }
+
 
     updateScreenAndWebcams(isTeacher, camera);
 

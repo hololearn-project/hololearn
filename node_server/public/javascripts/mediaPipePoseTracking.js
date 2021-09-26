@@ -51,3 +51,17 @@ const camera = new Camera(videoElement, {
   height: 720
 });
 camera.start();
+
+const cameraMesh = new Camera(videoElement, {
+  onFrame: async () => {
+      if () {
+
+      } else if () {
+        await faceMesh.send({image: videoElement});
+      } else if ()
+        
+  },
+  width: 1280,
+  height: 720
+  });
+  cameraMesh.start();

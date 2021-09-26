@@ -27,7 +27,8 @@ let countTemp = 0;
  */
 function start3DRecording() {
   if (readyToRecord && depthStream != undefined && imageStream != undefined && screenShareStream != undefined) {
-    console.log(screenShareStream.getTracks());
+    console.log('3D recording started');
+    // console.log(screenShareStream.getTracks());
     const options = {mimeType: 'video/webm'};
 
     mediaRecorderDepthStream = new MediaRecorder(depthStream, options);
@@ -92,7 +93,7 @@ function downloadMultipleFiles(urls) {
  */
 function handleDataAvailable3DRecorder(event, recordedChunksMethod) {
   if (event.data.size > 0) {
-    console.log(recordedChunksMethod.name);
+    // console.log(recordedChunksMethod.name);
     recordedChunksMethod.chunks.push(event.data);
     if (!recording3D) {
       console.log('downloading');
