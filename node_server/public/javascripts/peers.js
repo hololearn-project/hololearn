@@ -131,6 +131,7 @@ function startConnecting(teacher, name) {
     studentStream.style.display = 'none';
     studentStream.width = 500;
     studentStream.height = 500;
+    studentStream.muted = true;
     studentsDiv.appendChild(studentStream);
 
     const studentCtx = document.createElement('CANVAS');
@@ -228,9 +229,9 @@ function startConnecting(teacher, name) {
       splitted = string.split(' ');
       console.log(splitted);
       if (splitted[0] == 'mute') {
-        sources[splitted[1]].muted = true;
+        panners[splitted[1]].coneInnerAngle = 0;
       } else {
-        sources[splitted[1]].muted = false;
+        panners[splitted[1]].coneInnerAngle = 360;
       }
     });
     newPeer.on('signal', (data) => {
@@ -242,6 +243,7 @@ function startConnecting(teacher, name) {
         // teachers don't send screenshare via peer to
         // peer anymore
       } else {
+        start3DAudioUser(seat, stream);
         addVideoElement(id, stream, seat);
       }
       // make async broadcast call
@@ -356,18 +358,8 @@ function startConnecting(teacher, name) {
       socket.emit('rotated', selectedPosition, rotationNow);
       setPositionalHearing(rotationNow);
       lastRotation = rotationNow;
-      let x = -1 * (positions[0].a - a);
-      const y = -1 * (positions[0].b - b);
-      let z = -1 * (positions[0].c - c);
 
-      const soundVec = rotate2DVec({x: x, y: y}, rotationNow);
-
-      panner.positionX.value = soundVec.x;
-      panner.positionY.value = -1 * (positions[0].b - b);
-      panner.positionZ.value = soundVec.y;
-
-      // console.log(panner.positionX);
-      // console.log(panner.positionZ);
+      update3DAudioPosition();
     }
   }, 1000/10);
 
@@ -534,7 +526,7 @@ function startConnecting(teacher, name) {
         if (table == -2) {
           start3DRecording();
         }
-        start3DAudioTeacher(0, stream);
+        start3DAudioUser(0, stream);
       }
     });
 
