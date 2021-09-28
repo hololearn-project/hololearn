@@ -19,8 +19,12 @@ function startProjecting() {
   document.getElementById('select').style.display = 'none';
   document.getElementById('camText').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
+  const webcam = document.getElementById('webcam');
   // document.getElementById('webcam').style.display = 'none';
-  document.getElementById('webcam').muted = true;
+  webcam.muted = true;
+  webcam.style.bottom = '120px';
+  webcam.style.right = '75px';
+  webcam.style.position = 'absolute';
 
   document.getElementById('logInButton').style.display = 'none';
   startConnecting(false, 'teacherProjector');

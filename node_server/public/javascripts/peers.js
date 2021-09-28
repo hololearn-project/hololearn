@@ -232,6 +232,7 @@ function startConnecting(teacher, name) {
       } else {
         if (seat == -6) {
           // peer is the projector
+          console.log(stream);
           document.getElementById('projectorInput').srcObject = stream;
           document.getElementById('projectorInput').style.display = 'block';
           document.getElementById('projectorInput').onresize = function() {
