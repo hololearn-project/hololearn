@@ -229,6 +229,9 @@ function startConnecting(teacher, name) {
       // peer is projector
       if (seat == -5) {
         document.getElementsByClassName('input_video')[0].srcObject = stream;
+        const teacherStreamRemovedBackground = document.getElementById('outputCanvas').srcObject;
+        const removedBackgroundId = teacherStreamRemovedBackground.id;
+        newPeer.send(removedBackgroundId);
       } else {
         if (seat == -6) {
           // peer is the projector
