@@ -3,6 +3,7 @@
 let teacherSocket = '';
 let teacherPeer = null;
 const activeconnections = new Map();
+positionalHearing = false;
 
 let lastRotation = 0;
 // eslint-disable-next-line prefer-const
@@ -131,6 +132,7 @@ function startConnecting(teacher, name) {
     studentStream.style.display = 'none';
     studentStream.width = 500;
     studentStream.height = 500;
+    studentStream.muted = true;
     studentsDiv.appendChild(studentStream);
 
     const studentCtx = document.createElement('CANVAS');
@@ -222,6 +224,25 @@ function startConnecting(teacher, name) {
     } else {
       newPeer = new SimplePeer();
     }
+    newPeer.on('data', (data) => {
+      // got a data channel message
+      const string = utf8ArrayToStr(data);
+      if (string == 'streamId received') {
+        newPeer.addStream(teacherStreamRemovedBackground);
+      } else {
+        if (string.includes(' ')) {
+          splitted = string.split(' ');
+          if (splitted[0] == 'mute') {
+            panners[splitted[1]].coneInnerAngle = 0;
+          } else {
+            panners[splitted[1]].coneInnerAngle = 360;
+          }
+        } else {
+          removedBackgroundStream = data;
+          newPeer.send('streamId received');
+        }
+      }
+    });
     newPeer.on('signal', (data) => {
       socket.emit('signal', id, data);
     });
@@ -229,27 +250,62 @@ function startConnecting(teacher, name) {
       // peer is projector
       if (seat == -5) {
         document.getElementsByClassName('input_video')[0].srcObject = stream;
-        const teacherStreamRemovedBackground = document.getElementById('outputCanvas').srcObject;
-        const removedBackgroundId = teacherStreamRemovedBackground.id;
-        newPeer.send(removedBackgroundId);
+        // eslint-disable-next-line no-unused-vars
+        removedBackgroundId = teacherStreamRemovedBackground.id;
+        teacherProjectorPeer = newPeer;
+        sendStreamId();
       } else {
         if (seat == -6) {
           // peer is the projector
-          console.log(stream);
-          document.getElementById('projectorInput').srcObject = stream;
-          document.getElementById('projectorInput').style.display = 'block';
-          document.getElementById('projectorInput').onresize = function() {
-            const videoWidth = document.getElementById('projectorInput').width;
-            document.getElementById('projectorInput').style.left = 'calc((100% - ' + videoWidth + '%) / 2)';
-          };
+          if (stream.id == removedBackgroundStream) {
+            document.getElementById('selfView').srcObject = stream;
+            document.getElementById('selfView').muted = true;
+            document.getElementById('selfView').style.bottom = '120px';
+            document.getElementById('selfView').style.right = '75px';
+            document.getElementById('selfView').style.position = 'absolute';
+            document.getElementById('selfView').style.display = 'block';
+          } else {
+            document.getElementById('projectorInput').srcObject = stream;
+            document.getElementById('projectorInput').style.display = 'block';
+            document.getElementById('projectorInput').onresize = function() {
+              const videoWidth = document.getElementById('projectorInput').width;
+              document.getElementById('projectorInput').style.left = 'calc((100% - ' + videoWidth + '%) / 2)';
+            };
+          }
         } else {
+          addVideoElement(id, stream, seat);
+          start3DAudioUser(seat, stream);
           addVideoElement(id, stream, seat);
         }
       }
       // make async broadcast call
     });
     newPeer.on('connect', () => {
+      if (selectedPosition == -6) {
+        chatConnected = true;
+        sendStreamId();
+      }
       console.log('Connected!');
+      if (positionalHearing) {
+        activeconnections.forEach((connection) => {
+          if (unmutedSeats.includes(connection.seat) && connection.seat != 0 &! isTeacher) {
+            connection.peerObject.send(String('unmute ' + selectedPosition));
+          }
+        });
+        const mutedPositions = [1, 2, 3, 4, 5];
+        unmutedSeats.forEach((seat) => {
+          const index = mutedPositions.indexOf(seat);
+          if (index > -1) {
+            mutedPositions.splice(index, 1);
+          }
+        });
+        activeconnections.forEach((connection) => {
+          if (mutedPositions.includes(parseInt(connection.seat)) && connection.seat != 0 &! isTeacher) {
+            connection.peerObject.send(String('mute ' + selectedPosition));
+          }
+        });
+        setPositionalHearing(rotationNow);
+      }
     });
     newPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);
@@ -341,7 +397,10 @@ function startConnecting(teacher, name) {
   setInterval(function() {
     if (rotationNow != lastRotation && socket.connected) {
       socket.emit('rotated', selectedPosition, rotationNow);
+      setPositionalHearing(rotationNow);
       lastRotation = rotationNow;
+
+      update3DAudioPosition();
     }
   }, 1000/10);
 
@@ -502,10 +561,13 @@ function startConnecting(teacher, name) {
         }
         // if it's a screenshare stream, add to the right element
         addScreenShare(stream, false);
+        document.getElementById('teacherAudio').src = stream.getAudioTracks()[0];
+        document.getElementById('audioElem').play();
 
         if (table == -2) {
           start3DRecording();
         }
+        start3DAudioUser(0, stream);
       }
     });
 
@@ -558,8 +620,9 @@ function addScreenShare(stream, replay) {
   // ctxStreams[0] = ctx2
   // canvasWebcams[0] = canvas
   const screenshareScreen = document.getElementById('screenshare');
+  screenshareScreen.muted = true;
   if (table != -1) {
-    screenshareScreen.muted = false;
+    // screenshareScreen.muted = false;
   }
   if (replay) {
     screenshareScreen.src = stream;

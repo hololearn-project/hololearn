@@ -71,7 +71,6 @@ function getLecture(lecture) {
  * starts the rewatching of the lecture retrieved from the database.
  */
 function startRewatch() {
-  console.log(imageStreamDataBase);
   document.getElementById('lidarVideoStream1').src = URL.createObjectURL(new Blob([imageStreamDataBase]));
   document.getElementById('lidarVideoStream1').play();
 

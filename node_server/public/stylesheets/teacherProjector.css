@@ -6,3 +6,8 @@
   transform: rotate(270deg);
   height: 300px;
 }
+
+#selfView {
+  height: 300px;
+  z-index: 5;
+}
