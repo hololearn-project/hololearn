@@ -14,7 +14,7 @@ let chatConnected = false;
 let removedBackgroundId = undefined;
 
 const videoElement = document.getElementsByClassName('input_video')[0];
-const canvasElement = document.getElementsByClassName('output_canvas')[0];
+const canvasElement = document.getElementById('outputCanvas');
 const canvasCtx = canvasElement.getContext('2d');
 const landmarkContainer = document.getElementsByClassName('landmark-grid-container')[0];
 // const grid = new LandmarkGrid(landmarkContainer);
@@ -58,7 +58,7 @@ const pose = new Pose({locateFile: (file) => {
   return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
 }});
 pose.setOptions({
-  modelComplexity: 0, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
+  modelComplexity: 1, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
   smoothLandmarks: true,
   enableSegmentation: true,
   smoothSegmentation: false,
@@ -104,6 +104,29 @@ function startProjecting() {
 function sendStreamId() {
   if (teacherProjectorPeer != undefined && chatConnected) {
     teacherProjectorPeer.send(removedBackgroundId);
+  }
+}
+
+/**
+ * rotates the teacher 90 degrees to the right.
+ */
+function rotateTeacher() {
+  const output = document.getElementById('outputCanvas');
+  const currentClass = output.classList[0];
+  output.classList.remove(currentClass);
+  switch (currentClass) {
+    case 'rotateRight':
+      output.classList.add('rotateDown');
+      break;
+    case 'rotateDown':
+      output.classList.add('rotateLeft');
+      break;
+    case 'rotateLeft':
+      output.classList.add('rotateUp');
+      break;
+    case 'rotateUp':
+      output.classList.add('rotateRight');
+      break;
   }
 }
 

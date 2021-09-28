@@ -6,6 +6,7 @@ removedBackgroundStream = '';
 // eslint-disable-next-line no-unused-vars
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 userClassroomId = 'defaultClassroom';
+let rotate = 'right';
 getCamerasAndMics();
 document.getElementById('camText').style.display = 'block';
 document.getElementById('micText').style.display = 'block';
@@ -25,6 +26,63 @@ function startProjecting() {
 
   document.getElementById('logInButton').style.display = 'none';
   startConnecting(false, 'teacherProjector');
+}
+
+/**
+ * Rotates the video of the teacher.
+ */
+function rotateSelfView() {
+  const selfView = document.getElementById('selfView');
+  const currentClass = selfView.classList[0];
+  selfView.classList.remove(currentClass);
+  switch (currentClass) {
+    case 'rotateRight':
+      selfView.classList.add('rotateDown');
+      break;
+    case 'rotateDown':
+      selfView.classList.add('rotateLeft');
+      break;
+    case 'rotateLeft':
+      selfView.classList.add('rotateUp');
+      break;
+    case 'rotateUp':
+      selfView.classList.add('rotateRight');
+      break;
+  }
+}
+
+/**
+ * Sets the chosen camera.
+ * @param {boolean} inLecture if the user is in a lecture or not.
+ * @param {string} deviceId id of the chosen device.
+ */
+function cameraChosenRotated(inLecture, deviceId) {
+  if (!inLecture) {
+    webcam.style.display = 'block';
+  }
+  const videoConstraints = {};
+  stopMediaTrackVideo(webcam.srcObject);
+  if (inLecture) {
+    videoConstraints.deviceId = {exact: deviceId.id};
+  } else {
+    videoConstraints.deviceId = {exact: select.value};
+  }
+  navigator.mediaDevices.getUserMedia({audio: false, video: videoConstraints})
+      .then((stream) => {
+        if (webcam.srcObject == null || webcam.srcObject == undefined) {
+          webcam.srcObject = stream;
+          localMediaStreamWebcam = stream;
+        } else {
+          stopMediaTrackVideo(localMediaStreamWebcam);
+          webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
+          localMediaStreamWebcam.addTrack(stream.getVideoTracks()[0]);
+        }
+        document.getElementById('webcam').style.marginTop = 50 + document.getElementById('webcam').width + 'px';
+        console.log(stream.getVideoTracks()[0]);
+      });
+  if (inLecture) {
+    document.getElementById('selectCamInLecture').style.display = 'none';
+  }
 }
 
 // eslint-disable-next-line no-unused-vars

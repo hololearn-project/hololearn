@@ -2,7 +2,6 @@
 	<head>
     <link rel="stylesheet" href="stylesheets/toggleMenu.css">
 		<link rel="stylesheet" href="stylesheets/style.css">
-    <link rel="stylesheet" href="stylesheets/mediaCheck.css">
     <link rel="stylesheet" href="stylesheets/notification.css">
     <link rel="stylesheet" href="stylesheets/advancedSettings.css">
     <link rel="stylesheet" href="stylesheets/attendanceList.css">
@@ -36,7 +35,7 @@
       </div>
 
       <h3 id="camText" style="display: none;">Select your camera</h3>
-        <select id="select" style="display: none;" onchange="cameraChosen(false, '')">
+        <select id="select" style="display: none;" onchange="cameraChosenRotated(false, '')">
             <option disabled selected value> -- select an option -- </option>
         </select>
         <h3 id="micText" style="display: none;" >Select your mic</h3>
@@ -44,8 +43,12 @@
             <option disabled selected value> -- select an option -- </option>
         </select>
 
-        <video autoplay="true" id="webcam" style="display: none;"></video>
-        <video autoplay="true" id="selfView" style="display: none;"></video>
+        <video autoplay="true" id="webcam" class="rotateRight" style="display: none; height: 300px;"></video>
+        <video autoplay="true" id="selfView" class="rotateRight" style="display: none;"></video>
+        <i id="rotateIcon" style="font-size:18x; color: white;" class="fas fa-redo" onclick="rotateSelfView()"></i>
+
+
+
         <video autoplay="true" id="projectorInput" width="80%" style="display: none; position: absolute; padding-bottom: 10px; max-height: 80%;"></video>
 
 

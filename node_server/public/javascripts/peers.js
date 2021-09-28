@@ -260,8 +260,6 @@ function startConnecting(teacher, name) {
           if (stream.id == removedBackgroundStream) {
             document.getElementById('selfView').srcObject = stream;
             document.getElementById('selfView').muted = true;
-            document.getElementById('selfView').style.bottom = '120px';
-            document.getElementById('selfView').style.right = '75px';
             document.getElementById('selfView').style.position = 'absolute';
             document.getElementById('selfView').style.display = 'block';
           } else {
