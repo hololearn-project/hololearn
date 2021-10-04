@@ -196,7 +196,7 @@ async function load3DEnvironment() {
     //   setRecordedDepthSource();
     // }
 
-    await drawSkeleton();
+    await loadAssets();
 
     // sets the target of the camera
     if (true) {
@@ -282,7 +282,7 @@ async function load3DEnvironment() {
     if (faceMeshFlag) {
       updateFaceMesh();
     } else if (bodyTrackFlag) {
-      updateLooseBody();
+      updateSkeleton();
     }
 
 
