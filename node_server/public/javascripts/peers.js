@@ -225,8 +225,10 @@ function startConnecting(teacher, name) {
     // let newPeer = new SimplePeer({ initiator: true, config: peerConfig });
     let newPeer;
     if (seat > selectedPosition || seat == -1) {
+      console.log('inintiator');
       newPeer = new SimplePeer({initiator: true});
     } else {
+      console.log('not initiator');
       newPeer = new SimplePeer();
     }
     newPeer.on('data', (data) => {
