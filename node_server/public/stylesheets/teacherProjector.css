@@ -49,3 +49,10 @@
   margin: auto;
   margin-top: calc(50px + width);
 }
+
+#screenShareOption {
+  width: 250px;
+  margin-left: calc((100% - 250px) / 2);
+  background: rgb(150, 150, 150);
+  border: none;
+}

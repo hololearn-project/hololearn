@@ -42,6 +42,8 @@
         <select id="selectMic" style="display: none;" onchange="micChosen(false)">
             <option disabled selected value> -- select an option -- </option>
         </select>
+        <br>
+      <button id="screenShareOption" onclick="startScreenShare()">Share your screen</button>
 
         <video autoplay="true" id="webcam" class="rotateRight" style="display: none; height: 300px;"></video>
         <video autoplay="true" id="selfView" class="rotateRight" style="display: none;"></video>
@@ -52,7 +54,7 @@
         <video autoplay="true" id="projectorInput" width="80%" style="display: none; position: absolute; padding-bottom: 10px; max-height: 80%;"></video>
 
 
-        <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 50px;">Log In</button>
+        <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 100px;">Log In</button>
 
       <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
       <script src="./javascripts/peers.js"></script>

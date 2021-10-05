@@ -13,6 +13,8 @@ document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
 document.getElementById('select').style.display = 'block';
 
+let teacherProjectorScreenShare = undefined;
+
 /**
  * starts sending the vid.
  */
@@ -78,11 +80,37 @@ function cameraChosenRotated(inLecture, deviceId) {
           localMediaStreamWebcam.addTrack(stream.getVideoTracks()[0]);
         }
         document.getElementById('webcam').style.marginTop = 50 + document.getElementById('webcam').width + 'px';
-        console.log(stream.getVideoTracks()[0]);
       });
   if (inLecture) {
     document.getElementById('selectCamInLecture').style.display = 'none';
   }
+}
+
+// eslint-disable-next-line require-jsdoc
+async function startScreenShare() {
+  if (teacherProjectorScreenShare != undefined) {
+    teacherProjectorScreenShare.getTracks().forEach(function(track) {
+      track.stop();
+    });
+  }
+  const displayMediaOptions = {
+    video: {
+      cursor: 'always',
+      width: {ideal: 4096},
+      height: {ideal: 2160},
+    },
+    audio: false,
+  };
+  await navigator.mediaDevices.getDisplayMedia(displayMediaOptions)
+      .then(function(stream) {
+        teacherProjectorScreenShare = stream;
+      });
+  document.getElementById('screenShareOption').innerHTML = 'Update ScreenShare';
+  activeconnections.forEach((connection) => {
+    if (connection.seat == -7) {
+      connection.peerObject.addStream(teacherProjectorScreenShare);
+    }
+  });
 }
 
 // eslint-disable-next-line no-unused-vars
