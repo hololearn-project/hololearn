@@ -1,5 +1,7 @@
 <html>
 	<head>
+        <link rel="stylesheet" href="stylesheets/toggleMenu.css">
+        <link rel="stylesheet" href="stylesheets/toggleSwitch.css">
 		<link rel="stylesheet" href="stylesheets/style.css">
         <link rel="stylesheet" href="stylesheets/mediaCheck.css">
         <link rel="stylesheet" href="stylesheets/notification.css">
@@ -23,6 +25,22 @@
             <video id="webcamVid" style="display: none;" autoplay="true" muted></video>
 
             <canvas class="output_canvas" width="1280px" height="720px" style="display: none;"></canvas>
+        <audio id="audioElem" autoplay>
+            <source id='teacherAudio'>
+        </audio>
+        <a href="#menu" id="toggle"><span></span></a>
+
+        <div id="menu">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="databaseEditor.html">Database Overview</a></li>
+          </ul>
+        </div>
+
+        <div id="recordingNameInputDiv" style="display: none;">
+            <h4>What is the name of this lecture?</h4>
+            <input type="text" id="recordingNameInput" name="recordingName">
+            <button href="#" onclick="uploadLecture()" id="uploadLectureButton"><span id="save"><i id="saveIcon" style="font-size:24px; position: relative;" class="fa">&#xf093;</i></span></button>
         </div>
         <div id="inputDiv" style="display: none">
             <input id="input" type='file' accept=".zip" multiple name="file"/>
@@ -67,8 +85,30 @@
             </div>
         </div>
         <div>
+            <div id="selectMicInLecture" style="display: none;">
+                <div id="positionalHearingSwitch" style="position: absolute; right: 10px;" >
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round" onclick="togglePositionalHearing()"></span>
+                    </label>
+                </div>
+                <br>
+                <br>
+                <div id="threeDAudioSwitch" style="position: absolute; right: 10px;" >
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider round" onclick="toggleThreeDAudio()"></span>
+                    </label>
+                </div>
+                <h3 style="position: absolute; left: 10px; top: -6px;">Positional hearing:</h3>
+                <h3 style="position: absolute; left: 10px; top: 34px;">3D audio:</h3>
+                <br>
+                <br>
+                <hr style="border: 1px solid white;">
+                <div id="micDisplay"></div>
+            </div>
             <div id="selectCamInLecture" style="display: none"></div>
-            <div id="selectMicInLecture" style="display: none"></div>
+            <div id="selectLectureRewatch" style="display: none"></div>
             <div id="attendanceListWrapper" style="background: rgba(0, 0, 0, 0.6); display: none;">
                 <i id="nextIcon" style="font-size:18x; color: white;" class="fas fa-angle-left" onclick="previousTable()"></i>
                 <i id="previousIcon" style="font-size:18px; color: white;" class="fas fa-angle-right" onclick="nextTable()"></i>
@@ -288,8 +328,9 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.9.3/simplepeer.min.js"></script>
         <video id='lidarVideoStream1' style="display: none;" autoplay="true" muted></video>
         <video id='lidarVideoStream2' style="display: none;" autoplay="true" muted></video>
-        <video id='kinectVideo' loop style="display: none;" autoplay="true" muted>
+        <video id='kinectVideo' style="display: none;" autoplay="true" muted>
             <source src='kinect.webm'>
+            <source src='kinect.mp4'>
         </video>
         <script src="./javascripts/peers.js"></script>
         <script src="./javascripts/attendanceList.js"></script>
@@ -303,6 +344,13 @@
         <script src="./javascripts/faceLandmarkBroadcast.js"></script>
         <script src="./javascripts/faceMeshManager.js"></script>
 
+        <script src="./javascripts/3DRewatch.js"></script>
+        <script src="./javascripts/toggleMenu.js"></script>
+        <script src="./javascripts/positionalHearing.js"></script>
+        <script src="./javascripts/directionalAudio.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js" integrity="sha512-uVSVjE7zYsGz4ag0HEzfugJ78oHCI1KhdkivjQro8ABL/PRiEO4ROwvrolYAcZnky0Fl/baWKYilQfWvESliRA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js" integrity="sha512-3WaCYjK/lQuL0dVIRt1thLXr84Z/4Yppka6u40yEJT1QulYm9pCxguF6r8V84ndP5K03koI9hV1+zo/bUbgMtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script id="vs" type="x-shader/x-vertex">
 
             uniform sampler2D depthmap;

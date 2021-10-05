@@ -20,13 +20,31 @@ let db = new sqlite3.Database('./user1.db', sqlite3.OPEN_READWRITE | sqlite3.OPE
       }
     });
 
-db.close((err) => {
-  if (err) {
-    return console.error(err.message);
-  } else {
-    console.log('Close the database connection.');
-  }
-});
+// createTable(db);
+
+// // eslint-disable-next-line valid-jsdoc
+// /**
+//  * creates table.
+//  */
+// async function createTable(db) {
+//   await db.run('DROP TABLE lectures', (err) => {
+//     if (err) {
+//       console.log('error in dropping: ' + err);
+//     }
+//   });
+
+//   await
+//   db.run(
+//  'CREATE TABLE lectures(name text, depthStreamId integer, imageStreamId integer, screenShareStreamId integer)');
+// }
+
+// db.close((err) => {
+//   if (err) {
+//     return console.error(err.message);
+//   } else {
+//     console.log('Close the database connection.');
+//   }
+// });
 
 let globalScreenShare = undefined;
 let globalWebcam = undefined;
@@ -368,35 +386,121 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
-  socket.on('faceMeshArray', (array) => {
-    socket.broadcast.emit('faceMeshTeacher', array);
+  socket.on('editLecture', (lecture, newLectureName) => {
+    db.run('UPDATE lectures SET name = ? WHERE name = ?', [newLectureName, lecture.name], (err) => {
+      if (err) {
+        console.log('error on updating lecture: ' + lecture);
+      } else {
+        console.log('lecture edited');
+        socket.emit('editCompleted');
+      }
+    });
+  });
+  socket.on('removeLecture', (lecture) => {
+    db.run('DELETE FROM lectures WHERE name=?', [lecture.name], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('Lecture was deleted');
+    });
+    db.run('DELETE FROM streams WHERE id=?', [lecture.depthStreamId], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('DepthStream deleted was deleted');
+    });
+    db.run('DELETE FROM streams WHERE id=?', [lecture.imageStreamId], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('ImageStream deleted was deleted');
+    });
+    db.run('DELETE FROM streams WHERE id=?', [lecture.screenShareStreamId], (err) => {
+      if (err) {
+        return console.log(err.message);
+      }
+      console.log('ScreenShareStream deleted was deleted');
+    });
   });
 
+  socket.on('getDepthStream', (streamId) => {
+    db.all('SELECT * FROM streams WHERE id=' + streamId, (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        console.log(rows);
+        socket.emit('depthStream', rows);
+      }
+    });
+  });
+  socket.on('getImageStream', (streamId) => {
+    db.all('SELECT * FROM streams WHERE id=' + streamId, (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        console.log(rows);
+        socket.emit('imageStream', rows);
+      }
+    });
+  });
+  socket.on('getScreenShareStream', (streamId) => {
+    db.all('SELECT * FROM streams WHERE id=' + streamId, (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        console.log(rows);
+        socket.emit('screenShareStream', rows);
+      }
+    });
+  });
+  socket.on('getLectures', () => {
+    db.all('SELECT * FROM lectures', (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        socket.emit('allLectures', rows);
+      }
+    });
+  });
   socket.on('uploadLecture', (lectureName, depthBlob, imageBlob, screenShareBlob) => {
     // eslint-disable-next-line no-unused-vars
-    let counter = 0;
     db.all('SELECT * FROM streams', (error, rows) => {
       // receives all the results as an array
-      counter = rows.length;
-    });
-    db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [counter + 1, depthBlob], (err) => {
-      if (err) {
-        return console.log(err.message);
-      }
-      counter++;
-      console.log('Depth was added to the table: ${this.lastID}');
-    });
-    db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [counter + 1, imageBlob], (err) => {
-      if (err) {
-        return console.log(err.message);
-      }
-      console.log('Image was added to the table: ${this.lastID}');
-    });
-    db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [counter + 1, screenShareBlob], (err) => {
-      if (err) {
-        return console.log(err.message);
-      }
-      console.log('ScreenShare was added to the table: ${this.lastID}');
+      let highest = -1;
+      rows.forEach((stream) => {
+        if (stream.id > highest) {
+          highest = stream.id;
+        }
+      });
+      const startCount = highest;
+
+      console.log('counter at start is: ' + startCount);
+      db.run('INSERT INTO streams (id,stream) VALUES(?, ?)', [startCount + 1, depthBlob], (err) => {
+        if (err) {
+          return console.log(err.message);
+        }
+        console.log('Depth was added to the table: ${this.lastID}');
+      });
+      db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [startCount + 2, imageBlob], (err) => {
+        if (err) {
+          return console.log(err.message);
+        }
+        console.log('Image was added to the table: ${this.lastID}');
+      });
+      db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [startCount + 3, screenShareBlob], (err) => {
+        if (err) {
+          return console.log(err.message);
+        }
+        console.log('ScreenShare was added to the table: ${this.lastID}');
+      });
+
+      db.run('INSERT INTO lectures(name, depthStreamId, imageStreamId, screenShareStreamId) VALUES(?, ?, ?, ?)',
+          [lectureName, startCount + 1, startCount + 2, startCount + 3], (err) => {
+            if (err) {
+              return console.log(err.message);
+            }
+            console.log('Lecture was added to the table: ${this.lastID}');
+          });
     });
   });
 

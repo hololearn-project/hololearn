@@ -45,7 +45,7 @@
     padding-left: 4px;
 }
 
-#selectMicInLecture, #selectCamInLecture {
+#selectMicInLecture, #selectCamInLecture, #selectLectureRewatch {
     position: absolute;
     bottom: 400px;
     left: calc((100% - 500px) / 2);
@@ -72,11 +72,11 @@
     display: none; /* for Chrome, Safari, and Opera */
 }
 
-#selectMicInLecture::-webkit-scrollbar {
+#selectMicInLecture::-webkit-scrollbar, #selectLectureRewatch::-webkit-scrollbar {
     display: none; /* for Chrome, Safari, and Opera */
 }
 
-#selectMicInLecture {
+#selectMicInLecture,  #selectLectureRewatch{
     position: absolute;
     background: rgba(0, 0, 0, 0.6);
     color: white;
@@ -90,7 +90,15 @@
     overflow-y: scroll; 
 }
 
+#selectLectureRewatch {
+    height: 170px;
+}
+
 .optionInLecture:hover {
     background: rgba(80, 80, 80, 0.6);
+}
+
+#selectMicInLecture {
+    padding: 10px;
 }
 

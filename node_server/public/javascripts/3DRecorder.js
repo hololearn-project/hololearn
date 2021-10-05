@@ -19,6 +19,7 @@ const recordedChunksImageStream = [];
 const recordedChunksScreenShareStream = [];
 
 const urls = [];
+const blobs = [];
 
 let countTemp = 0;
 
@@ -27,8 +28,7 @@ let countTemp = 0;
  */
 function start3DRecording() {
   if (readyToRecord && depthStream != undefined && imageStream != undefined && screenShareStream != undefined) {
-    console.log('3D recording started');
-    // console.log(screenShareStream.getTracks());
+    console.log(screenShareStream.getTracks());
     const options = {mimeType: 'video/webm'};
 
     mediaRecorderDepthStream = new MediaRecorder(depthStream, options);
@@ -93,7 +93,7 @@ function downloadMultipleFiles(urls) {
  */
 function handleDataAvailable3DRecorder(event, recordedChunksMethod) {
   if (event.data.size > 0) {
-    // console.log(recordedChunksMethod.name);
+    console.log(recordedChunksMethod.name);
     recordedChunksMethod.chunks.push(event.data);
     if (!recording3D) {
       console.log('downloading');
@@ -112,22 +112,66 @@ function download3DRecorder(recordedChunksMethod) {
   });
   const url = URL.createObjectURL(blob);
   if (recordedChunksMethod.name == 'depth') {
-    const downloadUrl = {url: url, name: 'depthStream'};
-    urls.push(downloadUrl);
+    // const downloadUrl = {url: url, name: 'depthStream'};
+    // urls.push(downloadUrl);
+    const downloadBlob = {blob: blob, name: 'depthStream'};
+    blobs.push(downloadBlob);
   }
 
   if (recordedChunksMethod.name == 'image') {
-    const downloadUrl2 = {url: url, name: 'imageStream'};
-    urls.push(downloadUrl2);
+    // const downloadUrl2 = {url: url, name: 'imageStream'};
+    // urls.push(downloadUrl2);
+    const downloadBlob2 = {blob: blob, name: 'imageStream'};
+    blobs.push(downloadBlob2);
   }
 
   if (recordedChunksMethod.name == 'screen') {
-    const downloadUrl3 = {url: url, name: 'screenShareStream'};
-    urls.push(downloadUrl3);
+    // const downloadUrl3 = {url: url, name: 'screenShareStream'};
+    // urls.push(downloadUrl3);
+    const downloadBlob3 = {blob: blob, name: 'screenShareStream'};
+    blobs.push(downloadBlob3);
   }
-  if (urls.length >= 3) {
-    downloadMultipleFiles(urls);
+
+  if (blobs.length >= 3) {
+    document.getElementById('recordingNameInputDiv').style.display = 'block';
   }
+}
+
+/**
+ * uploads the lecture to the online database.
+ */
+function uploadLecture() {
+  let depthBlob = undefined;
+  // downloadMultipleFiles(urls);
+  blobs.forEach((blobObject) => {
+    if (blobObject.name == 'depthStream') {
+      depthBlob = blobObject.blob;
+    }
+    if (blobObject.name == 'imageStream') {
+      imageBlob = blobObject.blob;
+    }
+    if (blobObject.name == 'screenShareStream') {
+      screenShareBlob = blobObject.blob;
+    }
+  });
+  const lectureName = document.getElementById('recordingNameInput').value;
+  socket.on('allLectures', (lectures) => {
+    let unique = true;
+    lectures.forEach((onlineLecture) => {
+      if (lectureName == onlineLecture.name) {
+        unique = false;
+      }
+    });
+    if (unique) {
+      socket.emit('uploadLecture', lectureName, depthBlob, imageBlob, screenShareBlob);
+      document.getElementById('recordingNameInputDiv').style.display = 'none';
+      console.log('lecture uploaded!');
+    } else {
+      alert('this lecture name already exists. Try something else.');
+    }
+  });
+  socket.emit('getLectures');
+  console.log('lectures asked');
 }
 
 /**
@@ -161,7 +205,8 @@ function record3DClicked() {
  * Appears the file selecting tag.
  */
 function rewatchLecture() {
-  document.getElementById('inputDiv').style.display = 'block';
+  // document.getElementById('inputDiv').style.display = 'block';
+  displayLectures();
 }
 
 /**
