@@ -2,7 +2,7 @@
 
 let facialLandmarks;
 
-const videoElement = document.getElementById('webcam');
+const videoElement = document.getElementById('webcamVid');
 const canvasElement = document.getElementsByClassName('output_canvas')[0];
 const canvasCtx = canvasElement.getContext('2d');
 
