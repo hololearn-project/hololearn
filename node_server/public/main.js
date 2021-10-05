@@ -201,14 +201,14 @@ async function load3DEnvironment() {
     await loadAssets();
 
     // sets the target of the camera
-    if (true) {
+    if (isTeacher) {
       controls.target.set(0, 8, 27);
       controls.update();
-    } // else {
-    //   controls.target.set(a - (a - 0) * 0.01,
-    //       b - (b - 8) * 0.01, c - (c - 27) * 0.01 );
-    //   controls.update();
-    // }
+    } else {
+      controls.target.set(a - (a - 0) * 0.01,
+          b - (b - 8) * 0.01, c - (c - 27) * 0.01 );
+      controls.update();
+    }
 
     window.onresize = onWindowResize;
     // controls.addEventListener( 'dragstart', dragStartCallback );
