@@ -13,7 +13,7 @@ let lastTrackVideo = undefined;
 function changeMic(event) {
   event.stopPropagation();
   const select = document.getElementById('selectMicInLecture');
-  select.innerHTML = '';
+  document.getElementById('micDisplay').innerHTML = '';
 
   if (select.style.display == 'block') {
     select.style.display = 'none';

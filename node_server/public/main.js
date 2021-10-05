@@ -38,7 +38,7 @@ let teacherIncomingMediaStream = null;
 let teacherTracks = [];
 
 // Adds the possible positions
-positions.push(undefined);
+positions.push({a: 0, b: 7, c: 27});
 positions.push({a: -5, b: 7, c: 5});
 positions.push({a: 0, b: 7, c: 6});
 positions.push({a: 5, b: 7, c: 5});
@@ -79,6 +79,8 @@ async function loadNet() { // this one is more efficient
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
+  document.getElementById('connectButton').style.display = 'none';
+
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
   }
@@ -204,7 +206,6 @@ async function load3DEnvironment() {
    */
   function animate() {
     requestAnimationFrame( animate );
-
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;

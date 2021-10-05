@@ -131,6 +131,7 @@ function startConnecting(teacher, name) {
     studentStream.style.display = 'none';
     studentStream.width = 500;
     studentStream.height = 500;
+    studentStream.muted = true;
     studentsDiv.appendChild(studentStream);
 
     const studentCtx = document.createElement('CANVAS');
@@ -222,19 +223,53 @@ function startConnecting(teacher, name) {
     } else {
       newPeer = new SimplePeer();
     }
-    newPeer.on('signal', (data) => socket.emit('signal', id, data));
+    newPeer.on('data', (data) => {
+      // got a data channel message
+      const string = utf8ArrayToStr(data);
+      splitted = string.split(' ');
+      console.log(splitted);
+      if (splitted[0] == 'mute') {
+        panners[splitted[1]].coneInnerAngle = 0;
+      } else {
+        panners[splitted[1]].coneInnerAngle = 360;
+      }
+    });
+    newPeer.on('signal', (data) => {
+      socket.emit('signal', id, data);
+    });
     newPeer.on('stream', (stream) => {
       // peer is teacher and stream is screen share
       if (seat == 0) {
         // teachers don't send screenshare via peer to
         // peer anymore
       } else {
+        start3DAudioUser(seat, stream);
         addVideoElement(id, stream, seat);
       }
       // make async broadcast call
     });
     newPeer.on('connect', () => {
       console.log('Connected!');
+      if (positionalHearing) {
+        activeconnections.forEach((connection) => {
+          if (unmutedSeats.includes(connection.seat) && connection.seat != 0 &! isTeacher) {
+            connection.peerObject.send(String('unmute ' + selectedPosition));
+          }
+        });
+        const mutedPositions = [1, 2, 3, 4, 5];
+        unmutedSeats.forEach((seat) => {
+          const index = mutedPositions.indexOf(seat);
+          if (index > -1) {
+            mutedPositions.splice(index, 1);
+          }
+        });
+        activeconnections.forEach((connection) => {
+          if (mutedPositions.includes(parseInt(connection.seat)) && connection.seat != 0 &! isTeacher) {
+            connection.peerObject.send(String('mute ' + selectedPosition));
+          }
+        });
+        setPositionalHearing(rotationNow);
+      }
     });
     newPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);
@@ -321,7 +356,10 @@ function startConnecting(teacher, name) {
   setInterval(function() {
     if (rotationNow != lastRotation && socket.connected) {
       socket.emit('rotated', selectedPosition, rotationNow);
+      setPositionalHearing(rotationNow);
       lastRotation = rotationNow;
+
+      update3DAudioPosition();
     }
   }, 1000/10);
 
@@ -482,10 +520,13 @@ function startConnecting(teacher, name) {
         }
         // if it's a screenshare stream, add to the right element
         addScreenShare(stream, false);
+        document.getElementById('teacherAudio').src = stream.getAudioTracks()[0];
+        document.getElementById('audioElem').play();
 
         if (table == -2) {
           start3DRecording();
         }
+        start3DAudioUser(0, stream);
       }
     });
 
@@ -538,8 +579,9 @@ function addScreenShare(stream, replay) {
   // ctxStreams[0] = ctx2
   // canvasWebcams[0] = canvas
   const screenshareScreen = document.getElementById('screenshare');
+  screenshareScreen.muted = true;
   if (table != -1) {
-    screenshareScreen.muted = false;
+    // screenshareScreen.muted = false;
   }
   if (replay) {
     screenshareScreen.src = stream;
