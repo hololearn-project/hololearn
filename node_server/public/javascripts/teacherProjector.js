@@ -66,13 +66,13 @@ function cameraChosenRotated(inLecture, deviceId) {
   stopMediaTrackVideo(webcam.srcObject);
   if (inLecture) {
     videoConstraints.deviceId = {exact: deviceId.id,
-      width: {ideal: 4096},
-      height: {ideal: 2160},
+      width: {ideal: 2048},
+      height: {ideal: 1080},
     };
   } else {
     videoConstraints.deviceId = {exact: select.value,
-      width: {ideal: 4096},
-      height: {ideal: 2160},
+      width: {ideal: 2048},
+      height: {ideal: 1080},
     };
   }
   navigator.mediaDevices.getUserMedia({audio: false, video: videoConstraints})
