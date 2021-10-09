@@ -58,7 +58,7 @@ const pose = new Pose({locateFile: (file) => {
   return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
 }});
 pose.setOptions({
-  modelComplexity: 2, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
+  modelComplexity: 0, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
   smoothLandmarks: true,
   enableSegmentation: true,
   smoothSegmentation: false,
