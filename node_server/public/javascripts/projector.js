@@ -71,8 +71,8 @@ const camera = new Camera(videoElement, {
   onFrame: async () => {
     await pose.send({image: videoElement});
   },
-  width: {ideal: 4096},
-  height: {ideal: 2160},
+  // width: {ideal: 4096},
+  // height: {ideal: 2160},
 });
 camera.start();
 
