@@ -262,6 +262,7 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').play();
         } else {
           document.getElementsByClassName('input_video')[0].srcObject = stream;
+
           // eslint-disable-next-line no-unused-vars
           removedBackgroundId = teacherStreamRemovedBackground.id;
           teacherProjectorPeer = newPeer;

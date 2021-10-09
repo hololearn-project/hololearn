@@ -62,6 +62,7 @@ pose.setOptions({
   smoothLandmarks: true,
   enableSegmentation: true,
   smoothSegmentation: false,
+  smoothSegmentation: true,
   minDetectionConfidence: 0.95,
   minTrackingConfidence: 0.95,
 });
@@ -71,8 +72,8 @@ const camera = new Camera(videoElement, {
   onFrame: async () => {
     await pose.send({image: videoElement});
   },
-  // width: 1280,
-  // height: 720,
+  width: {ideal: 4096},
+  height: {ideal: 2160},
 });
 camera.start();
 
