@@ -85,7 +85,7 @@ function loadCanonicalFaceModel() {
         faceGeometry.setAttribute('uv',
           new THREE.BufferAttribute(new Float32Array(genUVs()), 2));
 
-        const canonTexture = textureLoader.load('./assets/textures/clown.png');
+        const canonTexture = textureLoader.load('./assets/textures/canonical-face-texture-photoshop.jpg');
 
         const canonMaterial = new THREE.MeshBasicMaterial({ 
           map: canonTexture,

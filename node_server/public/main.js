@@ -113,8 +113,6 @@ async function load3DEnvironment() {
   video.style.display = 'none';
   webcam.style.display = 'none';
 
-  // var scene = new THREE.Scene();
-
   scene.background = new THREE.Color( 0xf0f0f0 );
   const objects = [];
 
@@ -174,6 +172,11 @@ async function load3DEnvironment() {
         CLASSROOM_SCENE_LOCATION,
         // called when the resource is loaded
         function( gltf ) {
+          classroomGLFT = gltf;
+          let obj = {};
+          obj.kid = [1, 2, 3];
+          classroomGLFT.asset.extras = obj;
+          console.log(classroomGLFT);
           scene.add( gltf.scene );
           gltf.animations; // Array<THREE.AnimationClip>
           gltf.scene; // THREE.Group
@@ -189,6 +192,7 @@ async function load3DEnvironment() {
           console.log( 'An error happened' );
         },
     );
+
 
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
