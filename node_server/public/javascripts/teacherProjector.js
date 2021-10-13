@@ -12,6 +12,8 @@ document.getElementById('camText').style.display = 'block';
 document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
 document.getElementById('select').style.display = 'block';
+document.getElementById('buttonGroup').style.width = '60px';
+document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
 
 let teacherProjectorScreenShare = undefined;
 
@@ -24,9 +26,10 @@ function startProjecting() {
   document.getElementById('camText').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
   document.getElementById('webcam').style.display = 'none';
-
+  document.getElementById('buttonGroup').style.display = 'block';
 
   document.getElementById('logInButton').style.display = 'none';
+  teacherStream = localMediaStreamWebcam;
   startConnecting(false, 'teacherProjector');
 }
 
@@ -62,24 +65,25 @@ function cameraChosenRotated(inLecture, deviceId) {
   if (!inLecture) {
     webcam.style.display = 'block';
   }
-  const videoConstraints = {};
+  const videoConstraints = {
+    width: {ideal: 200},
+    height: {ideal: 100},
+  };
   stopMediaTrackVideo(webcam.srcObject);
   if (inLecture) {
     videoConstraints.deviceId = {exact: deviceId.id,
-      // width: {ideal: 1280},
-      // height: {ideal: 720},
     };
   } else {
     videoConstraints.deviceId = {exact: select.value,
-      // width: {ideal: 1280},
-      // height: {ideal: 720},
     };
   }
+  console.log(videoConstraints);
   navigator.mediaDevices.getUserMedia({audio: false, video: videoConstraints})
       .then((stream) => {
         if (webcam.srcObject == null || webcam.srcObject == undefined) {
           webcam.srcObject = stream;
           localMediaStreamWebcam = stream;
+          console.log(stream.getVideoTracks()[0].getSettings().width);
         } else {
           stopMediaTrackVideo(localMediaStreamWebcam);
           webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
@@ -102,8 +106,8 @@ async function startScreenShare() {
   const displayMediaOptions = {
     video: {
       cursor: 'always',
-      width: {ideal: 4096},
-      height: {ideal: 2160},
+      width: {ideal: 200},
+      height: {ideal: 100},
     },
     audio: false,
   };
@@ -117,6 +121,7 @@ async function startScreenShare() {
       connection.peerObject.addStream(teacherProjectorScreenShare);
     }
   });
+  screenShareStream = teacherProjectorScreenShare;
 }
 
 // eslint-disable-next-line no-unused-vars

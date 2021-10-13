@@ -163,6 +163,7 @@ function uploadLecture() {
       }
     });
     if (unique) {
+      console.log(depthBlob);
       socket.emit('uploadLecture', lectureName, depthBlob, imageBlob, screenShareBlob);
       document.getElementById('recordingNameInputDiv').style.display = 'none';
       console.log('lecture uploaded!');

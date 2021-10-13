@@ -26,7 +26,8 @@ function togglePositionalHearing() {
 
 /* eslint-disable require-jsdoc */
 function setPositionalHearing(rotation) {
-  if (!positionalHearing || isTeacher) {
+  console.log(selectedPosition);
+  if (!positionalHearing || isTeacher || selectedPosition < 1) {
     return;
   }
 
