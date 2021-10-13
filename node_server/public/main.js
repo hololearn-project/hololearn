@@ -38,7 +38,7 @@ let teacherIncomingMediaStream = null;
 let teacherTracks = [];
 
 // Adds the possible positions
-positions.push({a: 0, b: 7, c: 27});
+positions.push(undefined);
 positions.push({a: -5, b: 7, c: 5});
 positions.push({a: 0, b: 7, c: 6});
 positions.push({a: 5, b: 7, c: 5});
@@ -79,8 +79,6 @@ async function loadNet() { // this one is more efficient
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
-  document.getElementById('connectButton').style.display = 'none';
-
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
   }
@@ -108,7 +106,16 @@ async function load3DEnvironment() {
 
   const renderer = new THREE.WebGLRenderer();
   renderer.setSize( width, height - 1);
+
+  //VR
+  renderer.xr.enabled = true;
+  
   document.body.appendChild( renderer.domElement );
+
+  //VR      
+  //import {VRButton } from "./javascripts/threejs-scripts/VRButton.js";
+  document.body.appendChild( VRButton.createButton( renderer ) );
+  
 
   camera.position.x = a;
   camera.position.y = b;
@@ -205,7 +212,10 @@ async function load3DEnvironment() {
    * Updates the environment and gets an image from it.
    */
   function animate() {
-    requestAnimationFrame( animate );
+    //VR requires the .setAnimationLoop instead of .requestAnimationFrame
+    renderer.setAnimationLoop(animate);
+    //requestAnimationFrame( animate );
+
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;
