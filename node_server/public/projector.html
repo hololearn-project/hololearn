@@ -1,0 +1,72 @@
+<html>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+	<head>
+    <link rel="stylesheet" href="stylesheets/toggleMenu.css">
+		<link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="stylesheets/mediaCheck.css">
+    <link rel="stylesheet" href="stylesheets/notification.css">
+    <link rel="stylesheet" href="stylesheets/advancedSettings.css">
+    <link rel="stylesheet" href="stylesheets/attendanceList.css">
+    <link rel="stylesheet" href="stylesheets/buttonGroup.css">
+    <link rel="stylesheet" href="stylesheets/3DRecording.css">
+    <link rel="stylesheet" href="stylesheets/databaseEditor.css">
+    <link rel="stylesheet" href="stylesheets/projector.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+		<title>Hololearn Projector Page</title>
+		<style>
+			body { background: black; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body class="body">
+      <a href="#menu" id="toggle"><span></span></a>
+
+      <div id="menu">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="databaseEditor.html">Database Overview</a></li>
+          <li><a href="projector.html">Projector Page</a></li>
+          <li><a href="teacherProjector.html">Teacher Projector Page</a></li>
+          <li><a href="projectorScreenShare.html" target="_blank">Slides</a></li>
+        </ul>
+      </div>
+
+      <h3 id="camText" style="display: none;">Select your camera</h3>
+        <select id="select" style="display: none;" onchange="cameraChosen(false, '')">
+            <option disabled selected value> -- select an option -- </option>
+        </select>
+        <h3 id="micText" style="display: none;" >Select your mic</h3>
+        <select id="selectMic" style="display: none;" onchange="micChosen(false)">
+            <option disabled selected value> -- select an option -- </option>
+        </select>
+
+        <video autoplay="true" id="webcam" style="display: none"></video>
+
+        <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 50px;">Log In</button>
+        <i id="rotateIcon" style="font-size:18x; color: white;" class="fas fa-redo" onclick="rotateTeacher()"></i>
+
+
+      <div class="container" style="display: block;">
+        <video class="input_video" style="display: none;"></video>
+        <canvas id="outputCanvas" class="rotateRight" style="display: none; margin-top: 100px;" width="4096px" height="2160px"></canvas>
+      </div>
+    
+      <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
+      <script src="./javascripts/peers.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.9.3/simplepeer.min.js"></script>
+      <script src="./javascripts/toggleMenu.js"></script>
+      <!-- <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script> -->
+      <script src="./javascripts/mediaCheck.js"></script>
+      <!-- <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/control_utils_3d.js" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script> -->
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+      <script src="./javascripts/projector.js"></script>
+
+
+	</body>
+</html>
