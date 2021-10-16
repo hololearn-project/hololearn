@@ -1,4 +1,4 @@
-/* eslint-disable require-jsdoc */
+/* eslint-disable */
 // const audioContext = window.AudioContext = window.AudioContext || window.webkitAudioContext;
 panners = new Array(positions.length + 1);
 let threeDAudio = true;

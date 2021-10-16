@@ -2,49 +2,10 @@
 /* eslint-disable camelcase */
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
-// three.js init variables
-let teacherWebcamOn = false;
-let positions = [];
-let width = window.innerWidth;
-let height = window.innerHeight;
-let lastTime = Date.now();
-let mapScreen = '';
-let selectedPosition = 0;
-let nameUser = '';
-let mapScreenWebcam = '';
-let net = '';
-let student_canvas = null;
-let count = 0;
-let isTeacher = false;
-let countReceivedElement = 1;
-let a = 0;
-let b = 0;
-let c = 0;
-let objects = [];
-let faceMeshFlag = false;
-let bodyTrackFlag = false;
-
+// three.js init variabl
 // vars useful for receiving teacher streams
-let teacherIncomingMediaStream = null;
-let teacherTracks = [];
-
-const servRtcStrms = new Map();
-const servRtcStrmsLidars = ['videostream', 'depthstream'];
-const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
-const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
-const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
-const FACE_MESH_LANDMARK_COUNT = 468;
-
-let vertexMarker = 0;
-
 servRtcStrms.set('videostream', 'lidarVideoStream1');
 servRtcStrms.set('depthstream', 'lidarVideoStream2');
-
-let renderer = new THREE.WebGLRenderer();
-
-let scene = new THREE.Scene();
-let teacherModel = new THREE.BufferGeometry();
-let userClassroomId = 'defaultClassroom';
 
 // Adds the possible positions
 positions.push({a: 0, b: 7, c: 27});
@@ -56,21 +17,7 @@ positions.push({a: 16, b: 7, c: 14});
 
 console.warn = () => { };
 
-// these are video settings
-const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
-const URL_DEPTHFEED_PYTHON = 'http://localhost:5000/depth_feed';
-const CLASSROOM_SCENE_LOCATION = '/assets/scene.gltf';
-const SOCKET_ADDRESS = 'http://localhost:8080';
-const CLASSROOM_BLACKBOARD_IMAGE = '/assets/fourier.png';
-const WEBCAM_FRAMES_PER_SECOND = 20;
-const DEBUG = true;
 loadNet();
-/**
- * Load neural network from tensorflow. This does the background removal for us.
- */
-// async function loadNet() { // old one
-// net = await bodyPix.load()
-// }
 
 /**
  * Load neural network from tensorflow. This does the background removal for us.
@@ -116,15 +63,12 @@ async function load3DEnvironment() {
   // var scene = new THREE.Scene();
 
   scene.background = new THREE.Color( 0xf0f0f0 );
-  const objects = [];
 
   updateSubSample();
 
   initModel();
   renderer.setSize( width, height - 1);
   document.body.appendChild( renderer.domElement );
-
-  const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 
   camera.position.x = a;
   camera.position.y = b;
@@ -192,11 +136,6 @@ async function load3DEnvironment() {
 
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-    // if (playback) {
-    //   setRecordedPictureSource();
-    //   setRecordedDepthSource();
-    // }
 
     await loadAssets();
 
@@ -267,7 +206,6 @@ async function load3DEnvironment() {
     let lookAtVector = new THREE.Vector3();
     camera.getWorldDirection(lookAtVector);
     rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
-    console.log(rotation);
     if (!isTeacher) {
       if (student_canvas != null) {
         student_canvas.rotation.y = rotation;

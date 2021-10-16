@@ -41,7 +41,7 @@ minTrackingConfidence: 0.5
 });
 pose.onResults(onResultsPose);
 
-const camera = new Camera(videoElement, {
+const cam = new Camera(videoElement, {
     onFrame: async () => {
       if (faceMeshFlag) {
         await faceMesh.send({image: videoElement});
@@ -52,4 +52,4 @@ const camera = new Camera(videoElement, {
     width: 1280,
     height: 720
   });
-  camera.start();
+  cam.start();

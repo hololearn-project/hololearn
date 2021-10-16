@@ -6,7 +6,7 @@ removedBackgroundStream = '';
 // eslint-disable-next-line no-unused-vars
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 userClassroomId = 'defaultClassroom';
-let rotate = 'right';
+const rotate = 'right';
 getCamerasAndMics();
 document.getElementById('camText').style.display = 'block';
 document.getElementById('micText').style.display = 'block';
