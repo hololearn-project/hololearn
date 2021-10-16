@@ -2,6 +2,7 @@
 // eslint-disable-next-line no-unused-vars
 let teacherSocket = '';
 let teacherPeer = null;
+let teacherWebcam = undefined;
 const activeconnections = new Map();
 positionalHearing = false;
 
@@ -16,6 +17,12 @@ socket = io.connect(window.location.origin);
 
 socket.emit('getUsers');
 
+socket.on('faceMeshTeacher', (array) => {
+  if (!isTeacher) {
+    facialLandmarksClient = array;
+    updateFaceMesh();
+  }
+});
 socket.on('teacherStreamChanged', () => {
   if (table == -2 && recording3D) {
     const screenshareScreen = document.getElementById('screenshare');
@@ -29,7 +36,6 @@ socket.on('teacherStreamChanged', () => {
     }, 3000);
   }
 });
-
 
 socket.on('users', (users) => {
   const options = document.getElementsByName('room');
@@ -220,8 +226,10 @@ function startConnecting(teacher, name) {
     // let newPeer = new SimplePeer({ initiator: true, config: peerConfig });
     let newPeer;
     if (seat > selectedPosition || seat == -1) {
+      console.log('inintiator');
       newPeer = new SimplePeer({initiator: true});
     } else {
+      console.log('not initiator');
       newPeer = new SimplePeer();
     }
     newPeer.on('data', (data) => {
@@ -593,6 +601,14 @@ function startConnecting(teacher, name) {
         }
         start3DAudioUser(0, stream);
       }
+      console.log('streamId: ' + sid);
+      // if (sid == 'webcamstream') {
+      //   webcamStream = stream;
+      //   cameraMesh.start();
+      //   document.getElementById('webcamVid').srcObject = stream;
+      //   console.log('set it correctly');
+      //   teacherWebcamOn = true;
+      // }
     });
 
     teacherPeer.on('track', (track, stream) => {
@@ -607,6 +623,13 @@ function startConnecting(teacher, name) {
         // localMediaStream.getAudioTracks()[0].enabled = true;
         teacherPeer.addStream(localMediaStream);
       }
+      // Add the webam of the teacher for the face mesh if there is one.
+      // console.log(localMediaStreamWebcam);
+      // if (teacher && localMediaStreamWebcam != null) {
+      //   const faceStream = new MediaStream();
+      //   faceStream.addTrack(localMediaStreamWebcam.getVideoTracks()[0]);
+      //   teacherPeer.addStream(faceStream);
+      // }
     });
     teacherPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);
@@ -666,7 +689,6 @@ function addScreenShare(stream, replay) {
     transparent: true,
     side: THREE.DoubleSide,
   }));
-  me2.position.set( 0, 16, 32);
   me2.rotation.y = Math.PI;
   scene.add( me2 );
   objects.push( me2 );
