@@ -1,5 +1,4 @@
 const express = require('express');
-const cv = require('https://www.jsdelivr.com/package/npm/opencvjs');
 // eslint-disable-next-line new-cap
 const router = express.Router();
 
