@@ -18,7 +18,6 @@ const canvasElement = document.getElementById('outputCanvas');
 const canvasCtx = canvasElement.getContext('2d');
 const landmarkContainer = document.getElementsByClassName('landmark-grid-container')[0];
 // const grid = new LandmarkGrid(landmarkContainer);
-
 /**
  * Gets the results
  * @param {Object} results the results
