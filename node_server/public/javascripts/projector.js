@@ -15,6 +15,8 @@ let removedBackgroundId = undefined;
 
 const videoElement = document.getElementsByClassName('input_video')[0];
 const canvasElement = document.getElementById('outputCanvas');
+const interCanvas = document.getElementById('interCanvas');
+const interCtx = interCanvas.getContext('2d');
 const canvasCtx = canvasElement.getContext('2d');
 const landmarkContainer = document.getElementsByClassName('landmark-grid-container')[0];
 // const grid = new LandmarkGrid(landmarkContainer);
@@ -33,6 +35,9 @@ function onResults(results) {
   canvasCtx.drawImage(results.segmentationMask, 0, 0,
       canvasElement.width, canvasElement.height);
 
+  interCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  interCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
   // Only overwrite existing pixels.
   canvasCtx.globalCompositeOperation = 'source-out';
   canvasCtx.fillStyle = '#000000';
@@ -40,8 +45,14 @@ function onResults(results) {
 
   // Only overwrite missing pixels.
   canvasCtx.globalCompositeOperation = 'destination-atop';
-  canvasCtx.drawImage(
-      results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+  let imgData = interCtx.getImageData(0, 0, canvasElement.width, canvasElement.height);
+  let src = cv.matFromImageData(imgData);
+  const erosion = erode(src);
+
+  canvasCtx.drawImage(erosion, 0, 0, canvasElement.width, canvasElement.height);
+
+  // canvasCtx.drawImage(erosion, 0, 0, canvasElement.width, canvasElement.height);
 
   // canvasCtx.globalCompositeOperation = 'source-over';
   // drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
