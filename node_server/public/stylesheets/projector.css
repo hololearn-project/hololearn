@@ -49,3 +49,10 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+#input {
+  position: absolute;
+  width: 200px;
+  margin-left: calc((100% - 200px) / 2);
+  margin-top: 50px;
+}

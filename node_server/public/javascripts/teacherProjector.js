@@ -66,8 +66,8 @@ function cameraChosenRotated(inLecture, deviceId) {
     webcam.style.display = 'block';
   }
   const videoConstraints = {
-    width: {ideal: 200},
-    height: {ideal: 100},
+    width: {ideal: 2048},
+    height: {ideal: 1024},
   };
   stopMediaTrackVideo(webcam.srcObject);
   if (inLecture) {
@@ -106,8 +106,6 @@ async function startScreenShare() {
   const displayMediaOptions = {
     video: {
       cursor: 'always',
-      width: {ideal: 200},
-      height: {ideal: 100},
     },
     audio: false,
   };

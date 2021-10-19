@@ -20,6 +20,9 @@
 		</style>
 	</head>
 	<body class="body">
+    <input type="file"
+       id="input" name="input_video"
+       accept="video/mp4, video/mov, video/webm">
       <a href="#menu" id="toggle"><span></span></a>
 
       <div id="menu">
@@ -41,14 +44,15 @@
             <option disabled selected value> -- select an option -- </option>
         </select>
 
-        <video autoplay="true" id="webcam" style="display: none"></video>
+        <video autoplay="true" id="webcam" style="display: none" muted></video>
+        <video autoplay="true" id="fileCam" style="display: none" loop></video>
 
         <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 50px;">Log In</button>
         <i id="rotateIcon" style="font-size:18x; color: white;" class="fas fa-redo" onclick="rotateTeacher()"></i>
 
 
       <div class="container" style="display: block;">
-        <video class="input_video" style="display: none;"></video>
+        <video id="input_video" class="input_video" style="display: none;" muted></video>
         <canvas id="outputCanvas" class="rotateRight" style="display: none; margin-top: 100px;" width="4096px" height="2160px"></canvas>
       </div>
     

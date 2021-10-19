@@ -19,6 +19,16 @@ const canvasCtx = canvasElement.getContext('2d');
 const landmarkContainer = document.getElementsByClassName('landmark-grid-container')[0];
 // const grid = new LandmarkGrid(landmarkContainer);
 
+document.getElementById('input').addEventListener('change', function() {
+  startProjecting();
+  const media = URL.createObjectURL(document.getElementById('input').files[0]);
+  const video = document.getElementById('fileCam');
+  video.src = media;
+  video.play();
+  const videoCapture = video.captureStream();
+  document.getElementById('input_video').srcObject = videoCapture;
+});
+
 /**
  * Gets the results
  * @param {Object} results the results
@@ -58,7 +68,7 @@ const pose = new Pose({locateFile: (file) => {
   return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
 }});
 pose.setOptions({
-  modelComplexity: 1, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
+  modelComplexity: 0, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
   smoothLandmarks: true,
   enableSegmentation: true,
   smoothSegmentation: false,
@@ -87,6 +97,7 @@ document.getElementById('select').style.display = 'block';
  */
 function startProjecting() {
   document.getElementById('selectMic').style.display = 'none';
+  document.getElementById('input').style.display = 'none';
   document.getElementById('select').style.display = 'none';
   document.getElementById('camText').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
