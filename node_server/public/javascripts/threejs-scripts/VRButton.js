@@ -22,6 +22,10 @@ class VRButton {
 				button.textContent = 'EXIT VR';
 
 				currentSession = session;
+				
+				//set the scale for VR
+				scene.scale.set(0.2,0.2,0.2);  
+
 
 			}
 
@@ -32,6 +36,9 @@ class VRButton {
 				button.textContent = 'ENTER VR';
 
 				currentSession = null;
+				
+				//set the scale for non-VR
+				scene.scale.set(1,1,1);  
 
 			}
 
