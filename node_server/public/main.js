@@ -184,6 +184,14 @@ async function load3DEnvironment() {
     }
     // controls.addEventListener( 'dragstart', dragStartCallback );
     // controls.addEventListener( 'dragend', dragendCallback );
+    
+    //set the scale for VR
+    if(renderer.xr.isPresenting()){
+      scene.scale.set(0.2,0.2,0.2);  
+    }
+    else{
+      scene.scale.set(1,1,1);
+    }
 
     // Starts the webcam or screen sharing
     await startWebcam(a, b, c, scene, objects, isTeacher, camera);
