@@ -21,6 +21,7 @@ let teacherProjectorScreenShare = undefined;
  * starts sending the vid.
  */
 function startProjecting() {
+  webcam.muted = true;
   document.getElementById('selectMic').style.display = 'none';
   document.getElementById('select').style.display = 'none';
   document.getElementById('camText').style.display = 'none';
@@ -30,6 +31,7 @@ function startProjecting() {
 
   document.getElementById('logInButton').style.display = 'none';
   teacherStream = localMediaStreamWebcam;
+  console.log(localMediaStreamWebcam.getVideoTracks()[0].getSettings());
   startConnecting(false, 'teacherProjector');
 }
 
@@ -66,8 +68,8 @@ function cameraChosenRotated(inLecture, deviceId) {
     webcam.style.display = 'block';
   }
   const videoConstraints = {
-    width: {ideal: 2048},
-    height: {ideal: 1024},
+    width: {ideal: 3840},
+    height: {ideal: 2160},
   };
   stopMediaTrackVideo(webcam.srcObject);
   if (inLecture) {
@@ -77,13 +79,11 @@ function cameraChosenRotated(inLecture, deviceId) {
     videoConstraints.deviceId = {exact: select.value,
     };
   }
-  console.log(videoConstraints);
   navigator.mediaDevices.getUserMedia({audio: false, video: videoConstraints})
       .then((stream) => {
         if (webcam.srcObject == null || webcam.srcObject == undefined) {
           webcam.srcObject = stream;
           localMediaStreamWebcam = stream;
-          console.log(stream.getVideoTracks()[0].getSettings().width);
         } else {
           stopMediaTrackVideo(localMediaStreamWebcam);
           webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
@@ -105,6 +105,8 @@ async function startScreenShare() {
   }
   const displayMediaOptions = {
     video: {
+      width: {ideal: 3840},
+      height: {ideal: 2160},
       cursor: 'always',
     },
     audio: false,

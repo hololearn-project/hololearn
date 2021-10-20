@@ -63,6 +63,7 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity .4s;
+  z-index: 50;
 }
 /* #menu:after {
   position: absolute;

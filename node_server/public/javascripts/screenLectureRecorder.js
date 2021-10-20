@@ -10,6 +10,9 @@ let screenShareStream = undefined;
 let mediaRecorderTeacherStream = undefined;
 let mediaRecorderScreenShareStream = undefined;
 
+let base64TeacherStream = undefined;
+let base64ScreenShareStream = undefined;
+
 
 const recordedChunksTeacherStream = [];
 const recordedChunksScreenShareStream = [];
@@ -109,11 +112,28 @@ async function uploadLecture() {
       console.log(teacherStream.getVideoTracks()[0].getSettings().width);
       console.log(teacherBlob);
       console.log(screenShareBlob);
-      socket.emit('test');
-      socket.emit('uploadScreenLecture', lectureName, teacherBlob, screenShareBlob);
-      socket.emit('test');
-      document.getElementById('recordingNameInputDiv').style.display = 'none';
-      console.log('lecture uploaded!');
+      const reader = new FileReader();
+      reader.readAsDataURL(teacherBlob);
+      reader.onloadend = function() {
+        const base64data = reader.result;
+        base64TeacherStream = base64data;
+        if (base64ScreenShareStream != undefined || mediaRecorderScreenShareStream == undefined) {
+          socket.emit('uploadScreenLecture', lectureName, base64TeacherStream, base64ScreenShareStream);
+          document.getElementById('recordingNameInputDiv').style.display = 'none';
+          console.log('lecture uploaded!');
+        }
+      };
+      const reader2 = new FileReader();
+      reader2.readAsDataURL(screenShareBlob);
+      reader2.onloadend = function() {
+        const base64data = reader2.result;
+        base64ScreenShareStream = base64data;
+        if (base64TeacherStream != undefined) {
+          socket.emit('uploadScreenLecture', lectureName, base64TeacherStream, base64ScreenShareStream);
+          document.getElementById('recordingNameInputDiv').style.display = 'none';
+          console.log('lecture uploaded!');
+        }
+      };
     } else {
       alert('this lecture name already exists. Try something else.');
     }
@@ -146,6 +166,6 @@ function record3DClicked() {
   }
 }
 
-socket.on('testBack', () => {
-  console.log('testback');
+socket.on('testBack', (stream) => {
+  console.log(stream);
 });

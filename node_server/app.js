@@ -520,7 +520,7 @@ io.sockets.on('connection', (socket) => {
     });
   });
   socket.on('uploadScreenLecture', (lectureName, teacherBlob, screenShareBlob) => {
-    console.log('lecture received');
+    console.log(teacherBlob);
     // eslint-disable-next-line no-unused-vars
     db.all('SELECT * FROM screenLectureStreams', (error, rows) => {
       // receives all the results as an array
@@ -725,7 +725,13 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('test', () => {
-    socket.emit('testBack');
+    db.all('SELECT * FROM screenLectureStreams', (error, rows) => {
+      if (error) {
+        console.log('error while retrieving the lectures: ' + error);
+      } else {
+        socket.emit('testback', rows[11]);
+      }
+    });
   });
 
   socket.on('getUsers', () => {

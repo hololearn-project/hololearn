@@ -301,8 +301,10 @@ function startConnecting(teacher, name) {
     });
     newPeer.on('connect', () => {
       if (seat == -7) {
-        newPeer.addStream(teacherProjectorScreenShare);
-        console.log('added stream to slidePlayer');
+        if (teacherProjectorScreenShare != undefined) {
+          newPeer.addStream(teacherProjectorScreenShare);
+          console.log('added stream to slidePlayer');
+        }
       }
       if (selectedPosition == -6) {
         chatConnected = true;

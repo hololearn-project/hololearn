@@ -71,9 +71,9 @@ pose.setOptions({
   modelComplexity: 0, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
   smoothLandmarks: true,
   enableSegmentation: true,
-  smoothSegmentation: false,
-  minDetectionConfidence: 0.95,
-  minTrackingConfidence: 0.95,
+  smoothSegmentation: true,
+  minDetectionConfidence: 0.97,
+  minTrackingConfidence: 0.97,
 });
 pose.onResults(onResults);
 
