@@ -26,7 +26,7 @@ class VRButton {
 				//set the scale for VR
 				scene.scale.set(0.2,0.2,0.2);  
 
-
+				camera.target.set(0,0,0);
 			}
 
 			function onSessionEnded( /*event*/ ) {
