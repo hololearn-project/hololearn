@@ -261,12 +261,7 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
-          document.getElementsByClassName('input_video')[0].srcObject = stream;
-
-          // eslint-disable-next-line no-unused-vars
-          removedBackgroundId = teacherStreamRemovedBackground.id;
-          teacherProjectorPeer = newPeer;
-          sendStreamId();
+          document.getElementById('teacher').srcObject = stream;
         }
       } else {
         if (seat == -6) {
@@ -275,8 +270,6 @@ function startConnecting(teacher, name) {
           console.log(removedBackgroundStream);
           switch (stream.id) {
             case removedBackgroundStream:
-              console.log('here');
-              document.getElementById('selfView').srcObject = stream;
               document.getElementById('selfView').muted = true;
               document.getElementById('selfView').style.position = 'absolute';
               document.getElementById('selfView').style.display = 'block';
@@ -343,9 +336,10 @@ function startConnecting(teacher, name) {
       // errorCounter = errorCounter + 1;
     });
     // if table is -4 it is the projector or teacher
-    if (table == -4 && (typeof localMediaStreamWebcam) !== 'undefined') {
+    if (table == -4 && (typeof teacherStream) !== 'undefined') {
       if (seat != -7) {
-        newPeer.addStream(localMediaStreamWebcam);
+        console.log(teacherStream);
+        newPeer.addStream(teacherStream);
       }
     }
     if ((!isTeacher) && !(seat < 0) && table != -4) {

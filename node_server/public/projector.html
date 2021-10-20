@@ -45,16 +45,11 @@
         </select>
 
         <video autoplay="true" id="webcam" style="display: none" muted></video>
+        <video autoplay="true" id="teacher" class="rotateUp"></video>
         <video autoplay="true" id="fileCam" style="display: none" loop></video>
 
         <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 50px;">Log In</button>
         <i id="rotateIcon" style="font-size:18x; color: white;" class="fas fa-redo" onclick="rotateTeacher()"></i>
-
-
-      <div class="container" style="display: block;">
-        <video id="input_video" class="input_video" style="display: none;"></video>
-        <canvas id="outputCanvas" class="rotateRight" style="display: none; margin-top: 100px;" width="4096px" height="2160px"></canvas>
-      </div>
     
       <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
       <script src="./javascripts/peers.js"></script>

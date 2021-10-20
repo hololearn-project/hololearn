@@ -30,8 +30,11 @@ function startProjecting() {
   document.getElementById('buttonGroup').style.display = 'block';
 
   document.getElementById('logInButton').style.display = 'none';
-  teacherStream = localMediaStreamWebcam;
-  console.log(localMediaStreamWebcam.getVideoTracks()[0].getSettings());
+  teacherStream = document.getElementById('output_canvas').captureStream(25);
+  const streamingStuff = document.getElementById('output_canvas').captureStream(25);
+  console.log(teacherStream);
+  document.getElementById('selfView').srcObject = teacherStream;
+
   startConnecting(false, 'teacherProjector');
 }
 
@@ -68,8 +71,8 @@ function cameraChosenRotated(inLecture, deviceId) {
     webcam.style.display = 'block';
   }
   const videoConstraints = {
-    width: {ideal: 3840},
-    height: {ideal: 2160},
+    width: {ideal: 1080},
+    height: {ideal: 720},
   };
   stopMediaTrackVideo(webcam.srcObject);
   if (inLecture) {
@@ -84,6 +87,7 @@ function cameraChosenRotated(inLecture, deviceId) {
         if (webcam.srcObject == null || webcam.srcObject == undefined) {
           webcam.srcObject = stream;
           localMediaStreamWebcam = stream;
+          document.getElementById('input_video').srcObject = stream;
         } else {
           stopMediaTrackVideo(localMediaStreamWebcam);
           webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
@@ -159,3 +163,68 @@ function utf8ArrayToStr(array) {
 
   return out;
 }
+
+const videoElement = document.getElementsByClassName('input_video')[0];
+const canvasElement = document.getElementsByClassName('output_canvas')[0];
+const canvasCtx = canvasElement.getContext('2d');
+const landmarkContainer = document.getElementsByClassName('landmark-grid-container')[0];
+// const grid = new LandmarkGrid(landmarkContainer);
+
+// eslint-disable-next-line require-jsdoc
+/**
+ * Gets the results
+ * @param {Object} results the results
+ */
+function onResults(results) {
+  if (!results.poseLandmarks) {
+    // grid.updateLandmarks([]);
+    return;
+  }
+
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx.drawImage(results.segmentationMask, 0, 0,
+      canvasElement.width, canvasElement.height);
+
+  // Only overwrite existing pixels.
+  canvasCtx.globalCompositeOperation = 'source-out';
+  canvasCtx.fillStyle = '#000000';
+  canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+
+  // Only overwrite missing pixels.
+  canvasCtx.globalCompositeOperation = 'destination-atop';
+  canvasCtx.drawImage(
+      results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+  // canvasCtx.globalCompositeOperation = 'source-over';
+  // drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
+  //     {color: '#00FF00', lineWidth: 4});
+  // drawLandmarks(canvasCtx, results.poseLandmarks,
+  //     {color: '#FF0000', lineWidth: 2});
+  // canvasCtx.restore();
+
+  // grid.updateLandmarks(results.poseWorldLandmarks);
+}
+
+const pose = new Pose({locateFile: (file) => {
+  return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+}});
+pose.setOptions({
+  modelComplexity: 0, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
+  smoothLandmarks: true,
+  enableSegmentation: true,
+  smoothSegmentation: true,
+  minDetectionConfidence: 0.97,
+  minTrackingConfidence: 0.97,
+});
+pose.onResults(onResults);
+
+const camera = new Camera(videoElement, {
+  onFrame: async () => {
+    await pose.send({image: videoElement});
+  },
+  // width: {ideal: 4096},
+  // height: {ideal: 2160},
+});
+camera.start();
+console.log('camera started');

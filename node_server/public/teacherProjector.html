@@ -42,9 +42,9 @@
         </ul>
       </div>
 
-      <div class="container" style="display: none;">
-        <video class="input_video" muted></video>
-        <canvas class="output_canvas" width="1280px" height="720px" style="display: block;" muted></canvas>
+      <div class="container">
+        <video id="input_video" class="input_video" muted></video>
+        <canvas class="output_canvas" id="output_canvas" width="1280px" height="720px" style="display: none;" muted></canvas>
       </div>
 
       <h3 id="camText" style="display: none;">Select your camera</h3>
@@ -74,9 +74,10 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.9.3/simplepeer.min.js"></script>
       <script src="./javascripts/toggleMenu.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+      <!-- <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
       <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
-      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script> -->
+      <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
       <script src="./javascripts/mediaCheck.js"></script>
       <script src="./javascripts/teacherProjector.js"></script>
       <script src="./javascripts/screenLectureRecorder.js"></script>
