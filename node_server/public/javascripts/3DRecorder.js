@@ -28,7 +28,6 @@ let countTemp = 0;
  */
 function start3DRecording() {
   if (readyToRecord && depthStream != undefined && imageStream != undefined && screenShareStream != undefined) {
-    console.log(screenShareStream.getTracks());
     const options = {mimeType: 'video/webm'};
 
     mediaRecorderDepthStream = new MediaRecorder(depthStream, options);
@@ -93,10 +92,8 @@ function downloadMultipleFiles(urls) {
  */
 function handleDataAvailable3DRecorder(event, recordedChunksMethod) {
   if (event.data.size > 0) {
-    console.log(recordedChunksMethod.name);
     recordedChunksMethod.chunks.push(event.data);
     if (!recording3D) {
-      console.log('downloading');
       download3DRecorder(recordedChunksMethod);
     }
   }
@@ -163,7 +160,6 @@ function uploadLecture() {
       }
     });
     if (unique) {
-      console.log(depthBlob);
       socket.emit('uploadLecture', lectureName, depthBlob, imageBlob, screenShareBlob);
       document.getElementById('recordingNameInputDiv').style.display = 'none';
       console.log('lecture uploaded!');
@@ -172,7 +168,6 @@ function uploadLecture() {
     }
   });
   socket.emit('getLectures');
-  console.log('lectures asked');
 }
 
 /**

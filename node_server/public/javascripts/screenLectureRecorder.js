@@ -139,7 +139,6 @@ async function uploadLecture() {
     }
   });
   socket.emit('getScreenLectures');
-  console.log('lectures asked');
 }
 
 /**
@@ -165,7 +164,3 @@ function record3DClicked() {
     recording3D = true;
   }
 }
-
-socket.on('testBack', (stream) => {
-  console.log(stream);
-});

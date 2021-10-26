@@ -217,7 +217,6 @@ async function load3DEnvironment() {
     let lookAtVector = new THREE.Vector3();
     camera.getWorldDirection(lookAtVector);
     rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
-    console.log(rotation);
     if (!isTeacher) {
       if (student_canvas != null) {
         student_canvas.rotation.y = rotation;

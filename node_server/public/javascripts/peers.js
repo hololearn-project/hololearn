@@ -255,12 +255,15 @@ function startConnecting(teacher, name) {
       socket.emit('signal', id, data);
     });
     newPeer.on('stream', (stream) => {
-      // peer is projector
+      // peer is the teacher
       if (seat == -5) {
+        // selectedPosition -7 -> you are the slides player.
         if (selectedPosition == -7) {
+          // adding the screen share to the page.
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
+          // You are the projector and you are adding the teacher to the page.
           document.getElementById('teacher').srcObject = stream;
         }
       } else {
@@ -291,11 +294,13 @@ function startConnecting(teacher, name) {
       // make async broadcast call
     });
     newPeer.on('connect', () => {
+      // seat -7 means the peer is the slide player.
       if (seat == -7) {
         if (teacherProjectorScreenShare != undefined) {
           newPeer.addStream(teacherProjectorScreenShare);
         }
       }
+      // selected position == -6 means you are the projector
       if (selectedPosition == -6) {
         if (document.getElementById('webcam').srcObject != undefined) {
           newPeer.addStream(document.getElementById('webcam').srcObject);
