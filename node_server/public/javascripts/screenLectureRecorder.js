@@ -24,10 +24,6 @@ const blobs = [];
  * Starts the 3D recording if all components are ready and record is clicked.
  */
 function start3DRecording() {
-  console.log('start3DRecording');
-  console.log(readyToRecord);
-  console.log(teacherStream);
-
   if (readyToRecord && teacherStream != undefined) {
     const options = {mimeType: 'video/webm'};
 
@@ -56,7 +52,6 @@ function handleDataAvailable3DRecorder(event, recordedChunksMethod) {
   if (event.data.size > 0) {
     recordedChunksMethod.chunks.push(event.data);
     if (!recording3D) {
-      console.log('downloading');
       download3DRecorder(recordedChunksMethod);
     }
   }
@@ -74,6 +69,14 @@ function download3DRecorder(recordedChunksMethod) {
   if (recordedChunksMethod.name == 'teacher') {
     const downloadBlob = {blob: blob, name: 'teacherStream'};
     blobs.push(downloadBlob);
+
+    const link = document.createElement('a');
+    link.download = 'testDownload';
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    delete link;
   }
 
   if (recordedChunksMethod.name == 'screen') {
@@ -109,9 +112,6 @@ async function uploadLecture() {
       }
     });
     if (unique) {
-      console.log(teacherStream.getVideoTracks()[0].getSettings().width);
-      console.log(teacherBlob);
-      console.log(screenShareBlob);
       const reader = new FileReader();
       reader.readAsDataURL(teacherBlob);
       reader.onloadend = function() {

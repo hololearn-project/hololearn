@@ -20,12 +20,12 @@
 		</style>
 	</head>
 	<body class="body">
-    <input type="file"
+    <input type="file" style="z-index: 10;"
        id="input" name="input_video"
        accept="video/mp4, video/mov, video/webm">
-      <a href="#menu" id="toggle"><span></span></a>
+      <a href="#menu" id="toggle" onclick="hideShowInput()"><span onclick="hideShowInput()"></span></a>
 
-      <div id="menu">
+      <div id="menu" style="z-index: 9;">
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="databaseEditor.html">Database Overview</a></li>

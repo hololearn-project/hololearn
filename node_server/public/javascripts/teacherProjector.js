@@ -21,6 +21,7 @@ let teacherProjectorScreenShare = undefined;
  * starts sending the vid.
  */
 function startProjecting() {
+  document.getElementById('input_video').srcObject = localMediaStreamWebcam;
   webcam.muted = true;
   document.getElementById('selectMic').style.display = 'none';
   document.getElementById('select').style.display = 'none';
@@ -105,7 +106,6 @@ function cameraChosenRotated(inLecture, deviceId) {
         if (webcam.srcObject == null || webcam.srcObject == undefined) {
           webcam.srcObject = stream;
           localMediaStreamWebcam = stream;
-          document.getElementById('input_video').srcObject = stream;
         } else {
           stopMediaTrackVideo(localMediaStreamWebcam);
           webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
@@ -120,11 +120,6 @@ function cameraChosenRotated(inLecture, deviceId) {
 
 // eslint-disable-next-line require-jsdoc
 async function startScreenShare() {
-  if (teacherProjectorScreenShare != undefined) {
-    teacherProjectorScreenShare.getTracks().forEach(function(track) {
-      track.stop();
-    });
-  }
   const displayMediaOptions = {
     video: {
       width: {ideal: 3840},
@@ -135,6 +130,11 @@ async function startScreenShare() {
   };
   await navigator.mediaDevices.getDisplayMedia(displayMediaOptions)
       .then(function(stream) {
+        if (teacherProjectorScreenShare != undefined) {
+          teacherProjectorScreenShare.getTracks().forEach(function(track) {
+            track.stop();
+          });
+        }
         teacherProjectorScreenShare = stream;
       });
   document.getElementById('screenShareOption').innerHTML = 'Update ScreenShare';

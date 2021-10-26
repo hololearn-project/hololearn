@@ -13,12 +13,29 @@ let chatConnected = false;
 let removedBackgroundId = undefined;
 
 document.getElementById('teacher').style.width = window.innerWidth * 0.9;
+document.getElementById('teacher').style.marginLeft = window.innerWidth * 0.05;
 
 getCamerasAndMics();
 document.getElementById('camText').style.display = 'block';
 document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
 document.getElementById('select').style.display = 'block';
+
+document.getElementById('input').addEventListener('change', function() {
+  const media = URL.createObjectURL(this.files[0]);
+  const video = document.getElementById('teacher');
+  video.src = media;
+  video.style.display = 'block';
+  video.play();
+  document.getElementById('selectMic').style.display = 'none';
+  document.getElementById('input').style.display = 'none';
+  document.getElementById('select').style.display = 'none';
+  document.getElementById('camText').style.display = 'none';
+  document.getElementById('micText').style.display = 'none';
+  document.getElementById('webcam').style.display = 'none';
+  document.getElementById('webcam').muted = true;
+  document.getElementById('logInButton').style.display = 'none';
+});
 
 /**
  * starts sending the vid.
@@ -32,7 +49,6 @@ function startProjecting() {
   document.getElementById('webcam').style.display = 'none';
   document.getElementById('webcam').muted = true;
   document.getElementById('logInButton').style.display = 'none';
-
   startConnecting(false, 'projector');
 }
 
@@ -102,4 +118,15 @@ function utf8ArrayToStr(array) {
   }
 
   return out;
+}
+
+/**
+ * hides the input if not hidden and vice versa.
+ */
+function hideShowInput() {
+  if (document.getElementById('input').style.display == 'none') {
+    document.getElementById('input').style.display = 'block';
+  } else {
+    document.getElementById('input').style.display = 'none'
+  }
 }

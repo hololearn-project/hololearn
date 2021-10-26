@@ -4,6 +4,8 @@ table = -4;
 selectedPosition = -7;
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 userClassroomId = 'defaultClassroom';
+document.getElementById('buttonGroup').style.width = '60px';
+document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
 
 // eslint-disable-next-line require-jsdoc
 function startSharing() {
@@ -33,4 +35,9 @@ function rotateTeacher() {
       teacherview.classList.add('rotateRight');
       break;
   }
+}
+
+// eslint-disable-next-line require-jsdoc
+function closeWindow() {
+  close();
 }

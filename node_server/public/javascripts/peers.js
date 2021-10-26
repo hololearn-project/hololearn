@@ -261,7 +261,6 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
-          console.log(stream.getAudioTracks());
           document.getElementById('teacher').srcObject = stream;
         }
       } else {
@@ -295,11 +294,12 @@ function startConnecting(teacher, name) {
       if (seat == -7) {
         if (teacherProjectorScreenShare != undefined) {
           newPeer.addStream(teacherProjectorScreenShare);
-          console.log('added stream to slidePlayer');
         }
       }
       if (selectedPosition == -6) {
-        newPeer.addStream(document.getElementById('webcam').srcObject);
+        if (document.getElementById('webcam').srcObject != undefined) {
+          newPeer.addStream(document.getElementById('webcam').srcObject);
+        }
       }
       console.log('Connected!');
       if (positionalHearing) {
@@ -336,6 +336,9 @@ function startConnecting(teacher, name) {
     // if table is -4 it is the projector or teacher
     if (table == -4 && (typeof teacherStream) !== 'undefined') {
       if (seat != -7) {
+        if (localMediaStreamWebcam.getAudioTracks()[0] != undefined) {
+          teacherStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
+        }
         newPeer.addStream(teacherStream);
       }
     }
