@@ -261,21 +261,20 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
+          console.log(stream.getAudioTracks());
           document.getElementById('teacher').srcObject = stream;
         }
       } else {
         if (seat == -6) {
           // peer is the projector
-          console.log(stream.id);
-          console.log(removedBackgroundStream);
           switch (stream.id) {
             case removedBackgroundStream:
+              document.getElementById('projectorInput').srcObject = stream;
               document.getElementById('selfView').muted = true;
               document.getElementById('selfView').style.position = 'absolute';
               document.getElementById('selfView').style.display = 'block';
               break;
             default:
-              console.log('here');
               document.getElementById('projectorInput').srcObject = stream;
               document.getElementById('projectorInput').style.display = 'block';
               document.getElementById('projectorInput').onresize = function() {
@@ -300,8 +299,7 @@ function startConnecting(teacher, name) {
         }
       }
       if (selectedPosition == -6) {
-        chatConnected = true;
-        sendStreamId();
+        newPeer.addStream(document.getElementById('webcam').srcObject);
       }
       console.log('Connected!');
       if (positionalHearing) {
@@ -338,7 +336,6 @@ function startConnecting(teacher, name) {
     // if table is -4 it is the projector or teacher
     if (table == -4 && (typeof teacherStream) !== 'undefined') {
       if (seat != -7) {
-        console.log(teacherStream);
         newPeer.addStream(teacherStream);
       }
     }

@@ -31,9 +31,17 @@ function startProjecting() {
 
   document.getElementById('logInButton').style.display = 'none';
   teacherStream = document.getElementById('output_canvas').captureStream(25);
-  const streamingStuff = document.getElementById('output_canvas').captureStream(25);
-  console.log(teacherStream);
   document.getElementById('selfView').srcObject = teacherStream;
+
+  // eslint-disable-next-line max-len
+  if (document.getElementById('selfView').classList[0] == 'rotateLeft' || document.getElementById('selfView').classList[0] == 'rotateRight') {
+    const ratio = 1280 / 720;
+    document.getElementById('selfView').style.right = 10 - (ratio * 300 - 300) / 2;
+    document.getElementById('selfView').style.bottom = 10 + (ratio * 300 - 300) / 2;
+  } else {
+    document.getElementById('selfView').style.right = 10;
+    document.getElementById('selfView').style.bottom = 10;
+  }
 
   startConnecting(false, 'teacherProjector');
 }
@@ -58,6 +66,16 @@ function rotateSelfView() {
     case 'rotateUp':
       selfView.classList.add('rotateRight');
       break;
+  }
+
+  // eslint-disable-next-line max-len
+  if (document.getElementById('selfView').classList[0] == 'rotateLeft' || document.getElementById('selfView').classList[0] == 'rotateRight') {
+    const ratio = 1280 / 720;
+    document.getElementById('selfView').style.right = 10 - (ratio * 300 - 300) / 2;
+    document.getElementById('selfView').style.bottom = 10 + (ratio * 300 - 300) / 2;
+  } else {
+    document.getElementById('selfView').style.right = 10;
+    document.getElementById('selfView').style.bottom = 10;
   }
 }
 

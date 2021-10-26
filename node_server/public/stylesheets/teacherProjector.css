@@ -35,6 +35,9 @@
 
 #selfView {
   height: 300px;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
   z-index: 5;
 }
 
