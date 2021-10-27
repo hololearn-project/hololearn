@@ -1,0 +1,54 @@
+#mic, #speak, #rotateClassroom, #recordButton {
+    margin-left: 50%;
+    margin-right: 50%;
+    bottom: 100px;
+    margin-right:auto;
+    display: none;
+    position: absolute;
+    padding: 5px 15px;
+    border-radius: 50%;
+    background: rgb(0, 196, 65);
+    color: white;
+    cursor: pointer;
+}
+
+#recordButton {
+    margin-left: auto;
+    margin-right: auto;
+    width: 15%;
+    left: 42.5%;
+    border-radius: 5px;
+    background: red;
+    border: none;
+}
+
+#speak, #rotateClassroom {
+    background: red;
+    margin-left: 60%;
+    margin-right: 40%;
+}
+
+#rotateClassroom {
+    padding: 5px 10px;
+}
+
+#speak {
+    padding: 5px 10px;
+}
+
+#speakIcon {
+    margin-right: 3px;
+}
+
+
+#connectButton {
+    margin: auto;
+    margin-top: 50px;
+    display: none;
+}
+
+#webcam, #screenshare, #videoElement {
+    margin: auto;
+    margin-top: 50px;
+}
+
