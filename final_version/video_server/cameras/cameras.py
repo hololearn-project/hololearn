@@ -26,6 +26,9 @@ class camera(ABC):
     mapRes = 767
     dimX = 960
     dimY = 540
+    open_kernel = np.ones((5, 5), np.uint8)
+    erosion_kernel = np.ones((2, 2), np.uint8)
+    default_format=".jpg"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
 
@@ -108,9 +111,8 @@ class camera(ABC):
             largely the same array as the input image, with the background noise removed
 
         """
-        kernel = np.ones((5,5),np.uint8)
 
-        return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+        return cv2.morphologyEx(image, cv2.MORPH_OPEN, self.open_kernel)
 
     def find_min_max_non_zero(self, image):
         """
@@ -146,6 +148,25 @@ class camera(ABC):
 
             return x_0, x_n, y_0, y_n
 
+    def remove_background(self, depth, frame):
+
+        frame = np.delete(frame, 3, 2)
+
+        if frame.shape != depth.shape:
+            return frame
+        
+        bg_rm_frame = np.where(depth == self.mapRes, frame, 0)
+  
+        bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
+
+        return bg_rm_frame
+
+    def encode_img(self, image, imgFormat=default_format):
+        # print(image)
+        ret, buffer = cv2.imencode('.png', image)
+
+        return buffer.tobytes()
+
     def encode_bgr_channels(self, image):
         """
         Takes a depth map with depth values ranging from 0 to 755, and
@@ -161,15 +182,17 @@ class camera(ABC):
         [int, int, int]
             a 3d array representation of the depth map, with the previous depth value now being
             split accross 3 colour channels
-        """
-        b_channel = np.clip(image, 0, 255)
-        image = image - 255
+        # """
+        # b_channel = np.clip(image, 0, 255)
+        # image = image - 255
 
-        g_channel = np.clip(image, 0, 255)
-        image = image - 255
+        # g_channel = np.clip(image, 0, 255)
+        # image = image - 255
 
-        r_channel = np.clip(image, 0, 255)
-
+        # r_channel = np.clip(image, 0, 255)
+        b_channel = image
+        g_channel = image
+        r_channel = image
         return np.dstack((b_channel, g_channel, r_channel))
 
     def sharpen_edges(self, image):
@@ -216,13 +239,13 @@ class camera(ABC):
 
         self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
 
-        for (x,y,w,h) in self.faces:
-            if(w*h > 400):
-                cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
-                self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
-                break
+        # for (x,y,w,h) in self.faces:
+        #     if(w*h > 400):
+        #         cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
+        #         self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
+        #         break
             
-        return self.encode_img(color_image)
+        return color_image
     
     def process_depth(self, depth_image):
         """
@@ -250,7 +273,7 @@ class camera(ABC):
 
         depth_image = self.encode_bgr_channels(depth_image)
 
-        return self.encode_img(depth_image, imgFormat='.jpg')
+        return depth_image
 
 class camera_wrapper(camera):
 
@@ -300,7 +323,7 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        return self.cam.get_frame()
+        return self.encode_img(self.cam.get_frame())
 
     def get_depth(self):
         """
@@ -315,4 +338,10 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
-        return self.cam.get_depth()
+        return self.encode_img(self.cam.get_depth())
+
+    def get_frame_bgr(self):
+        frame = self.cam.get_frame()
+        depth = self.cam.get_depth()
+
+        return self.encode_img(self.remove_background(depth, frame))
