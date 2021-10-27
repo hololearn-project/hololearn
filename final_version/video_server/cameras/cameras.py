@@ -20,8 +20,8 @@ class camera(ABC):
     debug = False
     edge_tracking = False
     near_plane = 500
-    far_plane = 10000
-    point = 2500
+    far_plane = 100000
+    point = 1500
     face = (0, 0)
     mapRes = 767
     dimX = 960
@@ -63,7 +63,7 @@ class camera(ABC):
 
         return image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
         
-    def set_focal_window(self, image, range=1000):
+    def set_focal_window(self, image, range=700):
         """
         takes the depth map and normalises the values in the given range around
         the object's point attribute
@@ -155,7 +155,7 @@ class camera(ABC):
         if frame.shape != depth.shape:
             return frame
         
-        bg_rm_frame = np.where(depth == self.mapRes, frame, 0)
+        bg_rm_frame = np.where(depth == self.mapRes, 0, frame)
   
         bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
@@ -193,6 +193,32 @@ class camera(ABC):
         b_channel = image
         g_channel = image
         r_channel = image
+        return np.dstack((b_channel, g_channel, r_channel))
+
+    def encode_bgr_channels_color(self, image):
+        """
+        Takes a depth map with depth values ranging from 0 to 755, and
+        returns a color image, with the sum of the colour values equalling the input depth
+        for each pixel
+
+        Parameters
+        ----------
+        image: [int, int]
+
+        Returns
+        -------
+        [int, int, int]
+            a 3d array representation of the depth map, with the previous depth value now being
+            split accross 3 colour channels
+        # """
+        b_channel = np.clip(image, 0, 255)
+        image = image - 255
+
+        g_channel = np.clip(image, 0, 255)
+        image = image - 255
+
+        r_channel = np.clip(image, 0, 255)
+
         return np.dstack((b_channel, g_channel, r_channel))
 
     def sharpen_edges(self, image):
@@ -239,11 +265,11 @@ class camera(ABC):
 
         self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
 
-        # for (x,y,w,h) in self.faces:
-        #     if(w*h > 400):
-        #         cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
-        #         self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
-        #         break
+        for (x,y,w,h) in self.faces:
+            if(w*h > 400):
+                cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
+                self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
+                break
             
         return color_image
     
@@ -271,7 +297,12 @@ class camera(ABC):
 
         # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
 
+        # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
+        # cv2.waitKey(0)
+
         depth_image = self.encode_bgr_channels(depth_image)
+
+
 
         return depth_image
 

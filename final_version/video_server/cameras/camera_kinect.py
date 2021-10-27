@@ -52,11 +52,8 @@ class kinectcam(camera):
             a 3d array containing the image data, enoded as BRGA
         """
         capture = self.k4a.get_capture()
-        # color = capture.depth
         color = capture.transformed_color
-
-        return color
-
+        # return color
         return self.process_frame(color)
 
     def get_depth(self):
@@ -75,5 +72,8 @@ class kinectcam(camera):
         """
         capture = self.k4a.get_capture()
         depth = capture.depth
+
+        # cv2.imshow('depth', depth)
+        # cv2.waitKey(0)
 
         return self.process_depth(depth)
