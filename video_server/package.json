@@ -1,0 +1,22 @@
+{
+  "name": "three-js-boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "scripts.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github-learnthreejs:learnthreejs/three-js-boilerplate.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^17.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mjpeg-decoder": "^1.0.3",
+    "uniq": "^1.0.1"
+  }
+}
