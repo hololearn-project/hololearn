@@ -1,6 +1,7 @@
 import cv2
 import pyaudio
 import wave
+import numpy as np
 import threading
 import time
 import subprocess
@@ -39,9 +40,9 @@ class VideoRecorder():
 		
 		self.open = True
 		self.device_index = 0
-		self.fps = 30               # fps should be the minimum constant rate at which the camera can
-		self.fourcc = "MJPG"       # capture images (with no decrease in speed over time; testing is required)
-		self.frameSize = (540,960) # video formats and sizes also depend and vary according to the camera used
+		self.fps = 15          	        # fps should be the minimum constant rate at which the camera can
+		self.fourcc = "MJPG"       		# capture images (with no decrease in speed over time; testing is required)
+		self.frameSize = (576, 640) 	# video formats and also depend and vary according to the camera used
 		self.video_filename = "temp_video.avi"
 		self.cam = camera_obj() 
 		self.video_cap = cv2.VideoCapture(self.device_index)
@@ -49,6 +50,7 @@ class VideoRecorder():
 		self.video_out = cv2.VideoWriter(self.video_filename, self.video_writer, self.fps, self.frameSize)
 		self.frame_counts = 1
 		self.start_time = time.time()
+		self.preview = True
 					
 	# Video starts being recorded 
 # 	def record(self):
@@ -89,27 +91,20 @@ class VideoRecorder():
 		# If the input is the camera, pass 0 instead of the video file name
 		# Read until video is completed
 		while(self.open):
-		# Capture frame-by-frame
 			frame = self.cam.get_frame_bgr()
 
 			if frame is not None:
-
-				resized = cv2.resize(frame, self.frameSize, interpolation = cv2.INTER_AREA)
-				# cv2.imshow('frame', resized)
-				self.video_out.write(resized)
-			# Display the resulting frame
+				self.video_out.write(frame)
 				self.frame_counts += 1
-#					counter += 1
-#					timer_current = time.time() - timer_start
-				# time.sleep(1/self.fps)
-				# cv2.imshow('video_frame', resized)
-				# cv2.waitKey(1)
+				# if(self.preview):
+				# 	cv2.imshow('frame', frame)
+				# if cv2.waitKey(1) & 0xFF == ord('q'):
+				# 	break
 			else:
 				break
-			# Press Q on keyboard to  exit
-			# if cv2.waitKey(25) & 0xFF == ord('q'):
-			# 	print('Recording stopped')
-			# 	break
+
+		cv2.destroyAllWindows()
+
 	# Finishes the video recording therefore the thread too
 	def stop(self):
 		
@@ -119,7 +114,7 @@ class VideoRecorder():
 			self.video_out.release()
 			self.video_cap.release()
 			cv2.destroyAllWindows()
-			
+			# print("------------NUM FRAMES: ", self.frame_counts)
 		else: 
 			pass
 
@@ -245,7 +240,8 @@ def stop_AVrecording(filename):
 	
 #	 Merging audio and video signal
 	
-	if abs(recorded_fps - 6) >= 0.01:    # If the fps rate was higher/lower than expected, re-encode it to the expected
+	# if abs(recorded_fps - 6) >= 0.01:    # If the fps rate was higher/lower than expected, re-encode it to the expected
+	if False:    # If the fps rate was higher/lower than expected, re-encode it to the expected
 										
 		print("Re-encoding")
 		cmd = "ffmpeg -r " + str(recorded_fps) + " -i temp_video.avi -pix_fmt yuv420p -r 6 temp_video2.avi"
@@ -256,11 +252,12 @@ def stop_AVrecording(filename):
 		subprocess.call(cmd, shell=True)
 	
 	else:
-		
+				
 		print("Normal recording\nMuxing")
-		cmd = "ffmpeg -ac 2 -channel_layout stereo -i temp_audio.wav -i temp_video.avi -pix_fmt yuv420p " + filename + ".avi"
+		# cmd = "ffmpeg -ac 2 -channel_layout stereo -i temp_audio.wav -i temp_video.avi -pix_fmt yuv420p " + filename + ".avi"
+		cmd = "ffmpeg -ac 2 -channel_layout stereo -i temp_audio.wav -i temp_video.avi -pix_fmt yuv420p " + filename + ".mp4"
 		subprocess.call(cmd, shell=True)
-
+#
 		print("..")
 
 

@@ -24,8 +24,10 @@ class camera(ABC):
     point = 1500
     face = (0, 0)
     mapRes = 767
-    dimX = 960
-    dimY = 540
+    dimX = 576
+    dimY = 640
+    cropdimX = 960
+    cropdimY = 540
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".jpg"
@@ -58,6 +60,9 @@ class camera(ABC):
         [int, int, int]
             a slice of the given image, centered in the middle
         """
+
+        # print(image.shape)
+
         midY = int(image.shape[0]/2)
         midX = int(image.shape[1]/2)
 
@@ -259,7 +264,9 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        color_image = self.crop(color_image, width=400)
+        # color_image = self.crop(color_image, width=self.cropdimX)
+
+        color_image = cv2.transpose(color_image)
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
 
@@ -287,7 +294,9 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
-        depth_image = self.crop(depth_image, width=400)
+        # depth_image = self.crop(depth_image)
+
+        depth_image = cv2.transpose(depth_image)
 
         depth_image = self.set_focal_window(depth_image)
 
@@ -376,3 +385,6 @@ class camera_wrapper(camera):
         depth = self.cam.get_depth()
         ret = self.remove_background(depth, frame)
         return ret
+
+    def get_unproc_frame(self):
+        return self.crop(self.cam.get_frame_unproc()[:,:,:3], width=self.cropdimX)
