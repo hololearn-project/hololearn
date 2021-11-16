@@ -445,14 +445,12 @@ io.sockets.on('connection', (socket) => {
   });
   socket.on('teacherStreamUpload', (chunk, newStart) => {
     screenLectureUploadTeacher += chunk;
-    console.log(screenLectureUploadTeacher.length);
     socket.emit('sendNextChunkTeacher', newStart);
   });
 
   socket.on('screenLectureUploadScreenShare', () => {
     screenLectureUploadScreenShare = '';
     socket.emit('sendNextChunkScreenShare', 0);
-    console.log('started lecture upload initiation for screenshare');
   });
   socket.on('screenShareStreamUpload', (chunk, newStart) => {
     screenLectureUploadScreenShare += chunk;
@@ -549,7 +547,6 @@ io.sockets.on('connection', (socket) => {
       if (error) {
         console.log('error while retrieving the lectures: ' + error);
       } else {
-        console.log(rows);
         socket.emit('imageStream', rows);
       }
     });
@@ -559,7 +556,6 @@ io.sockets.on('connection', (socket) => {
       if (error) {
         console.log('error while retrieving the lectures: ' + error);
       } else {
-        console.log(rows);
         socket.emit('screenShareStream', rows);
       }
     });
@@ -581,7 +577,6 @@ io.sockets.on('connection', (socket) => {
               socket.on('nextChunkTeacher', (start) => {
                 if (teacherStream.length <= start) {
                   teacherUploaded = true;
-                  console.log(teacherStream[0].stream.substring(teacherStream[0].stream.indexOf(',')+1, 1000));
                   socket.emit('playLecture');
                 } else {
                   // eslint-disable-next-line max-len
