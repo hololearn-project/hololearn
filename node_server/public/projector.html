@@ -19,18 +19,16 @@
 		</style>
 	</head>
 	<body id="body" class="body">
-
-    <button id="replayButton"  onclick="getLecturesForReplay()">Replay</button>
-
       <a href="#menu" id="toggle" onclick="hideShowInput()"><span onclick="hideShowInput()"></span></a>
 
-      <div id="menu" style="z-index: 90;">
+      <div id="menu" style="display: none;">        
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="databaseEditor.html">Database Overview</a></li>
-          <li><a href="projector.html">Projector Page</a></li>
+          <li><a href="databaseScreenLectureEditor.html">Screen Lecture Database Overview</a></li>
           <li><a href="teacherProjector.html">Teacher Projector Page</a></li>
-          <li><a href="projectorScreenShare.html" target="_blank">Slides</a></li>
+          <li><a href="projector.html">Screen Projector Page</a></li>
+          <li><a href="projectorScreenShare.html" target="_blank">Screen Projector Slides</a></li>        
         </ul>
       </div>
 
@@ -42,6 +40,8 @@
         <select id="selectMic" style="display: none;" onchange="micChosen(false)">
             <option disabled selected value> -- select an option -- </option>
         </select>
+        <button id="replayButton"  onclick="getLecturesForReplay()">Replay</button>
+
 
         <div id="selectLectureRewatch" style="display: none; z-index: 10;"></div>
 

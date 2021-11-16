@@ -20,7 +20,6 @@ let db = new sqlite3.Database('./user1.db', sqlite3.OPEN_READWRITE | sqlite3.OPE
       }
     });
 
-
 // createTable(db);
 
 // // eslint-disable-next-line valid-jsdoc
@@ -472,7 +471,6 @@ io.sockets.on('connection', (socket) => {
       if (err) {
         console.log('error on updating lecture: ' + lecture);
       } else {
-        console.log('lecture edited');
         socket.emit('editCompleted');
       }
     });

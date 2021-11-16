@@ -19,6 +19,7 @@
 	</head>
 	<body>
       <div id="buttonGroup" class="buttonGroup">
+
         <div class="buttonInGroup" id="close_window" onclick="closeWindow();return false;">
             <i id="closeWindow" style="font-size:24px; color: white;" class='far fa-window-close'></i>
         </div>
@@ -27,9 +28,22 @@
       <video autoplay id="screenSharePlayer" width="90%" style="margin-left: 5%; display: none;"></video>
       <button id="screenShareOption" onclick="startSharing();">Start connecting!</button>
 
+      <div id="menu" style="display: none;">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="databaseEditor.html">Database Overview</a></li>
+          <li><a href="databaseScreenLectureEditor.html">Screen Lecture Database Overview</a></li>
+          <li><a href="teacherProjector.html">Teacher Projector Page</a></li>
+          <li><a href="projector.html">Screen Projector Page</a></li>
+          <li><a href="projectorScreenShare.html" target="_blank">Screen Projector Slides</a></li>        
+        </ul>
+      </div>
+
       <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.9.3/simplepeer.min.js"></script>
       <script src="./javascripts/projectorSceenShare.js"></script>
       <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
       <script src="./javascripts/peers.js"></script>
+      <script src="./javascripts/toggleMenu.js"></script>
+
 	</body>
 </html>

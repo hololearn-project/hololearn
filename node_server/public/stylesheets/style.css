@@ -85,6 +85,13 @@ button {
   margin-bottom: 10px;
 }
 
+button:hover {
+  background-color: #45b968;
+  border: 1px solid #45b968;
+
+
+}
+
 #loginButton {
   width: 100%;
 }
