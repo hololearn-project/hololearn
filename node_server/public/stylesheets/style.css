@@ -54,7 +54,7 @@ select {
 
 #select, #selectMic {
   width: 250px;
-  margin-left: calc(50% - 125px);
+  margin-left: calc((100% - 250px)/2);
   margin-top: 10px;
   margin-bottom: 20px;
 }

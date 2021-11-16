@@ -50,9 +50,12 @@
   scrollbar-width: none;  /* Firefox */
 }
 
-#input {
+#replayButton {
   position: absolute;
   width: 200px;
   margin-left: calc((100% - 200px) / 2);
   margin-top: 50px;
+  background-color: antiquewhite;
+  color: gray;
+  border: none;
 }

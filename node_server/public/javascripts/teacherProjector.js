@@ -32,6 +32,7 @@ function startProjecting() {
 
   document.getElementById('logInButton').style.display = 'none';
   teacherStream = document.getElementById('output_canvas').captureStream(25);
+  teacherStream.addTrack(webcam.srcObject.getAudioTracks()[0]);
   document.getElementById('selfView').srcObject = teacherStream;
 
   // eslint-disable-next-line max-len

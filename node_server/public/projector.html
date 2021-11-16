@@ -20,9 +20,9 @@
 		</style>
 	</head>
 	<body class="body">
-    <input type="file" style="z-index: 10;"
-       id="input" name="input_video"
-       accept="video/mp4, video/mov, video/webm">
+
+    <button id="replayButton"  onclick="getLecturesForReplay()">Replay</button>
+
       <a href="#menu" id="toggle" onclick="hideShowInput()"><span onclick="hideShowInput()"></span></a>
 
       <div id="menu" style="z-index: 9;">
@@ -43,6 +43,9 @@
         <select id="selectMic" style="display: none;" onchange="micChosen(false)">
             <option disabled selected value> -- select an option -- </option>
         </select>
+
+        <div id="selectLectureRewatch" style="display: none; z-index: 10;"></div>
+
 
         <video autoplay="true" id="webcam" style="display: none"></video>
         <video autoplay="true" id="teacher" class="rotateUp"></video>
@@ -65,6 +68,8 @@
       <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script> -->
       <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
       <script src="./javascripts/projector.js"></script>
+      <script src="./javascripts/replayScreenLecture.js"></script>
+
 
 
 	</body>

@@ -21,22 +21,6 @@ document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
 document.getElementById('select').style.display = 'block';
 
-document.getElementById('input').addEventListener('change', function() {
-  const media = URL.createObjectURL(this.files[0]);
-  const video = document.getElementById('teacher');
-  video.src = media;
-  video.style.display = 'block';
-  video.play();
-  document.getElementById('selectMic').style.display = 'none';
-  document.getElementById('input').style.display = 'none';
-  document.getElementById('select').style.display = 'none';
-  document.getElementById('camText').style.display = 'none';
-  document.getElementById('micText').style.display = 'none';
-  document.getElementById('webcam').style.display = 'none';
-  document.getElementById('webcam').muted = true;
-  document.getElementById('logInButton').style.display = 'none';
-});
-
 /**
  * starts sending the vid.
  */
@@ -127,6 +111,6 @@ function hideShowInput() {
   if (document.getElementById('input').style.display == 'none') {
     document.getElementById('input').style.display = 'block';
   } else {
-    document.getElementById('input').style.display = 'none'
+    document.getElementById('input').style.display = 'none';
   }
 }

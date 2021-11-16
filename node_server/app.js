@@ -385,6 +385,80 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  let screenLectureUploadTeacher = undefined;
+  let screenLectureUploadScreenShare = undefined;
+  socket.on('uploadCurrentLecture', (lectureName) => {
+    if (screenLectureUploadTeacher == undefined || screenLectureUploadTeacher == '') {
+      return;
+    }
+    db.all('SELECT * FROM screenLectureStreams', (error, rows) => {
+      // receives all the results as an array
+      let highest = -1;
+      rows.forEach((stream) => {
+        if (stream.id > highest) {
+          highest = stream.id;
+        }
+      });
+      const startCount = highest;
+
+      console.log('counter at start is: ' + startCount);
+      // eslint-disable-next-line max-len
+      db.run('INSERT INTO screenLectureStreams (id,stream) VALUES(?, ?)', [startCount + 1, screenLectureUploadTeacher], (err) => {
+        if (err) {
+          return console.log(err.message);
+        }
+        console.log('teacher was added to the table: ${this.lastID}');
+      });
+
+      // ScreenShare is not uploaded if not recorded.
+      if (screenLectureUploadScreenShare != undefined && screenLectureUploadScreenShare != '') {
+        // eslint-disable-next-line max-len
+        db.run('INSERT INTO screenLectureStreams(id, stream) VALUES(?, ?)', [startCount + 2, screenLectureUploadScreenShare], (err) => {
+          if (err) {
+            return console.log(err.message);
+          }
+          console.log('ScreenShare was added to the table: ${this.lastID}');
+        });
+
+        db.run('INSERT INTO screenLectures(name, teacherStreamId, screenShareStreamId) VALUES(?, ?, ?)',
+            [lectureName, startCount + 1, startCount + 2], (err) => {
+              if (err) {
+                return console.log(err.message);
+              }
+              console.log('Lecture was added to the table: ${this.lastID}');
+            });
+      } else {
+        db.run('INSERT INTO screenLectures(name, teacherStreamId, screenShareStreamId) VALUES(?, ?, ?)',
+            [lectureName, startCount + 1, -1], (err) => {
+              if (err) {
+                return console.log(err.message);
+              }
+              console.log('Lecture was added to the table: ${this.lastID}');
+            });
+      }
+    });
+  });
+  socket.on('screenLectureUploadTeacher', () => {
+    screenLectureUploadTeacher = '';
+    socket.emit('sendNextChunkTeacher', 0);
+    console.log('started lecture upload initiation');
+  });
+  socket.on('teacherStreamUpload', (chunk, newStart) => {
+    screenLectureUploadTeacher += chunk;
+    console.log(screenLectureUploadTeacher.length);
+    socket.emit('sendNextChunkTeacher', newStart);
+  });
+
+  socket.on('screenLectureUploadScreenShare', () => {
+    screenLectureUploadScreenShare = '';
+    socket.emit('sendNextChunkScreenShare', 0);
+    console.log('started lecture upload initiation for screenshare');
+  });
+  socket.on('screenShareStreamUpload', (chunk, newStart) => {
+    screenLectureUploadScreenShare += chunk;
+    socket.emit('sendNextChunkScreenShare', newStart);
+  });
+
   socket.on('editLecture', (lecture, newLectureName) => {
     db.run('UPDATE lectures SET name = ? WHERE name = ?', [newLectureName, lecture.name], (err) => {
       if (err) {
@@ -490,13 +564,65 @@ io.sockets.on('connection', (socket) => {
       }
     });
   });
-  socket.on('getScreenShareStreamScreenLecture', (streamId) => {
-    db.all('SELECT * FROM screenLectureStreams WHERE id=' + streamId, (error, rows) => {
+  socket.on('getScreenLecture', (lectureName) => {
+    console.log('request for lecture: ' + lectureName);
+    let screenShareUploaded = false;
+    let teacherUploaded = false;
+    db.all('SELECT * FROM screenLectures WHERE name=\'' + lectureName + '\'', (error, rows) => {
       if (error) {
-        console.log('error while retrieving the lectures: ' + error);
+        console.log('error while retrieving the lecture: ' + error);
       } else {
-        console.log(rows);
-        socket.emit('screenShareStreamscreenLecture', rows);
+        db.all('SELECT * FROM screenLectureStreams WHERE id=' + rows[0].teacherStreamId, (error, teacherStream) => {
+          if (error) {
+            console.log('error while retrieving the teacherStream: ' + error);
+          } else {
+            if (rows[0].screemShareStreamId == -1) {
+              console.log('only teacher stream');
+              socket.on('nextChunkTeacher', (start) => {
+                if (teacherStream.length <= start) {
+                  teacherUploaded = true;
+                  console.log(teacherStream[0].stream.substring(teacherStream[0].stream.indexOf(',')+1, 1000));
+                  socket.emit('playLecture');
+                } else {
+                  // eslint-disable-next-line max-len
+                  socket.emit('nextTeacherChunk', teacherStream[0].stream.substring(start, start + 100000), start + 100000);
+                }
+              });
+              socket.emit('onlyTeacherLecture');
+            } else {
+              // eslint-disable-next-line max-len
+              db.all('SELECT * FROM screenLectureStreams WHERE id=' + rows[0].screenShareStreamId, (error, screenShareStream) => {
+                if (error) {
+                  console.log('error while retrieving the teacherStream: ' + error);
+                } else {
+                  socket.on('getNextChunkTeacher', (start) => {
+                    if (teacherStream[0].stream.length <= start) {
+                      teacherUploaded = true;
+                      if (screenShareUploaded) {
+                        socket.emit('playLecture');
+                      }
+                    } else {
+                      // eslint-disable-next-line max-len
+                      socket.emit('nextTeacherChunk', teacherStream[0].stream.substring(start, start + 100000), start + 100000);
+                    }
+                  });
+                  socket.on('getNextChunkScreenShare', (start) => {
+                    if (screenShareStream[0].stream.length <= start) {
+                      screenShareUploaded = true;
+                      if (teacherUploaded) {
+                        socket.emit('playLecture');
+                      }
+                    } else {
+                      // eslint-disable-next-line max-len
+                      socket.emit('nextScreenShareChunk', screenShareStream[0].stream.substring(start, start + 100000), start + 100000);
+                    }
+                  });
+                  socket.emit('screenShareIncludedLecture');
+                }
+              });
+            }
+          }
+        });
       }
     });
   });
@@ -514,13 +640,11 @@ io.sockets.on('connection', (socket) => {
       if (error) {
         console.log('error while retrieving the lectures: ' + error);
       } else {
-        console.log('retrieved all lectures and now sending it');
         socket.emit('allScreenLectures', rows);
       }
     });
   });
   socket.on('uploadScreenLecture', (lectureName, teacherBlob, screenShareBlob) => {
-    console.log(teacherBlob);
     // eslint-disable-next-line no-unused-vars
     db.all('SELECT * FROM screenLectureStreams', (error, rows) => {
       // receives all the results as an array
@@ -532,19 +656,16 @@ io.sockets.on('connection', (socket) => {
       });
       const startCount = highest;
 
-      console.log('counter at start is: ' + startCount);
       db.run('INSERT INTO screenLectureStreams (id,stream) VALUES(?, ?)', [startCount + 1, teacherBlob], (err) => {
         if (err) {
           return console.log(err.message);
         }
-        console.log('teacher was added to the table: ${this.lastID}');
       });
 
       db.run('INSERT INTO screenLectureStreams(id, stream) VALUES(?, ?)', [startCount + 2, screenShareBlob], (err) => {
         if (err) {
           return console.log(err.message);
         }
-        console.log('ScreenShare was added to the table: ${this.lastID}');
       });
 
       db.run('INSERT INTO screenLectures(name, teacherStreamId, screenShareStreamId) VALUES(?, ?, ?)',
@@ -552,7 +673,6 @@ io.sockets.on('connection', (socket) => {
             if (err) {
               return console.log(err.message);
             }
-            console.log('Lecture was added to the table: ${this.lastID}');
           });
     });
   });
@@ -568,24 +688,20 @@ io.sockets.on('connection', (socket) => {
       });
       const startCount = highest;
 
-      console.log('counter at start is: ' + startCount);
       db.run('INSERT INTO streams (id,stream) VALUES(?, ?)', [startCount + 1, depthBlob], (err) => {
         if (err) {
           return console.log(err.message);
         }
-        console.log('Depth was added to the table: ${this.lastID}');
       });
       db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [startCount + 2, imageBlob], (err) => {
         if (err) {
           return console.log(err.message);
         }
-        console.log('Image was added to the table: ${this.lastID}');
       });
       db.run('INSERT INTO streams(id, stream) VALUES(?, ?)', [startCount + 3, screenShareBlob], (err) => {
         if (err) {
           return console.log(err.message);
         }
-        console.log('ScreenShare was added to the table: ${this.lastID}');
       });
 
       db.run('INSERT INTO lectures(name, depthStreamId, imageStreamId, screenShareStreamId) VALUES(?, ?, ?, ?)',
@@ -593,7 +709,6 @@ io.sockets.on('connection', (socket) => {
             if (err) {
               return console.log(err.message);
             }
-            console.log('Lecture was added to the table: ${this.lastID}');
           });
     });
   });
@@ -770,7 +885,6 @@ io.sockets.on('connection', (socket) => {
 
   console.log('Socket.io connection established');
   socket.on('announce', (data) => {
-    console.log(data);
     let alreadyHere = false;
     users.forEach((user) => {
       if (user.seat == data.selectedPosition && data.table == user.table &! data.table == -4) {
@@ -860,7 +974,6 @@ io.sockets.on('connection', (socket) => {
     io.emit('rotate', seat, rotation, thisUserTable);
   });
   socket.on('disconnect', function() {
-    console.log(socket.id);
     users = users.filter((x) => x.id != socket.id);
     io.emit('update-connections');
   });
@@ -988,7 +1101,6 @@ io.sockets.on('connection', (socket) => {
             user.peer.addStream(sentstream);
             stream.getTracks();
             user.teacherStreams.screensharestream = sentstream;
-            console.log(user.teacherStreams.screensharestream.getAudioTracks());
           });
         });
         user.peer.on('error', (err) => {

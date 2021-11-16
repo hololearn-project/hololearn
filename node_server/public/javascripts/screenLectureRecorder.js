@@ -1,6 +1,9 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
+let toCompare = '';
 let readyToRecord = false;
+let screenShareUploaded = false;
+let teacherUploaded = false;
 
 // eslint-disable-next-line prefer-const
 let teacherStream = undefined;
@@ -70,13 +73,14 @@ function download3DRecorder(recordedChunksMethod) {
     const downloadBlob = {blob: blob, name: 'teacherStream'};
     blobs.push(downloadBlob);
 
-    const link = document.createElement('a');
-    link.download = 'testDownload';
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    delete link;
+    // Downloads the teacher video.
+    // const link = document.createElement('a');
+    // link.download = 'testDownload';
+    // link.href = url;
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+    // delete link;
   }
 
   if (recordedChunksMethod.name == 'screen') {
@@ -117,23 +121,39 @@ async function uploadLecture() {
       reader.onloadend = function() {
         const base64data = reader.result;
         base64TeacherStream = base64data;
-        if (base64ScreenShareStream != undefined || mediaRecorderScreenShareStream == undefined) {
-          socket.emit('uploadScreenLecture', lectureName, base64TeacherStream, base64ScreenShareStream);
-          document.getElementById('recordingNameInputDiv').style.display = 'none';
-          console.log('lecture uploaded!');
-        }
+        // eslint-disable-next-line new-cap
+        toCompare = base64TeacherStream;
+        // eslint-disable-next-line max-len
+        socket.on('sendNextChunkTeacher', (start) => {
+          if (base64TeacherStream.length <= start) {
+            teacherUploaded = true;
+            sendLectureIfReady(lectureName);
+          } else {
+            // eslint-disable-next-line max-len
+            socket.emit('teacherStreamUpload', base64TeacherStream.substring(start, start + 100000), start + 100000);
+          }
+        });
+        socket.emit('screenLectureUploadTeacher');
       };
-      const reader2 = new FileReader();
-      reader2.readAsDataURL(screenShareBlob);
-      reader2.onloadend = function() {
-        const base64data = reader2.result;
-        base64ScreenShareStream = base64data;
-        if (base64TeacherStream != undefined) {
-          socket.emit('uploadScreenLecture', lectureName, base64TeacherStream, base64ScreenShareStream);
-          document.getElementById('recordingNameInputDiv').style.display = 'none';
-          console.log('lecture uploaded!');
-        }
-      };
+      if (screenShareBlob != undefined) {
+        const reader2 = new FileReader();
+        reader2.readAsDataURL(screenShareBlob);
+        reader2.onloadend = function() {
+          const base64data = reader2.result;
+          base64ScreenShareStream = base64data;
+          socket.on('sendNextChunkScreenShare', (start) => {
+            if (base64ScreenShareStream.length <= start) {
+              screenShareUploaded = true;
+              sendLectureIfReady(lectureName);
+            } else {
+              // eslint-disable-next-line max-len
+              socket.emit('screenShareStreamUpload', base64ScreenShareStream.substring(start, start + 100000), start + 100000);
+            }
+          });
+          socket.emit('screenLectureUploadScreenShare');
+        };
+        document.getElementById('recordingNameInputDiv').style.display = 'none';
+      }
     } else {
       alert('this lecture name already exists. Try something else.');
     }
@@ -162,5 +182,15 @@ function record3DClicked() {
     document.getElementById('3DStopRecordIcon').style.display = 'block';
     start3DRecording();
     recording3D = true;
+  }
+}
+
+// eslint-disable-next-line require-jsdoc
+function sendLectureIfReady(lectureName) {
+  if (!teacherUploaded) {
+    return;
+  }
+  if (mediaRecorderScreenShareStream == undefined || screenShareUploaded) {
+    socket.emit('uploadCurrentLecture', lectureName);
   }
 }
