@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="stylesheets/databaseEditor.css">
     <link rel="stylesheet" href="stylesheets/teacherProjector.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 		<title>Hololearn Teacher Projector</title>
 		<style>
@@ -19,10 +21,13 @@
 	</head>
 	<body>
 
-    <div id="recordingNameInputDiv" style="display: none;">
-      <h4>What is the name of this lecture?</h4>
+    <div id="recordingNameInputDivScreenLecture" style="display: none;">
+      <h4 id="lectureNameQuestion">What is the name of this lecture?</h4>
+      <div id="outsideProgressBar" class="w3-grey w3-round-large" style="margin: 20px; display: none;">
+        <div id="progressBar" class="w3-container w3-white w3-round-large" style="width:0%;">0%</div>
+      </div>
       <input type="text" id="recordingNameInput" name="recordingName">
-      <button href="#" onclick="uploadLecture()" id="uploadLectureButton"><span id="save"><i id="saveIcon" style="font-size:24px; position: relative;" class="fa">&#xf093;</i></span></button>
+      <button href="#" onclick="uploadLecture()" id="uploadLectureButton" style="margin-top: 40px;"><span id="save"><i id="saveIcon" style="font-size:24px; position: relative;" class="fa">&#xf093;</i></span></button>
     </div>
 
     <div id="buttonGroup" class="buttonGroup" style="display: none;">

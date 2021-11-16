@@ -35,6 +35,7 @@ async function playIt(teacherBase64, screenShareBase64) {
   // eslint-disable-next-line max-len
   const screenShareBlob = Base64ToBlob(screenShareBase64.substring(screenShareBase64.indexOf(',')+1, screenShareBase64.length));
   window.open(URL.createObjectURL(screenShareBlob), '_blank').focus();
+  document.getElementById('body').style.background = 'black';
 }
 
 /**

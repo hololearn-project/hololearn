@@ -30,3 +30,4 @@ node_server/user1.db
 node_server/user1.db
 *.db
 node_server/user1.db
+*.db

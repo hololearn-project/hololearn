@@ -26,13 +26,17 @@ document.getElementById('select').style.display = 'block';
  */
 function startProjecting() {
   document.getElementById('selectMic').style.display = 'none';
-  document.getElementById('input').style.display = 'none';
+  if (document.getElementById('input') != null) {
+    document.getElementById('input').style.display = 'none';
+  }
   document.getElementById('select').style.display = 'none';
   document.getElementById('camText').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
   document.getElementById('webcam').style.display = 'none';
   document.getElementById('webcam').muted = true;
   document.getElementById('logInButton').style.display = 'none';
+  document.getElementById('replayButton').style.display = 'none';
+  document.getElementById('body').style.background = 'black';
   startConnecting(false, 'projector');
 }
 
@@ -108,6 +112,7 @@ function utf8ArrayToStr(array) {
  * hides the input if not hidden and vice versa.
  */
 function hideShowInput() {
+  if (document.getElementById('input') == null) return;
   if (document.getElementById('input').style.display == 'none') {
     document.getElementById('input').style.display = 'block';
   } else {

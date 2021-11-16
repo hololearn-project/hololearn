@@ -59,3 +59,15 @@
   background: rgb(150, 150, 150);
   border: none;
 }
+
+#recordingNameInputDivScreenLecture {
+  z-index: 10;
+  position: absolute;
+  bottom: 150px;
+  height: 100px;
+  left: calc((100% - 400px) / 2);
+  width: 400px;
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+}

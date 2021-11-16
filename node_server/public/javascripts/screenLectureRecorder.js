@@ -1,6 +1,7 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
-let toCompare = '';
+let totalCharactersSend = 0;
+let totalCharactersToSend = 0;
 let readyToRecord = false;
 let screenShareUploaded = false;
 let teacherUploaded = false;
@@ -91,7 +92,11 @@ function download3DRecorder(recordedChunksMethod) {
   }
 
   if (blobs.length >= 2 || (blobs.length == 1 && mediaRecorderScreenShareStream == undefined)) {
-    document.getElementById('recordingNameInputDiv').style.display = 'block';
+    document.getElementById('outsideProgressBar').style.display = 'none';
+    document.getElementById('lectureNameQuestion').style.display = 'block';
+
+    document.getElementById('uploadLectureButton').style.display = 'block';
+    document.getElementById('recordingNameInputDivScreenLecture').style.display = 'block';
   }
 }
 
@@ -116,22 +121,29 @@ async function uploadLecture() {
       }
     });
     if (unique) {
+      document.getElementById('uploadLectureButton').style.display = 'none';
+      document.getElementById('lectureNameQuestion').style.display = 'none';
+      document.getElementById('outsideProgressBar').style.display = 'block';
       const reader = new FileReader();
       reader.readAsDataURL(teacherBlob);
       reader.onloadend = function() {
         const base64data = reader.result;
         base64TeacherStream = base64data;
-        // eslint-disable-next-line new-cap
-        toCompare = base64TeacherStream;
+        totalCharactersToSend += base64TeacherStream.length;
         // eslint-disable-next-line max-len
         socket.on('sendNextChunkTeacher', (start) => {
           if (base64TeacherStream.length <= start) {
+            totalCharactersSend += start - base64TeacherStream.length;
             teacherUploaded = true;
             sendLectureIfReady(lectureName);
           } else {
+            totalCharactersSend += 100000;
             // eslint-disable-next-line max-len
             socket.emit('teacherStreamUpload', base64TeacherStream.substring(start, start + 100000), start + 100000);
           }
+          document.getElementById('progressBar').style.width = totalCharactersSend/totalCharactersToSend*100 + '%';
+          // eslint-disable-next-line max-len
+          document.getElementById('progressBar').innerHTML = Math.round(totalCharactersSend/totalCharactersToSend*100) + '%';
         });
         socket.emit('screenLectureUploadTeacher');
       };
@@ -141,18 +153,23 @@ async function uploadLecture() {
         reader2.onloadend = function() {
           const base64data = reader2.result;
           base64ScreenShareStream = base64data;
+          totalCharactersToSend += base64ScreenShareStream.length;
           socket.on('sendNextChunkScreenShare', (start) => {
             if (base64ScreenShareStream.length <= start) {
+              totalCharactersSend += start - base64ScreenShareStream.length;
               screenShareUploaded = true;
               sendLectureIfReady(lectureName);
             } else {
+              totalCharactersSend += 100000;
               // eslint-disable-next-line max-len
               socket.emit('screenShareStreamUpload', base64ScreenShareStream.substring(start, start + 100000), start + 100000);
             }
+            document.getElementById('progressBar').style.width = totalCharactersSend/totalCharactersToSend*100 + '%';
+            // eslint-disable-next-line max-len
+            document.getElementById('progressBar').innerHTML = Math.round(totalCharactersSend/totalCharactersToSend*100) + '%';
           });
           socket.emit('screenLectureUploadScreenShare');
         };
-        document.getElementById('recordingNameInputDiv').style.display = 'none';
       }
     } else {
       alert('this lecture name already exists. Try something else.');
@@ -191,6 +208,8 @@ function sendLectureIfReady(lectureName) {
     return;
   }
   if (mediaRecorderScreenShareStream == undefined || screenShareUploaded) {
+    document.getElementById('outsideProgressBar').style.display = 'none';
+    document.getElementById('recordingNameInputDivScreenLecture').style.display = 'none';
     socket.emit('uploadCurrentLecture', lectureName);
   }
 }
