@@ -296,7 +296,7 @@ function startConnecting(teacher, name) {
     newPeer.on('connect', () => {
       // seat -7 means the peer is the slide player.
       if (seat == -7) {
-        if (teacherProjectorScreenShare != undefined) {
+        if (teacherProjectorScreenShare != undefined && selectedPosition != -6) {
           newPeer.addStream(teacherProjectorScreenShare);
         }
       }
