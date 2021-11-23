@@ -112,7 +112,10 @@ function cameraChosenRotated(inLecture, deviceId) {
           webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
           localMediaStreamWebcam.addTrack(stream.getVideoTracks()[0]);
         }
-        document.getElementById('webcam').style.marginTop = 50 + document.getElementById('webcam').width + 'px';
+        document.getElementById('webcam').addEventListener('playing', () => {
+          // eslint-disable-next-line max-len
+          document.getElementById('seperationDiv').style.height = document.getElementById('webcam').videoWidth - document.getElementById('webcam').videoHeight;
+        });
       });
   if (inLecture) {
     document.getElementById('selectCamInLecture').style.display = 'none';

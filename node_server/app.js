@@ -570,10 +570,12 @@ io.sockets.on('connection', (socket) => {
           if (error) {
             console.log('error while retrieving the teacherStream: ' + error);
           } else {
-            if (rows[0].screemShareStreamId == -1) {
+            if (rows[0].screemShareStreamId == -1 || rows[0].screemShareStreamId == undefined) {
               console.log('only teacher stream');
-              socket.on('nextChunkTeacher', (start) => {
-                if (teacherStream.length <= start) {
+              socket.on('getNextChunkTeacher', (start) => {
+                console.log('getting next chunk');
+                if (teacherStream[0].stream.length <= start) {
+                  console.log('Sending done. Now play that lecture');
                   teacherUploaded = true;
                   socket.emit('playLecture');
                 } else {

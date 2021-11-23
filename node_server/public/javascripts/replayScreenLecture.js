@@ -1,10 +1,16 @@
+let lecturesLoaded = false;
+
 /* eslint-disable new-cap */
 socket.on('onlyTeacherLecture', () => {
+  console.log('only teacher');
   teacherBase64 = '';
   socket.emit('getNextChunkTeacher', 0);
   socket.on('nextTeacherChunk', (chunk, nextStart) => {
     teacherBase64 += chunk;
     socket.emit('getNextChunkTeacher', nextStart);
+  });
+  socket.on('playLecture', () => {
+    playIt(teacherBase64, undefined);
   });
 });
 
@@ -32,11 +38,14 @@ async function playIt(teacherBase64, screenShareBase64) {
   const teacherBlob = Base64ToBlob(teacherBase64.substring(teacherBase64.indexOf(',')+1, teacherBase64.length));
   document.getElementById('teacher').src = URL.createObjectURL(teacherBlob);
 
-  // eslint-disable-next-line max-len
-  const screenShareBlob = Base64ToBlob(screenShareBase64.substring(screenShareBase64.indexOf(',')+1, screenShareBase64.length));
-  window.open(URL.createObjectURL(screenShareBlob), '_blank').focus();
+  if (screenShareBase64 != undefined) {
+    // eslint-disable-next-line max-len
+    const screenShareBlob = Base64ToBlob(screenShareBase64.substring(screenShareBase64.indexOf(',')+1, screenShareBase64.length));
+    window.open(URL.createObjectURL(screenShareBlob), '_blank').focus();
+  }
   document.getElementById('body').style.background = 'black';
 }
+
 
 /**
  * gets lecture from server and plays it on the page.
@@ -71,6 +80,15 @@ function Base64ToBlob(b64Data, contentType = '', sliceSize = 512) {
  * Gets lectures for replay from server and shows them to the user.
  */
 function getLecturesForReplay() {
+  if (lecturesLoaded) {
+    if (document.getElementById('selectLectureRewatch').style.display == 'none') {
+      document.getElementById('selectLectureRewatch').style.display = 'block';
+    } else {
+      document.getElementById('selectLectureRewatch').style.display = 'none';
+    }
+    return;
+  }
+  lecturesLoaded = true;
   document.getElementById('selectLectureRewatch').style.display = 'block';
   socket.on('allScreenLectures', (lectures) => {
     lectures.forEach((lecture) => {

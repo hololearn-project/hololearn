@@ -50,7 +50,6 @@
 
 #webcam {
   margin: auto;
-  margin-top: calc(50px + width);
 }
 
 #screenShareOption {
