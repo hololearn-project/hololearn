@@ -1,8 +1,10 @@
+/* eslint-disable require-jsdoc */
 /* eslint-disable camelcase */
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 // three.js init variables
-positions = [];
+let teacherWebcamOn = false;
+let positions = [];
 let width = window.innerWidth;
 let height = window.innerHeight;
 let lastTime = Date.now();
@@ -15,27 +17,34 @@ let student_canvas = null;
 let count = 0;
 let isTeacher = false;
 let countReceivedElement = 1;
-const servRtcStrms = new Map();
-const servRtcStrmsLidars = ['videostream', 'depthstream'];
-const servRtcStrmsScrnsh = ['screensharestream'];
-servRtcStrms.set('videostream', 'lidarVideoStream1');
-servRtcStrms.set('depthstream', 'lidarVideoStream2');
-const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
-
-const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 let a = 0;
 let b = 0;
 let c = 0;
-
-let scene = new THREE.Scene();
-let teacherModel = new THREE.BufferGeometry();
 let objects = [];
-let userClassroomId = 'defaultClassroom';
-
+let faceMeshFlag = false;
+let bodyTrackFlag = false;
 
 // vars useful for receiving teacher streams
 let teacherIncomingMediaStream = null;
 let teacherTracks = [];
+
+const servRtcStrms = new Map();
+const servRtcStrmsLidars = ['videostream', 'depthstream'];
+const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
+const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
+const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
+const FACE_MESH_LANDMARK_COUNT = 468;
+
+let vertexMarker = 0;
+
+servRtcStrms.set('videostream', 'lidarVideoStream1');
+servRtcStrms.set('depthstream', 'lidarVideoStream2');
+
+let renderer = new THREE.WebGLRenderer();
+
+let scene = new THREE.Scene();
+let teacherModel = new THREE.BufferGeometry();
+let userClassroomId = 'defaultClassroom';
 
 // Adds the possible positions
 positions.push({a: 0, b: 7, c: 27});
@@ -76,6 +85,10 @@ async function loadNet() { // this one is more efficient
 }
 
 /**
+ * Loads the steve.obj model
+ */
+
+/**
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
@@ -83,6 +96,11 @@ async function load3DEnvironment() {
 
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
+    // console.log(localMediaStreamWebcam);
+    if (localMediaStreamWebcam != null) {
+      cameraMesh.start();
+      teacherWebcamOn = true;
+    }
   }
 
   webcam.muted = true;
@@ -98,17 +116,15 @@ async function load3DEnvironment() {
   // var scene = new THREE.Scene();
 
   scene.background = new THREE.Color( 0xf0f0f0 );
-  const camera = new THREE.PerspectiveCamera( 70,
-      window.innerWidth / window.innerHeight, 1, 10000 );
   const objects = [];
 
   updateSubSample();
 
   initModel();
-
-  const renderer = new THREE.WebGLRenderer();
   renderer.setSize( width, height - 1);
   document.body.appendChild( renderer.domElement );
+
+  const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 
   camera.position.x = a;
   camera.position.y = b;
@@ -127,6 +143,15 @@ async function load3DEnvironment() {
   const loader = new THREE.GLTFLoader();
 
   /**
+   * Window resizer
+   */
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  /**
    * Initializes the whole system, including the 3D environment
    */
   async function init() {
@@ -136,6 +161,13 @@ async function load3DEnvironment() {
     light.position.set( 0, 0, 20 );
 
     scene.add(light);
+
+    const size = 0.02;
+    vertGeometry = new THREE.BoxGeometry(size, size, size);
+    vertMaterial = new THREE.MeshBasicMaterial({
+      color: 0x0000ff,
+      transparent: false,
+    });
 
     loader.load(
         // resource URL
@@ -166,6 +198,8 @@ async function load3DEnvironment() {
     //   setRecordedDepthSource();
     // }
 
+    await loadAssets();
+
     // sets the target of the camera
     if (isTeacher) {
       controls.target.set(0, 8, 27);
@@ -175,6 +209,8 @@ async function load3DEnvironment() {
           b - (b - 8) * 0.01, c - (c - 27) * 0.01 );
       controls.update();
     }
+
+    window.onresize = onWindowResize;
     // controls.addEventListener( 'dragstart', dragStartCallback );
     // controls.addEventListener( 'dragend', dragendCallback );
 
@@ -204,6 +240,20 @@ async function load3DEnvironment() {
   /**
    * Updates the environment and gets an image from it.
    */
+
+  function updateLooseBody() {
+    if (typeof landmarks == 'undefined' || typeof meshes == 'undefined' || meshes.length == 0) return;
+
+    let t;
+
+    for (t = 0; t < landmarks.length; t++) {
+      let track = meshes[t];
+      track.position.x = landmarks[t].x*10 + X_OFFSET;
+      track.position.y = - landmarks[t].y*10 + Y_OFFSET;
+      track.position.z = landmarks[t].z*10 + Z_OFFSET;
+    }
+  }
+
   function animate() {
     requestAnimationFrame( animate );
     map.needsUpdate = true;
@@ -229,6 +279,14 @@ async function load3DEnvironment() {
         students[i].rotation.y = rotations[i];
       }
     }
+
+    if (faceMeshFlag) {
+      updateFaceMesh();
+    } else if (bodyTrackFlag) {
+      updateSkeleton();
+    }
+
+
     updateScreenAndWebcams(isTeacher, camera);
 
     // if (!isTeacher)
@@ -249,6 +307,7 @@ async function load3DEnvironment() {
   if (table >= 0) {
     document.getElementById('buttonGroup').style.display = 'block';
     document.getElementById('advOptBtn').style.display = 'block';
+
 
     if (!isTeacher) {
       document.getElementById('speakButton').style.display = 'block';
@@ -280,6 +339,7 @@ async function load3DEnvironment() {
     }
     document.title = 'Recording HoloLearn';
   }
+
   animate();
   // simpleVerticies()
 }

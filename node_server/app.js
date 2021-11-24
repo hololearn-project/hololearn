@@ -47,6 +47,8 @@ let db = new sqlite3.Database('./user1.db', sqlite3.OPEN_READWRITE | sqlite3.OPE
 // });
 
 let globalScreenShare = undefined;
+let globalWebcam = undefined;
+
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -696,6 +698,7 @@ io.sockets.on('connection', (socket) => {
             videostream: null, // a teacher and has a python
             depthstream: null, // stream and a screenshare stream
             screensharestream: null,
+            webcamstream: null,
           },
           table: data.table,
         });
@@ -864,25 +867,54 @@ io.sockets.on('connection', (socket) => {
               user.peer.addStream(screensharestream);
               user.teacherStreams.screensharestream = screensharestream;
             }
+            if (teacher.teacherStreams.webcamstream != null) {
+              console.log('teacher has a webcam' +
+                  ' stream, sending to client...');
+              const webcamstream =
+                  new wrtc.MediaStream({id: 'webcamstream'});
+              globalWebcam.getTracks()
+                  .forEach((track) => webcamstream.addTrack(track));
+              user.peer.addStream(webcamstream);
+              user.teacherStreams.webcamstream = webcamstream;
+            }
           }
         });
         user.peer.on('stream', (stream) => {
           console.log('RECEIVED STREAM FROM A BROWSER CLIENT');
-          globalScreenShare = stream;
+          let savedstream;
+          console.log(stream.getAudioTracks().length);
+          if (stream.getAudioTracks().length == 0) {
+            console.log('webcam');
+            globalWebcam = stream;
+            savedstream = new wrtc.MediaStream({id: 'webcamstream'});
+          } else {
+            globalScreenShare = stream;
+            savedstream = new wrtc.MediaStream({id: 'screensharestream'});
+          }
           // send the stream to all non-teacher students of the same classroom
           const students = getStudentsOfSameClassroom(user.classroomId);
-          const savedstream = new wrtc.MediaStream({id: 'screensharestream'});
           stream.getTracks().forEach((trk) => savedstream.addTrack(trk));
-          user.teacherStreams.screensharestream = savedstream;
-          students.forEach((user) => {
-            const sentstream = new wrtc
-                .MediaStream({id: 'screensharestream'});
-            stream.getTracks().forEach((trk) => sentstream.addTrack(trk));
-            user.peer.addStream(sentstream);
-            stream.getTracks();
-            user.teacherStreams.screensharestream = sentstream;
-            console.log(user.teacherStreams.screensharestream.getAudioTracks());
-          });
+          if (stream.getAudioTracks().length == 0) {
+            user.teacherStreams.webcamstream = savedstream;
+            students.forEach((user) => {
+              const sentstream = new wrtc
+                  .MediaStream({id: 'webcamstream'});
+              stream.getTracks().forEach((trk) => sentstream.addTrack(trk));
+              user.peer.addStream(sentstream);
+              stream.getTracks();
+              user.teacherStreams.webcamstream = sentstream;
+            });
+          } else {
+            user.teacherStreams.screensharestream = savedstream;
+            students.forEach((user) => {
+              const sentstream = new wrtc
+                  .MediaStream({id: 'screensharestream'});
+              stream.getTracks().forEach((trk) => sentstream.addTrack(trk));
+              user.peer.addStream(sentstream);
+              stream.getTracks();
+              user.teacherStreams.screensharestream = sentstream;
+            });
+          }
         });
         user.peer.on('error', (err) => {
           console.log('error', err);
