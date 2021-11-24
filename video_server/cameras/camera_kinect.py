@@ -21,7 +21,7 @@ class kinectcam(camera):
         """
         k4a = PyK4A(
             Config(
-                color_resolution=pyk4a.ColorResolution.RES_720P,
+                color_resolution=pyk4a.ColorResolution.RES_1440P,
                 depth_mode=pyk4a.DepthMode.NFOV_UNBINNED,
                 synchronized_images_only=True,
             )

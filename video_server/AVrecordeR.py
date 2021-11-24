@@ -290,8 +290,8 @@ if __name__== "__main__":
 	
 	start_AVrecording(filename)  
 	
-	time.sleep(10)
-	
+	# time.sleep(10)
+	input()
 	stop_AVrecording(filename)
 
 

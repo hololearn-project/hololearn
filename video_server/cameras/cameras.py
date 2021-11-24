@@ -4,7 +4,7 @@ import math
 # Import OpenCV for easy image rendering
 import cv2
 import sys
-
+import threading
 import requests
 import os
 url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f52/raw/07eed8d5486b1abff88d7e34891f1326a9b6a6f5/haarcascade_frontalface_default.xml'
@@ -33,6 +33,7 @@ class camera(ABC):
     default_format=".jpg"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
+    transpose = True
 
     @abstractmethod
     def get_frame(self) -> bytes:
@@ -89,9 +90,12 @@ class camera(ABC):
             a 2d array, containing a depth map centered around the point attribute
 
         """
-        new_point = image[self.face]
+        new_point = image[self.face] #1300
 
-        if(self.near_plane < new_point < self.far_plane):
+        if(np.abs(new_point - 1300) >= 500):
+            new_point = 1300
+        else:
+            if(self.near_plane < new_point < self.far_plane):
                 self.point = new_point
 
         image = (image - (self.point - range)) / ((2 * range)/self.mapRes)
@@ -145,7 +149,9 @@ class camera(ABC):
         if np.max(image) == 0:
             return 0, 0, 0, 0
         else:
-            non_zero = np.transpose(np.nonzero(image))
+            non_zero = np.nonzero(image)
+            if(self.transpose): non_zero = np.transpose()
+            
             x_0 = np.amin(non_zero[:,1])
             x_n = np.amax(non_zero[:,1])
             y_0 = np.amin(non_zero[:,0])
@@ -266,7 +272,7 @@ class camera(ABC):
         """
         # color_image = self.crop(color_image, width=self.cropdimX)
 
-        color_image = cv2.transpose(color_image)
+        if (self.transpose): color_image = cv2.transpose(color_image)
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
 
@@ -296,7 +302,7 @@ class camera(ABC):
         """
         # depth_image = self.crop(depth_image)
 
-        depth_image = cv2.transpose(depth_image)
+        if(self.transpose): depth_image = cv2.transpose(depth_image)
 
         depth_image = self.set_focal_window(depth_image)
 
@@ -365,6 +371,22 @@ class camera_wrapper(camera):
         """
         return self.encode_img(self.cam.get_frame())
 
+    def get_frame_mt(self, out):
+        """
+        Calls the get_frame method of the wrapper's camera attribute, and returns the result
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the image data, enoded as BRGA
+        """
+        print("working...")
+        out[0] = self.cam.get_frame()
+        print(out[0].shape)
     def get_depth(self):
         """
         Calls the get_depth method of the wrapper's camera attribute, and returns the result
@@ -380,10 +402,33 @@ class camera_wrapper(camera):
         """
         return self.encode_img(self.cam.get_depth())
 
+    def get_depth_mt(self, out):
+        """
+        Calls the get_depth method of the wrapper's camera attribute, and returns the result
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the depth data, enoded as BRGA
+        """
+        out[1] = self.cam.get_depth()
+
     def get_frame_bgr(self):
-        frame = self.cam.get_frame()
-        depth = self.cam.get_depth()
-        ret = self.remove_background(depth, frame)
+        frames = np.empty(2)
+        f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
+        f_thread.start()
+        d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
+        d_thread.start()
+        # frame = self.cam.get_frame()
+        # depth = self.cam.get_depth()
+        f_thread.join()
+        d_thread.join()
+        print(frames[0])
+        ret = self.remove_background(frames[1], frames[0])
         return ret
 
     def get_unproc_frame(self):
