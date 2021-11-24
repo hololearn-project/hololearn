@@ -166,7 +166,8 @@ function cameraChosen(inLecture, deviceId) {
   if (inLecture) {
     videoConstraints.deviceId = {exact: deviceId.id};
   } else {
-    videoConstraints.deviceId = {exact: select.value};
+    videoConstraints.deviceId = {exact: select.value,
+    };
   }
   navigator.mediaDevices.getUserMedia({audio: false, video: videoConstraints})
       .then((stream) => {
