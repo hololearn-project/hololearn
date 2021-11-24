@@ -418,17 +418,17 @@ class camera_wrapper(camera):
         out[1] = self.cam.get_depth()
 
     def get_frame_bgr(self):
-        frames = np.empty(2)
-        f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
-        f_thread.start()
-        d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
-        d_thread.start()
-        # frame = self.cam.get_frame()
-        # depth = self.cam.get_depth()
-        f_thread.join()
-        d_thread.join()
-        print(frames[0])
-        ret = self.remove_background(frames[1], frames[0])
+        # frames = np.empty(2)
+        # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
+        # f_thread.start()
+        # d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
+        # d_thread.start()
+        frame = self.cam.get_frame()
+        depth = self.cam.get_depth()
+        # f_thread.join()
+        # d_thread.join()
+        # print(frames[0])
+        ret = self.remove_background(depth, frame)
         return ret
 
     def get_unproc_frame(self):
