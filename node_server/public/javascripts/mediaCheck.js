@@ -19,11 +19,11 @@ let muted = false;
 async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
   const micText = document.getElementById('micText');
   const camText = document.getElementById('camText');
-  if (!isTeacher) {
-    camText.style.display = 'block';
-  } else {
-    micText.style.marginTop = '100px';
-  }
+  // if (!isTeacher) {
+  camText.style.display = 'block';
+  // } else {
+  //   micText.style.marginTop = '100px';
+  // }
   micText.style.display = 'block';
   const connectButton = document.getElementById('connectButton');
   connectButton.style.display = 'block';
@@ -56,9 +56,9 @@ async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
  */
 function getCamerasAndMics() {
   navigator.mediaDevices.enumerateDevices().then((devices) => {
-    if (!isTeacher) {
-      gotDevicesCamera(devices);
-    }
+    // if (!isTeacher) {
+    gotDevicesCamera(devices);
+    // }
     gotDevicesMic(devices);
   });
 }
