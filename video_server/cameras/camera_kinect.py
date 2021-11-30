@@ -21,7 +21,7 @@ class kinectcam(camera):
         """
         k4a = PyK4A(
             Config(
-                color_resolution=pyk4a.ColorResolution.RES_1440P,
+                color_resolution=pyk4a.ColorResolution.RES_720P,
                 depth_mode=pyk4a.DepthMode.NFOV_UNBINNED,
                 synchronized_images_only=True,
             )
@@ -36,6 +36,8 @@ class kinectcam(camera):
 
         self.clipping_distance = 2000
         self.k4a = k4a
+
+        
 
     def get_frame(self):
         """
@@ -52,8 +54,9 @@ class kinectcam(camera):
             a 3d array containing the image data, enoded as BRGA
         """
         capture = self.k4a.get_capture()
-        color = capture.transformed_color
-        # return color
+        # color = capture.transformed_color
+        color = capture.color
+        print("color: "+str(color.shape))
         return self.process_frame(color)
 
     def get_frame_unproc(self):
@@ -75,9 +78,7 @@ class kinectcam(camera):
             a 3d array containing the depth data, enoded as BRGA
         """
         capture = self.k4a.get_capture()
-        depth = capture.depth
-
-        # cv2.imshow('depth', depth)
-        # cv2.waitKey(0)
+        depth = capture.transformed_depth
+        print("depth: "+str(depth.shape))
 
         return self.process_depth(depth)

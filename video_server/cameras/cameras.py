@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import math
 # Import OpenCV for easy image rendering
-import cv2
+import cv2 
 import sys
 import threading
 import requests
@@ -33,7 +33,7 @@ class camera(ABC):
     default_format=".jpg"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
-    transpose = True
+    transpose = False
 
     @abstractmethod
     def get_frame(self) -> bytes:
@@ -92,17 +92,19 @@ class camera(ABC):
         """
         new_point = image[self.face] #1300
 
-        if(np.abs(new_point - 1300) >= 500):
-            new_point = 1300
-        else:
-            if(self.near_plane < new_point < self.far_plane):
-                self.point = new_point
+        if(self.near_plane < new_point < self.far_plane):
+            self.point = new_point
 
         image = (image - (self.point - range)) / ((2 * range)/self.mapRes)
 
         # image[np.where(image < 10)] = 10000
+
+        image = np.clip(image, 0, self.mapRes)
+
+        # cv2.imshow("inside set focal", image)
+        # cv2.waitKey(0)
         
-        return np.clip(image, 0, self.mapRes)
+        return image
 
     def remove_background_noise(self, image):
         """
@@ -121,7 +123,12 @@ class camera(ABC):
 
         """
 
-        return cv2.morphologyEx(image, cv2.MORPH_OPEN, self.open_kernel)
+        image = cv2.morphologyEx(image, cv2.MORPH_OPEN, self.open_kernel)
+
+        # cv2.imshow("inside remove background noise", image)
+        # cv2.waitKey(0)
+
+        return image
 
     def find_min_max_non_zero(self, image):
         """
@@ -230,7 +237,12 @@ class camera(ABC):
 
         r_channel = np.clip(image, 0, 255)
 
-        return np.dstack((b_channel, g_channel, r_channel))
+        image = np.dstack((b_channel, g_channel, r_channel))
+
+        # cv2.imshow("inside encode bgr color", image)
+        # cv2.waitKey(0)
+
+        return image
 
     def sharpen_edges(self, image):
         """
@@ -302,22 +314,26 @@ class camera(ABC):
         """
         # depth_image = self.crop(depth_image)
 
+        cv2.imshow("depth before processing", depth_image)
+        cv2.waitKey(0)
+
         if(self.transpose): depth_image = cv2.transpose(depth_image)
 
         depth_image = self.set_focal_window(depth_image)
 
-        depth_image = self.remove_background_noise(depth_image)
-
-        depth_image = self.sharpen_edges(depth_image)
+        # depth_image = self.sharpen_edges(depth_image)
 
         # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
 
         # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
         # cv2.waitKey(0)
 
-        depth_image = self.encode_bgr_channels(depth_image)
+        depth_image = self.encode_bgr_channels_color(depth_image)
 
+        # depth_image = self.remove_background_noise(depth_image)
 
+        cv2.imshow("after processing", depth_image)
+        cv2.waitKey(0)
 
         return depth_image
 
