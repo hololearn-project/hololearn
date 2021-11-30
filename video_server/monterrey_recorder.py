@@ -286,7 +286,7 @@ def file_manager(filename):
 if __name__== "__main__":
 	
 	filename = "output"	
-	file_manager(filename)
+	# file_manager(filename)
 	
 	start_AVrecording(filename)  
 	
