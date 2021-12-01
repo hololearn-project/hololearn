@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
-getCameraPermission();
-getMicPermission();
+// await getCameraPermission();
+// await getMicPermission();
 
 table = -4;
 selectedPosition = -6;

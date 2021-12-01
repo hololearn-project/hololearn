@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 isTeacher = false;
 
-getMicPermission();
-getCameraPermission();
+// await getMicPermission();
+// await getCameraPermission();
 table = -4;
 selectedPosition = -5;
 removedBackgroundStream = '';
