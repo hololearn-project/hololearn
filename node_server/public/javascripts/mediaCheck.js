@@ -17,8 +17,6 @@ let muted = false;
  * @param {boolean} teacher - if the user is a teacher or not
  */
 async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
-  await getCameraPermission();
-  await getMicPermission();
   const micText = document.getElementById('micText');
   const camText = document.getElementById('camText');
   // if (!isTeacher) {
@@ -56,7 +54,9 @@ async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
 /**
  * gets the available mics and cameras
  */
-function getCamerasAndMics() {
+async function getCamerasAndMics() {
+  await getCameraPermission();
+  await getMicPermission();
   navigator.mediaDevices.enumerateDevices().then((devices) => {
     // if (!isTeacher) {
     gotDevicesCamera(devices);
