@@ -17,6 +17,8 @@ let muted = false;
  * @param {boolean} teacher - if the user is a teacher or not
  */
 async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
+  getCameraPermission();
+  getMicPermission();
   const micText = document.getElementById('micText');
   const camText = document.getElementById('camText');
   // if (!isTeacher) {

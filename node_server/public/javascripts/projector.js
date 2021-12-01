@@ -1,4 +1,8 @@
 /* eslint-disable no-unused-vars */
+
+getCameraPermission();
+getMicPermission();
+
 table = -4;
 selectedPosition = -6;
 // eslint-disable-next-line no-unused-vars
