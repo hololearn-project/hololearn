@@ -19,9 +19,13 @@ node_server/.vscode/settings.json
 .idea/
 .vscode/
 .coverage
-*.webm
 *.mkv
 *.xml
-*.mp4
 *.pyc
 node_server/package-lock.json
+node_server/user1.db
+node_server/user1.db
+node_server/user1.db
+*.db
+node_server/user1.db
+*.db

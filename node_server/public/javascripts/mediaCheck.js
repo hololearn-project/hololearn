@@ -19,11 +19,11 @@ let muted = false;
 async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
   const micText = document.getElementById('micText');
   const camText = document.getElementById('camText');
-  if (!isTeacher) {
-    camText.style.display = 'block';
-  } else {
-    micText.style.marginTop = '100px';
-  }
+  // if (!isTeacher) {
+  camText.style.display = 'block';
+  // } else {
+  //   micText.style.marginTop = '100px';
+  // }
   micText.style.display = 'block';
   const connectButton = document.getElementById('connectButton');
   connectButton.style.display = 'block';
@@ -54,11 +54,13 @@ async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
 /**
  * gets the available mics and cameras
  */
-function getCamerasAndMics() {
+async function getCamerasAndMics() {
+  await getCameraPermission();
+  await getMicPermission();
   navigator.mediaDevices.enumerateDevices().then((devices) => {
-    if (!isTeacher) {
-      gotDevicesCamera(devices);
-    }
+    // if (!isTeacher) {
+    gotDevicesCamera(devices);
+    // }
     gotDevicesMic(devices);
   });
 }
@@ -139,7 +141,7 @@ function gotDevicesMic(mediaDevicesNew, inLecture) {
         text.appendChild(t);
         option.appendChild(text);
 
-        document.getElementById('selectMicInLecture').appendChild(option);
+        document.getElementById('micDisplay').appendChild(option);
       } else {
         const option = document.createElement('option');
         option.value = mediaDevice.deviceId;
@@ -166,7 +168,8 @@ function cameraChosen(inLecture, deviceId) {
   if (inLecture) {
     videoConstraints.deviceId = {exact: deviceId.id};
   } else {
-    videoConstraints.deviceId = {exact: select.value};
+    videoConstraints.deviceId = {exact: select.value,
+    };
   }
   navigator.mediaDevices.getUserMedia({audio: false, video: videoConstraints})
       .then((stream) => {
@@ -257,6 +260,26 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
           });
           const select = document.getElementById('selectMicInLecture');
           select.style.display = 'none';
+          if (positionalHearing) {
+            activeconnections.forEach((connection) => {
+              if (unmutedSeats.includes(connection.seat)) {
+                connection.peerObject.send(String('unmute ' + selectedPosition));
+              }
+            });
+            const mutedPositions = [1, 2, 3, 4, 5];
+            unmutedSeats.forEach((seat) => {
+              const index = mutedPositions.indexOf(seat);
+              if (index > -1) {
+                mutedPositions.splice(index, 1);
+              }
+            });
+            activeconnections.forEach((connection) => {
+              if (mutedPositions.includes(connection.seat)) {
+                connection.peerObject.send(String('mute ' + selectedPosition));
+              }
+            });
+            setPositionalHearing(rotationNow);
+          }
         }
       });
 }

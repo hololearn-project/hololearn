@@ -1,3 +1,4 @@
+/* eslint-disable require-jsdoc */
 /* eslint-disable no-unused-vars */
 /* eslint-disable valid-jsdoc */
 
@@ -71,9 +72,9 @@ const playback = true;
 /* Flag to indicate wether or not the next frame should be rendered */
 let render = true;
 
-const staticModels = ['M6', 'M5'];
+const staticModels = ['M4', 'M5', 'M6'];
 
-const dynamicModels = ['M4', 'M3', 'M1', 'M2'];
+const dynamicModels = ['M1', 'M2'];
 
 
 /*
@@ -97,6 +98,8 @@ function initModel() {
 
   pictureVideo = getPictureVideo();
   depthVideo = getDepthVideo();
+  pictureVideo.play();
+  depthVideo.play();
 }
 
 /**
@@ -360,7 +363,7 @@ function updatePoints(dctx) {
 
   for (y = 0; y < imgLength; y+= subSample) {
     for (x = 0; x < imgWidth; x+= subSample) {
-      const z = (depthData[getLoc(x, y)] +
+      const z = 255 - (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2])/3;
 
@@ -401,7 +404,7 @@ function updatePointsAndColors(dctx, ctx) {
 
   for (y = 0; y < imgLength; y += subSample) {
     for (x = 0; x < imgWidth; x += subSample) {
-      const z = (depthData[getLoc(x, y)] +
+      const z = 255 - (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2]) / 3;
       points[i] = x;
@@ -645,19 +648,13 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
   dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
 
   switch (modelType) {
-    case 'M1': // mesh
-      modelFromTriangles(dctx);
-      break;
-    case 'M2': // index
+    case 'M1': // index
       modelFromIndexes(dctx);
       break;
-    case 'M3': // point cloud
+    case 'M2': // point cloud
       ctx.drawImage(pictureVideo, 0, 0, imgWidth, imgLength);
       modelFromPoints(dctx, ctx);
       break;
-    case 'M4': // flat (TensorFlow removal)
-      ctx.drawImage(pictureVideo, 0, 0, imgWidth, imgLength);
-      model2DNoDepth(ctx);
   }
 
   render = true;
@@ -667,14 +664,11 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
  */
 function createStaticModel() {
   switch (modelType) {
-    case 'M5': // point cloud with shaders
-      createLightWeightPointCloudModel();
-      break;
+    // case 'M5': // point cloud with shaders
+    //   createLightWeightPointCloudModel();
+    //   break;
     case 'M6': // hidden
       hideModel();
-      break;
-    case 'M7': // flat (depth removal)
-      model2DWithDepth();
       break;
   }
 }
@@ -707,7 +701,7 @@ function removeModel() {
  * @return the element with id=lidarVideoStream1
  */
 function getPictureVideo() {
-  return document.getElementById('lidarVideoStream1');
+  return document.getElementById('kinectVideo');
 }
 
 /**
@@ -715,7 +709,7 @@ function getPictureVideo() {
  * @return the element with id=lidarVideoStream2
  */
 function getDepthVideo() {
-  return document.getElementById('lidarVideoStream2');
+  return document.getElementById('kinectVideo');
 }
 
 /**
@@ -806,14 +800,32 @@ function animateTeacher(dctx, ctx, depthCanvas, imageCanvas) {
 function updateType() {
   const newType = document.getElementById('modelType').value;
 
-  teacherModel = new THREE.BufferGeometry();
-
-  initModel();
-
-  render = true;
+  switch (newType) {
+    case 'M4':
+      console.log('Changed to face tracking');
+      faceMeshFlag = true;
+      face.visible = true;
+      bodyTrackFlag = false;
+      bodyGroup.visible = false;
+      break;
+    case 'M5':
+      console.log('Changed to body tracking');
+      faceMeshFlag = false;
+      face.visible = false;
+      bodyGroup.visible = true;
+      bodyTrackFlag = true;
+      break;
+    default:
+      faceMeshFlag = false;
+      face.visible = false;
+      bodyTrackFlag = false;
+      bodyGroup.visible = false;
+      teacherModel = new THREE.BufferGeometry();
+      initModel();
+      render = true;
+  }
 
   modelType = newType;
-
   removeModel();
 }
 

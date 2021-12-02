@@ -2,7 +2,9 @@
 // eslint-disable-next-line no-unused-vars
 let teacherSocket = '';
 let teacherPeer = null;
+let teacherWebcam = undefined;
 const activeconnections = new Map();
+positionalHearing = false;
 
 let lastRotation = 0;
 // eslint-disable-next-line prefer-const
@@ -15,6 +17,12 @@ socket = io.connect(window.location.origin);
 
 socket.emit('getUsers');
 
+socket.on('faceMeshTeacher', (array) => {
+  if (!isTeacher) {
+    facialLandmarksClient = array;
+    updateFaceMesh();
+  }
+});
 socket.on('teacherStreamChanged', () => {
   if (table == -2 && recording3D) {
     const screenshareScreen = document.getElementById('screenshare');
@@ -28,7 +36,6 @@ socket.on('teacherStreamChanged', () => {
     }, 3000);
   }
 });
-
 
 socket.on('users', (users) => {
   const options = document.getElementsByName('room');
@@ -131,6 +138,7 @@ function startConnecting(teacher, name) {
     studentStream.style.display = 'none';
     studentStream.width = 500;
     studentStream.height = 500;
+    studentStream.muted = true;
     studentsDiv.appendChild(studentStream);
 
     const studentCtx = document.createElement('CANVAS');
@@ -218,23 +226,115 @@ function startConnecting(teacher, name) {
     // let newPeer = new SimplePeer({ initiator: true, config: peerConfig });
     let newPeer;
     if (seat > selectedPosition || seat == -1) {
+      console.log('inintiator');
       newPeer = new SimplePeer({initiator: true});
     } else {
+      console.log('not initiator');
       newPeer = new SimplePeer();
     }
-    newPeer.on('signal', (data) => socket.emit('signal', id, data));
+    newPeer.on('data', (data) => {
+      // got a data channel message
+      const string = utf8ArrayToStr(data);
+      switch (string) {
+        case 'streamId received':
+          newPeer.addStream(teacherStreamRemovedBackground);
+          break;
+        case 'screenShareId Received':
+          newPeer.addStream(teacherProjectorScreenShare);
+          break;
+        default:
+          if (string.includes(' ')) {
+            splitted = string.split(' ');
+            switch (splitted[0]) {
+              case 'mute':
+                panners[splitted[1]].coneInnerAngle = 0;
+                break;
+              case 'unmute':
+                panners[splitted[1]].coneInnerAngle = 360;
+                break;
+            }
+          } else {
+            removedBackgroundStream = string;
+            newPeer.send('streamId received');
+          }
+      }
+    });
+    newPeer.on('signal', (data) => {
+      socket.emit('signal', id, data);
+    });
     newPeer.on('stream', (stream) => {
-      // peer is teacher and stream is screen share
-      if (seat == 0) {
-        // teachers don't send screenshare via peer to
-        // peer anymore
+      // peer is the teacher
+      if (seat == -5) {
+        // selectedPosition -7 -> you are the slides player.
+        if (selectedPosition == -7) {
+          // adding the screen share to the page.
+          document.getElementById('screenSharePlayer').srcObject = stream;
+          document.getElementById('screenSharePlayer').play();
+        } else {
+          // You are the projector and you are adding the teacher to the page.
+          document.getElementById('teacher').srcObject = stream;
+        }
       } else {
-        addVideoElement(id, stream, seat);
+        if (seat == -6) {
+          // peer is the projector
+          switch (stream.id) {
+            case removedBackgroundStream:
+              document.getElementById('projectorInput').srcObject = stream;
+              document.getElementById('selfView').muted = true;
+              document.getElementById('selfView').style.position = 'absolute';
+              document.getElementById('selfView').style.display = 'block';
+              break;
+            default:
+              document.getElementById('projectorInput').srcObject = stream;
+              document.getElementById('projectorInput').style.display = 'block';
+              document.getElementById('projectorInput').onresize = function() {
+                const videoWidth = document.getElementById('projectorInput').width;
+                document.getElementById('projectorInput').style.left = 'calc((100% - ' + videoWidth + '%) / 2)';
+              };
+              break;
+          }
+        } else {
+          addVideoElement(id, stream, seat);
+          start3DAudioUser(seat, stream);
+          addVideoElement(id, stream, seat);
+        }
       }
       // make async broadcast call
     });
     newPeer.on('connect', () => {
+      // seat -7 means the peer is the slide player.
+      if (seat == -7) {
+        if (teacherProjectorScreenShare != undefined && selectedPosition != -6) {
+          newPeer.addStream(teacherProjectorScreenShare);
+        }
+      }
+      // selected position == -6 means you are the projector
+      if (selectedPosition == -6) {
+        if (document.getElementById('webcam').srcObject != undefined) {
+          newPeer.addStream(document.getElementById('webcam').srcObject);
+        }
+      }
       console.log('Connected!');
+      if (positionalHearing) {
+        activeconnections.forEach((connection) => {
+          if (unmutedSeats.includes(connection.seat) && connection.seat != 0 &! isTeacher) {
+            connection.peerObject.send(String('unmute ' + selectedPosition));
+          }
+        });
+        const mutedPositions = [1, 2, 3, 4, 5];
+        unmutedSeats.forEach((seat) => {
+          const index = mutedPositions.indexOf(seat);
+          if (index > -1) {
+            mutedPositions.splice(index, 1);
+          }
+        });
+        activeconnections.forEach((connection) => {
+          if (mutedPositions.includes(parseInt(connection.seat)) && connection.seat != 0 &! isTeacher) {
+            connection.peerObject.send(String('mute ' + selectedPosition));
+          }
+        });
+        setPositionalHearing(rotationNow);
+      }
     });
     newPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);
@@ -246,7 +346,16 @@ function startConnecting(teacher, name) {
       // }
       // errorCounter = errorCounter + 1;
     });
-    if ((!isTeacher) && !(seat < 0)) {
+    // if table is -4 it is the projector or teacher
+    if (table == -4 && (typeof teacherStream) !== 'undefined') {
+      if (seat != -7) {
+        if (localMediaStreamWebcam.getAudioTracks()[0] != undefined) {
+          teacherStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
+        }
+        newPeer.addStream(teacherStream);
+      }
+    }
+    if ((!isTeacher) && !(seat < 0) && table != -4) {
       outputStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
       newPeer.addStream(outputStream);
     }
@@ -321,7 +430,10 @@ function startConnecting(teacher, name) {
   setInterval(function() {
     if (rotationNow != lastRotation && socket.connected) {
       socket.emit('rotated', selectedPosition, rotationNow);
+      setPositionalHearing(rotationNow);
       lastRotation = rotationNow;
+
+      update3DAudioPosition();
     }
   }, 1000/10);
 
@@ -482,11 +594,22 @@ function startConnecting(teacher, name) {
         }
         // if it's a screenshare stream, add to the right element
         addScreenShare(stream, false);
+        document.getElementById('teacherAudio').src = stream.getAudioTracks()[0];
+        document.getElementById('audioElem').play();
 
         if (table == -2) {
           start3DRecording();
         }
+        start3DAudioUser(0, stream);
       }
+      console.log('streamId: ' + sid);
+      // if (sid == 'webcamstream') {
+      //   webcamStream = stream;
+      //   cameraMesh.start();
+      //   document.getElementById('webcamVid').srcObject = stream;
+      //   console.log('set it correctly');
+      //   teacherWebcamOn = true;
+      // }
     });
 
     teacherPeer.on('track', (track, stream) => {
@@ -501,6 +624,13 @@ function startConnecting(teacher, name) {
         // localMediaStream.getAudioTracks()[0].enabled = true;
         teacherPeer.addStream(localMediaStream);
       }
+      // Add the webam of the teacher for the face mesh if there is one.
+      // console.log(localMediaStreamWebcam);
+      // if (teacher && localMediaStreamWebcam != null) {
+      //   const faceStream = new MediaStream();
+      //   faceStream.addTrack(localMediaStreamWebcam.getVideoTracks()[0]);
+      //   teacherPeer.addStream(faceStream);
+      // }
     });
     teacherPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);
@@ -538,8 +668,9 @@ function addScreenShare(stream, replay) {
   // ctxStreams[0] = ctx2
   // canvasWebcams[0] = canvas
   const screenshareScreen = document.getElementById('screenshare');
+  screenshareScreen.muted = true;
   if (table != -1) {
-    screenshareScreen.muted = false;
+    // screenshareScreen.muted = false;
   }
   if (replay) {
     screenshareScreen.src = stream;
@@ -559,7 +690,6 @@ function addScreenShare(stream, replay) {
     transparent: true,
     side: THREE.DoubleSide,
   }));
-  me2.position.set( 0, 16, 32);
   me2.rotation.y = Math.PI;
   scene.add( me2 );
   objects.push( me2 );

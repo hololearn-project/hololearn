@@ -7,7 +7,7 @@ let lecturesLoaded = false;
  * Displays all lectures that can be watched.
  */
 function displayLectures() {
-  document.getElementById('selectLectureRewatch').style.display = 'block';
+  document.getElementById('selectLectureRewatch3D').style.display = 'block';
   socket.emit('getLectures');
   socket.on('allLectures', (lectures) => {
     if (!lecturesLoaded) {
@@ -30,7 +30,7 @@ function displayLectures() {
         text.appendChild(t);
         option.appendChild(text);
 
-        document.getElementById('selectLectureRewatch').appendChild(option);
+        document.getElementById('selectLectureRewatch3D').appendChild(option);
       });
     }
   });
@@ -42,7 +42,7 @@ function displayLectures() {
  * @param {lecture object} lecture The lecture to be retrieved.
  */
 function getLecture(lecture) {
-  document.getElementById('selectLectureRewatch').style.display = 'none';
+  document.getElementById('selectLectureRewatch3D').style.display = 'none';
   socket.emit('getDepthStream', lecture.depthStreamId);
   socket.emit('getImageStream', lecture.imageStreamId);
   socket.emit('getScreenShareStream', lecture.screenShareStreamId);
@@ -71,7 +71,6 @@ function getLecture(lecture) {
  * starts the rewatching of the lecture retrieved from the database.
  */
 function startRewatch() {
-  console.log(imageStreamDataBase);
   document.getElementById('lidarVideoStream1').src = URL.createObjectURL(new Blob([imageStreamDataBase]));
   document.getElementById('lidarVideoStream1').play();
 
