@@ -11,7 +11,7 @@
   height: 0;
 }
 
-.slider {
+.sliderCheck {
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -23,7 +23,7 @@
   transition: .4s;
 }
 
-.slider:before {
+.sliderCheck:before {
   position: absolute;
   content: "";
   height: 21px;
@@ -35,11 +35,11 @@
   transition: .4s;
 }
 
-input:checked + .slider {
+input:checked + .sliderCheck {
   background-color: green;
 }
 
-input:focus + .slider {
+input:focus + .sliderCheck {
   box-shadow: 0 0 1px #2196F3;
 }
 
@@ -50,10 +50,10 @@ input:checked + .slider:before {
 }
 
 /* Rounded sliders */
-.slider.round {
+.sliderCheck.round {
   border-radius: 34px;
 }
 
-.slider.round:before {
+.sliderCheck.round:before {
   border-radius: 50%;
 }
