@@ -39,20 +39,20 @@ class VideoRecorder():
 	
 	def __init__(self):
 		self.cam = camera_obj().cam
-		self.video_filename1 = "depth_video.avi"
-		self.video_filename2 = "color_video.avi"
+		self.video_filename1 = "depth_video.mp4"
+		self.video_filename2 = "color_video.mp4"
 		self.open = True
 		self.device_index = 0
-		self.fps = 15          	        # fps should be the minimum constant rate at which the camera can
-		self.fourcc = "MJPG"       		# capture images (with no decrease in speed over time; testing is required)
-		self.frameSize = (576, 640) 	# video formats and also depend and vary according to the camera used
+		self.fps = 10          	        # fps should be the minimum constant rate at which the camera can
+		self.fourcc = "mp4v"       		# capture images (with no decrease in speed over time; testing is required)
+		self.frameSize = (960, 540) 	# video formats and also depend and vary according to the camera used
 		self.video_writer1 = cv2.VideoWriter_fourcc(*self.fourcc)
-		# self.video_writer2 = cv2.VideoWriter_fourcc(*self.fourcc)
+		self.video_writer2 = cv2.VideoWriter_fourcc(*self.fourcc)
 		self.video_out1 = cv2.VideoWriter(self.video_filename1, self.video_writer1, self.fps, self.frameSize)
-		# self.video_out2 = cv2.VideoWriter(self.video_filename2, self.video_writer2, self.fps, self.frameSize)
+		self.video_out2 = cv2.VideoWriter(self.video_filename2, self.video_writer2, self.fps, self.frameSize)
 		self.frame_counts = 1
 		self.start_time = time.time()
-		self.preview = False
+		self.preview = True
 				
 	def record(self):
 
@@ -63,18 +63,22 @@ class VideoRecorder():
 		# Read until video is completed
 		while(self.open):
 
+			color_frame = self.cam.get_frame()
+			color_frame = np.delete(color_frame, 3, 2)
+			self.video_out2.write(color_frame)
+
 			depth_frame = self.cam.get_depth()
 			self.video_out1.write(depth_frame)
-			# print(depth_frame.shape)
 
-			# color_frame = self.cam.get_frame()
-			# color_frame = np.delete(color_frame, 3, 2)
-			# self.video_out2.write(color_frame)
+			# print("color: "+str(color_frame.shape))
+			# print("depth: "+str(depth_frame.shape))
+	
 
 			self.frame_counts += 1
 
 			if(self.preview):
-				cv2.imshow('frame', depth_frame)
+				#cv2.imshow('depth', depth_frame)
+				cv2.imshow('color', color_frame)
 			if cv2.waitKey(1) & 0xFF == ord('q'):
 				break
 
@@ -86,7 +90,7 @@ class VideoRecorder():
 		if self.open==True:
 			self.open=False
 			self.video_out1.release()
-			# self.video_out2.release()
+			self.video_out2.release()
 			cv2.destroyAllWindows()
 		else: 
 			pass
@@ -116,11 +120,11 @@ def stop_AVrecording(filename1, filename2):
 	print("recorded fps " + str(recorded_fps))
 	video_thread.stop()
 	# Makes sure the threads have finished
-	while threading.active_count() > 1:
-		time.sleep(1)
+	# while threading.active_count() > 1:
+	# 	time.sleep(1)
 
-	cmd = "ffmpeg -i "+filename1+".avi -c:v copy -c:a copy -y "+filename1+".mp4"
-	subprocess.call(cmd, shell=True)
+	# cmd = "ffmpeg -i "+filename1+".avi -c:v copy -c:a copy -y "+filename1+".mp4"
+	# subprocess.call(cmd, shell=True)
 
 	# cmd = "ffmpeg -i "+filename2+".avi -c:v copy -c:a copy -y "+filename2+".mp4"
 	# subprocess.call(cmd, shell=True)
@@ -146,6 +150,3 @@ if __name__== "__main__":
 
 	input()
 	stop_AVrecording(filename1, filename2)
-
-
-

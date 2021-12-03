@@ -34,6 +34,7 @@ class camera(ABC):
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
     transpose = False
+    bgr = False
 
     @abstractmethod
     def get_frame(self) -> bytes:
@@ -173,7 +174,7 @@ class camera(ABC):
         if frame.shape != depth.shape:
             return frame
         
-        bg_rm_frame = np.where(depth == self.mapRes, 0, frame)
+        bg_rm_frame = np.where(depth >= self.mapRes - 10, 0, frame)
   
         bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
@@ -314,8 +315,8 @@ class camera(ABC):
         """
         # depth_image = self.crop(depth_image)
 
-        cv2.imshow("depth before processing", depth_image)
-        cv2.waitKey(0)
+        # cv2.imshow("depth before processing", depth_image)
+        # cv2.waitKey(0)
 
         if(self.transpose): depth_image = cv2.transpose(depth_image)
 
@@ -327,13 +328,17 @@ class camera(ABC):
 
         # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
         # cv2.waitKey(0)
-
-        depth_image = self.encode_bgr_channels_color(depth_image)
-
+        if(self.bgr):
+            depth_image = self.encode_bgr_channels(depth_image)
+        else:
+            depth_image = self.encode_bgr_channels_color(depth_image)
+            
         # depth_image = self.remove_background_noise(depth_image)
 
-        cv2.imshow("after processing", depth_image)
-        cv2.waitKey(0)
+        # cv2.imshow("after processing", depth_image)
+        # cv2.waitKey(0)
+
+
 
         return depth_image
 
