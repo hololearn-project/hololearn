@@ -801,21 +801,28 @@ function updateType() {
   const newType = document.getElementById('modelType').value;
 
   switch (newType) {
-    case 'M4':
+    case 'M3':
       console.log('Changed to face tracking');
       faceMeshFlag = true;
       face.visible = true;
       bodyTrackFlag = false;
       bodyGroup.visible = false;
       break;
-    case 'M5':
+    case 'M4':
       console.log('Changed to body tracking');
       faceMeshFlag = false;
       face.visible = false;
       bodyGroup.visible = true;
       bodyTrackFlag = true;
       break;
+    case 'M5':
+      console.log('Changed to hidden');
+      faceMeshFlag = false;
+      face.visible = false;
+      bodyGroup.visible = false;
+      bodyTrackFlag = false;
     default:
+      console.log('Changed to 3d modelling');
       faceMeshFlag = false;
       face.visible = false;
       bodyTrackFlag = false;
