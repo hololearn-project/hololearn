@@ -821,6 +821,7 @@ function updateType() {
       face.visible = false;
       bodyGroup.visible = false;
       bodyTrackFlag = false;
+      break;
     default:
       console.log('Changed to 3d modelling');
       faceMeshFlag = false;
