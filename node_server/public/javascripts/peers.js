@@ -571,10 +571,12 @@ function startConnecting(teacher, name) {
       teacherIncomingMediaStream = stream;
       // Set video element to be the stream depending on its ID
       const sid = stream.id;
+      console.log(stream.getTracks());
       if (servRtcStrmsLidars.includes(sid)) {
         if (stream.id == 'depthstream') {
           depthStream = stream;
         } else {
+          document.getElementById('test').srcObject = stream;
           imageStream = stream;
         }
         // if it's a lidar stream, figure out which one it is and

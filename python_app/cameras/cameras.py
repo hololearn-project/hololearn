@@ -390,7 +390,9 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        return self.encode_img(self.cam.get_frame())
+        ret = self.cam.get_frame()
+        print(ret.shape)
+        return self.encode_img(ret)
 
     def get_frame_mt(self, out):
         """
@@ -450,7 +452,13 @@ class camera_wrapper(camera):
         # d_thread.join()
         # print(frames[0])
         ret = self.remove_background(depth, frame)
+        print(ret.shape)
+        
         return ret
+
+    def get_frame_bgr_encoded(self):
+        return self.encode_img(self.cam.get_frame_bgr())
+
 
     def get_unproc_frame(self):
         return self.crop(self.cam.get_frame_unproc()[:,:,:3], width=self.cropdimX)

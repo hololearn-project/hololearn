@@ -213,9 +213,10 @@ if __name__ == "__main__":
     mediatracks = []
     # mediatracks.append(webcam)
     # mediatracks.append(flagstream)
-    mediatracks.append(streamingTrack.depthTrack)
-    mediatracks.append(streamingTrack.videoTrack)
+    # mediatracks.append(streamingTrack.depthTrack)
     # mediatracks.append(streamingTrack.videoTrack)
+    mediatracks.append(streamingTrack.BGRTrack)
+    mediatracks.append(streamingTrack.videoTrack)
 
     # Keep the asyncio loop running until connection closed or
     # keyboard interrupt found.
