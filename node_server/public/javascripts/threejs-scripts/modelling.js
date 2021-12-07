@@ -701,7 +701,7 @@ function removeModel() {
  * @return the element with id=lidarVideoStream1
  */
 function getPictureVideo() {
-  return document.getElementById('kinectVideo');
+  return document.getElementById('lidarVideoStream1');
 }
 
 /**
@@ -709,7 +709,7 @@ function getPictureVideo() {
  * @return the element with id=lidarVideoStream2
  */
 function getDepthVideo() {
-  return document.getElementById('kinectVideo');
+  return document.getElementById('lidarVideoStream2');
 }
 
 /**
