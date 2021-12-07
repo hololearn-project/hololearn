@@ -205,7 +205,10 @@ function filterIndices(vertices) {
     const z2 = vertices[(i2 * 3) + 2];
     const z3 = vertices[(i3 * 3) + 2];
 
-    if (z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh) {
+    // if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
+    //   newIndices.push(i1, i2, i3);
+    // }
+    if ((z1 > thresh && z2 > thresh && z3 > thresh)) {
       newIndices.push(i1, i2, i3);
     }
   }
