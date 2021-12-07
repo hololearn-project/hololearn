@@ -13,6 +13,15 @@ let chatConnected = false;
 // eslint-disable-next-line prefer-const
 let removedBackgroundId = undefined;
 
+const pictureStream = document.getElementById('lidarVideoStream1Canvas');
+const pictureCtx = pictureStream.getContext('2d');
+
+const depthStreamRetrieved = document.getElementById('lidarVideoStream2Canvas');
+const depthCtx = depthStreamRetrieved.getContext('2d');
+
+const teacherCanvas = document.getElementById('teacherCanvas');
+const teacherCtx = teacherCanvas.getContext('2d');
+
 document.getElementById('teacher').style.width = window.innerWidth * 0.9;
 document.getElementById('teacher').style.marginLeft = window.innerWidth * 0.05;
 
@@ -118,5 +127,30 @@ function hideShowInput() {
     document.getElementById('input').style.display = 'block';
   } else {
     document.getElementById('input').style.display = 'none';
+  }
+}
+
+/**
+ * Removes the background of the teacher with both lidar streams.
+ */
+async function removeBackgroundWithDepth() {
+  while (true) {
+    pictureCtx.drawImage(document.getElementById('lidarVideoStream2'),
+        0, 0, document.getElementById('lidarVideoStream1').width, document.getElementById('lidarVideoStream1').height);
+    depthCtx.drawImage(document.getElementById('lidarVideoStream1'),
+        0, 0, document.getElementById('lidarVideoStream1').width, document.getElementById('lidarVideoStream1').height);
+
+    const pictureData = await pictureCtx.getImageData(0,
+        0, 400, 400);
+    const depthData = await depthCtx.getImageData(0,
+        0, 400, 400);
+
+    for (let i = 0; i < pictureData.data.length; i = i + 4) {
+      if (depthData.data[i] > 220) {
+        pictureData.data[i + 3] = 0;
+      }
+    }
+
+    teacherCtx.putImageData(pictureData, 0, 0);
   }
 }

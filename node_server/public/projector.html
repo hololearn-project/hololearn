@@ -50,6 +50,14 @@
         <video autoplay="true" id="teacher" class="rotateUp"></video>
         <video autoplay="true" id="fileCam" style="display: none" loop></video>
 
+        <video id='lidarVideoStream1' style="display: none;" autoplay="true" muted></video>
+        <video id='lidarVideoStream2' style="display: none;" autoplay="true" muted></video>
+
+        <canvas id='lidarVideoStream1Canvas'></canvas>
+        <canvas id='lidarVideoStream2Canvas'></canvas>
+
+        <canvas id="teacherCanvas" class="rotateUp"></canvas>
+
         <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 50px;">Log In</button>
         <i id="rotateIcon" style="font-size:18x; color: white;" class="fas fa-redo" onclick="rotateTeacher()"></i>
     

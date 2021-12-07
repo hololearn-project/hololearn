@@ -13,6 +13,18 @@ let socket = null;
 let newUser = true;
 let lastNoti = '';
 
+const servRtcStrms = new Map();
+const servRtcStrmsLidars = ['videostream', 'depthstream'];
+const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
+
+
+servRtcStrms.set('videostream', 'lidarVideoStream1');
+servRtcStrms.set('depthstream', 'lidarVideoStream2');
+
+// vars useful for receiving teacher streams
+let teacherIncomingMediaStream = null;
+let teacherTracks = [];
+
 socket = io.connect(window.location.origin);
 
 socket.emit('getUsers');
@@ -576,7 +588,6 @@ function startConnecting(teacher, name) {
         if (stream.id == 'depthstream') {
           depthStream = stream;
         } else {
-          document.getElementById('test').srcObject = stream;
           imageStream = stream;
         }
         // if it's a lidar stream, figure out which one it is and
@@ -604,7 +615,10 @@ function startConnecting(teacher, name) {
         }
         start3DAudioUser(0, stream);
       }
-      console.log('streamId: ' + sid);
+      if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
+         undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
+        removeBackgroundWithDepth();
+      }
       // if (sid == 'webcamstream') {
       //   webcamStream = stream;
       //   cameraMesh.start();

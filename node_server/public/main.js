@@ -24,21 +24,11 @@ let objects = [];
 let faceMeshFlag = false;
 let bodyTrackFlag = false;
 
-// vars useful for receiving teacher streams
-let teacherIncomingMediaStream = null;
-let teacherTracks = [];
-
-const servRtcStrms = new Map();
-const servRtcStrmsLidars = ['videostream', 'depthstream'];
-const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
 const FACE_MESH_LANDMARK_COUNT = 468;
 
 let vertexMarker = 0;
-
-servRtcStrms.set('videostream', 'lidarVideoStream1');
-servRtcStrms.set('depthstream', 'lidarVideoStream2');
 
 let renderer = new THREE.WebGLRenderer();
 
