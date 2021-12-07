@@ -1,16 +1,12 @@
-# flake8: noqa
 from abc import ABC, abstractmethod
 import numpy as np
 import math
 # Import OpenCV for easy image rendering
-import cv2
+import cv2 
 import sys
-from pathlib import Path
+import threading
 import requests
 import os
-
-webcam = False
-
 url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f52/raw/07eed8d5486b1abff88d7e34891f1326a9b6a6f5/haarcascade_frontalface_default.xml'
 filename = url.split('/')[-1] # this will take only -1 splitted part of the url
 filepath = ""
@@ -20,49 +16,26 @@ if(not os.path.isfile(filepath + filename)):
     with open(filepath + filename,'wb') as output_file:
         output_file.write(r.content)
 
-def _add_dll_directory(path: Path):
-    from ctypes import c_wchar_p, windll  # type: ignore
-    from ctypes.wintypes import DWORD
-
-    AddDllDirectory = windll.kernel32.AddDllDirectory
-    AddDllDirectory.restype = DWORD
-    AddDllDirectory.argtypes = [c_wchar_p]
-    AddDllDirectory(str(path))
-
-
-def kinect():
-    if sys.platform != "win32":
-        return
-    env_path = os.getenv("KINECT_LIBS", None)
-    if env_path:
-        candidate = Path(env_path)
-        dll = candidate / "k4a.dll"
-        if dll.exists():
-            _add_dll_directory(candidate)
-            return
-    # autodetecting
-    program_files = Path("C:\\Program Files\\")
-    for dir in sorted(program_files.glob("Azure Kinect SDK v*"), reverse=True):
-        candidate = dir / "sdk" / "windows-desktop" / "amd64" / "release" / "bin"
-        dll = candidate / "k4a.dll"
-        if dll.exists():
-            _add_dll_directory(candidate)
-            return
-
-
 class camera(ABC):
     debug = False
     edge_tracking = False
     near_plane = 500
-    far_plane = 10000
-    point = 2500
+    far_plane = 100000
+    point = 1500
     face = (0, 0)
     mapRes = 767
-    dimX = 960
-    dimY = 540
+    dimX = 576
+    dimY = 640
+    cropdimX = 960
+    cropdimY = 540
+    open_kernel = np.ones((5, 5), np.uint8)
+    erosion_kernel = np.ones((2, 2), np.uint8)
+    default_format=".jpg"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
-    depthRange = 1000
+    transpose = False
+    bgr = False
+
     @abstractmethod
     def get_frame(self) -> bytes:
         pass
@@ -88,22 +61,16 @@ class camera(ABC):
         -------
         [int, int, int]
             a slice of the given image, centered in the middle
-
         """
 
-        if(type(image) != np.ndarray):
-           raise Exception("Image is not valid")
-        elif(height > image.shape[0] or width > image.shape[1]):
-           raise Exception("New image dimensions exceed original image size")
-        elif(height < 0 or width < 0):
-           raise Exception("New image dimensions less than zero")
+        # print(image.shape)
 
         midY = int(image.shape[0]/2)
         midX = int(image.shape[1]/2)
 
         return image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
         
-    def set_focal_window(self, image, window=depthRange):
+    def set_focal_window(self, image, range=700):
         """
         takes the depth map and normalises the values in the given range around
         the object's point attribute
@@ -124,23 +91,21 @@ class camera(ABC):
             a 2d array, containing a depth map centered around the point attribute
 
         """
-
-        if(type(image) != np.ndarray):
-           raise Exception("Image is not valid")
-        if(window <= 0):
-           raise Exception("Range must be greater than zero")
-
-        new_point = image[self.face]
+        new_point = image[self.face] #1300
 
         if(self.near_plane < new_point < self.far_plane):
-                self.point = new_point
+            self.point = new_point
 
-        image = (image - (self.point - window)) / ((2 * window)/self.mapRes)
-
+        image = (image - (self.point - range)) / ((2 * range)/self.mapRes)
 
         # image[np.where(image < 10)] = 10000
+
+        image = np.clip(image, 0, self.mapRes)
+
+        # cv2.imshow("inside set focal", image)
+        # cv2.waitKey(0)
         
-        return np.clip(image, 0, self.mapRes)
+        return image
 
     def remove_background_noise(self, image):
         """
@@ -158,12 +123,13 @@ class camera(ABC):
             largely the same array as the input image, with the background noise removed
 
         """
-        if(type(image) != np.ndarray):
-           raise Exception("Image is not valid")
 
-        kernel = np.ones((5,5),np.uint8)
-        
-        return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+        image = cv2.morphologyEx(image, cv2.MORPH_OPEN, self.open_kernel)
+
+        # cv2.imshow("inside remove background noise", image)
+        # cv2.waitKey(0)
+
+        return image
 
     def find_min_max_non_zero(self, image):
         """
@@ -188,19 +154,37 @@ class camera(ABC):
 
 
         """
-        if(type(image) != np.ndarray):
-           raise Exception("Image is not valid")
-
         if np.max(image) == 0:
             return 0, 0, 0, 0
         else:
-            non_zero = np.transpose(np.nonzero(image))
+            non_zero = np.nonzero(image)
+            if(self.transpose): non_zero = np.transpose()
+            
             x_0 = np.amin(non_zero[:,1])
             x_n = np.amax(non_zero[:,1])
             y_0 = np.amin(non_zero[:,0])
             y_n = np.amax(non_zero[:,0])
 
-            return int(x_0), int(x_n), int(y_0), int(y_n)
+            return x_0, x_n, y_0, y_n
+
+    def remove_background(self, depth, frame):
+
+        frame = np.delete(frame, 3, 2)
+
+        if frame.shape != depth.shape:
+            return frame
+        
+        bg_rm_frame = np.where(depth >= self.mapRes - 10, 0, frame)
+  
+        bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
+
+        return bg_rm_frame
+
+    def encode_img(self, image, imgFormat=default_format):
+        # print(image)
+        ret, buffer = cv2.imencode('.png', image)
+
+        return buffer.tobytes()
 
     def encode_bgr_channels(self, image):
         """
@@ -217,18 +201,35 @@ class camera(ABC):
         [int, int, int]
             a 3d array representation of the depth map, with the previous depth value now being
             split accross 3 colour channels
+        # """
+        # b_channel = np.clip(image, 0, 255)
+        # image = image - 255
+
+        # g_channel = np.clip(image, 0, 255)
+        # image = image - 255
+
+        # r_channel = np.clip(image, 0, 255)
+        b_channel = image
+        g_channel = image
+        r_channel = image
+        return np.dstack((b_channel, g_channel, r_channel))
+
+    def encode_bgr_channels_color(self, image):
         """
+        Takes a depth map with depth values ranging from 0 to 755, and
+        returns a color image, with the sum of the colour values equalling the input depth
+        for each pixel
 
-        if(type(image) != np.ndarray):
-           raise Exception("Image is not valid")
-        elif(image.ndim != 2):
-           raise Exception("Image is not 2-dimensional")
-        elif(np.amin(image) < 0):
-           raise Exception("Image is not valid (negative depths)")
-        # if True:
-        #     image[np.where(image >= 755)] = 0
-            
+        Parameters
+        ----------
+        image: [int, int]
 
+        Returns
+        -------
+        [int, int, int]
+            a 3d array representation of the depth map, with the previous depth value now being
+            split accross 3 colour channels
+        # """
         b_channel = np.clip(image, 0, 255)
         image = image - 255
 
@@ -237,7 +238,12 @@ class camera(ABC):
 
         r_channel = np.clip(image, 0, 255)
 
-        return np.dstack((g_channel, r_channel, b_channel))
+        image = np.dstack((b_channel, g_channel, r_channel))
+
+        # cv2.imshow("inside encode bgr color", image)
+        # cv2.waitKey(0)
+
+        return image
 
     def sharpen_edges(self, image):
         """
@@ -255,9 +261,6 @@ class camera(ABC):
             The resultant sharpened image
         """
 
-        if(type(image) != np.ndarray):
-           raise Exception("Image is not valid")
-
         _, thresh = cv2.threshold(image, 1, 255, cv2.THRESH_BINARY)
 
         thresh = np.uint8(thresh)
@@ -273,18 +276,16 @@ class camera(ABC):
 
         Parameters
         ----------
-        image: [int, int, int]
+        image: [int, int]
         
         Returns
         -------
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
+        # color_image = self.crop(color_image, width=self.cropdimX)
 
-        if(type(color_image) != np.ndarray):
-           raise Exception("Image is not valid")
-
-        color_image = self.crop(color_image, width=400)
+        if (self.transpose): color_image = cv2.transpose(color_image)
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
 
@@ -292,7 +293,7 @@ class camera(ABC):
 
         for (x,y,w,h) in self.faces:
             if(w*h > 400):
-                # cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
+                cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
                 self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
                 break
             
@@ -312,23 +313,31 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
+        # depth_image = self.crop(depth_image)
 
-        if(type(depth_image) != np.ndarray):
-           raise Exception("Image is not valid")
-        elif(depth_image.ndim != 2):
-           raise Exception("Image is not 2-dimensional")
+        # cv2.imshow("depth before processing", depth_image)
+        # cv2.waitKey(0)
 
-        depth_image = self.crop(depth_image, width=400)
+        if(self.transpose): depth_image = cv2.transpose(depth_image)
 
         depth_image = self.set_focal_window(depth_image)
 
-        depth_image = self.remove_background_noise(depth_image)
+        # depth_image = self.sharpen_edges(depth_image)
 
-        depth_image = self.sharpen_edges(depth_image)
+        # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
 
-        x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
+        # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
+        # cv2.waitKey(0)
+        if(self.bgr):
+            depth_image = self.encode_bgr_channels(depth_image)
+        else:
+            depth_image = self.encode_bgr_channels_color(depth_image)
+            
+        # depth_image = self.remove_background_noise(depth_image)
 
-        depth_image = self.encode_bgr_channels(depth_image)
+        # cv2.imshow("after processing", depth_image)
+        # cv2.waitKey(0)
+
 
 
         return depth_image
@@ -349,7 +358,6 @@ class camera_wrapper(camera):
         none
         """
         self.cam = None
-
         try:
             from cameras.camera_intel import intelcam
             self.cam = intelcam()
@@ -357,19 +365,17 @@ class camera_wrapper(camera):
         except Exception as e:
             print(e)
             try:
-                kinect()
                 from cameras.camera_kinect import kinectcam
                 self.cam = kinectcam()
                 self.cam.get_frame()
             except Exception as e:
-                try:
-                    from cameras.camera_vga import vgacam
-                    self.cam = vgacam()
-                    self.cam.get_frame()
-                    print("kinected")
-                except Exception as e:
-                    print(e)
-
+                print(e)
+        # if type == 'intel':
+        #     from cameras.camera_intel import intelcam
+        #     self.cam = intelcam()
+        # if type == 'kinect':
+        #     from cameras.camera_kinect import kinectcam
+        #     self.cam = kinectcam()
     
     def get_frame(self):
         """
@@ -384,8 +390,24 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        return self.cam.get_frame()
+        return self.encode_img(self.cam.get_frame())
 
+    def get_frame_mt(self, out):
+        """
+        Calls the get_frame method of the wrapper's camera attribute, and returns the result
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the image data, enoded as BRGA
+        """
+        print("working...")
+        out[0] = self.cam.get_frame()
+        print(out[0].shape)
     def get_depth(self):
         """
         Calls the get_depth method of the wrapper's camera attribute, and returns the result
@@ -399,4 +421,36 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
-        return self.cam.get_depth()
+        return self.encode_img(self.cam.get_depth())
+
+    def get_depth_mt(self, out):
+        """
+        Calls the get_depth method of the wrapper's camera attribute, and returns the result
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the depth data, enoded as BRGA
+        """
+        out[1] = self.cam.get_depth()
+
+    def get_frame_bgr(self):
+        # frames = np.empty(2)
+        # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
+        # f_thread.start()
+        # d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
+        # d_thread.start()
+        frame = self.cam.get_frame()
+        depth = self.cam.get_depth()
+        # f_thread.join()
+        # d_thread.join()
+        # print(frames[0])
+        ret = self.remove_background(depth, frame)
+        return ret
+
+    def get_unproc_frame(self):
+        return self.crop(self.cam.get_frame_unproc()[:,:,:3], width=self.cropdimX)
