@@ -27,7 +27,7 @@ function updateFaceMesh() {
 function updateSkeleton() {
 
   let t;
-
+  if(typeof landmarks == 'undefined') return;
   for (t=0; t < landmark_mapping_1.length; t++){
     bones[landmark_mapping_1[t]].position.x = landmarks[landmark_mapping_2[t]].x;
     bones[landmark_mapping_1[t]].position.y = - landmarks[landmark_mapping_2[t]].y;
