@@ -250,14 +250,26 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
               localMediaStreamWebcam.getAudioTracks()[0].muted = true;
             }
           }
+          console.log('removing stream now');
+          console.log('track to remove: ');
+          console.log(lastTrackAudio);
+          console.log('of stream: ');
+          console.log(outputStream.getTracks());
           activeconnections.forEach((connection) => {
             connection.peerObject.removeTrack(lastTrackAudio, outputStream);
           });
+          console.log('adding the new audio now!');
+          console.log('stream to add: ');
+          console.log( localMediaStreamWebcam.getAudioTracks()[0]);
+          outputStream.removeTrack(lastTrackAudio);
           activeconnections.forEach((connection) => {
             connection.peerObject.addTrack(localMediaStreamWebcam.
                 getAudioTracks()[0], outputStream);
-            lastTrackAudio = localMediaStreamWebcam.getAudioTracks()[0];
           });
+          lastTrackAudio = localMediaStreamWebcam.getAudioTracks()[0];
+          outputStream.addTrack(lastTrackAudio);
+          console.log('outputstream after: ');
+          console.log(outputStream.getTracks());
           const select = document.getElementById('selectMicInLecture');
           select.style.display = 'none';
           if (positionalHearing) {
