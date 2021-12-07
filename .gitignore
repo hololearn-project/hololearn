@@ -23,3 +23,9 @@ node_server/.vscode/settings.json
 *.xml
 *.pyc
 node_server/package-lock.json
+node_server/user1.db
+node_server/user1.db
+node_server/user1.db
+*.db
+node_server/user1.db
+*.db
