@@ -123,6 +123,21 @@ class LidarVideoTrack(VideoStreamTrack):
         return frame
 
 
+class LidarBGRTrack(VideoStreamTrack):
+    def __init__(self, cam: camera_obj):
+        super().__init__()
+        self.cam = cam
+
+    async def recv(self) -> Frame:
+        pts, time_base = await self.next_timestamp()
+        cvframe = self.cam.get_frame_bgr()
+        cvframe = np.array(cvframe, dtype=np.uint8)
+        frame = VideoFrame.from_ndarray(cvframe, format='bgra')
+        frame.pts = pts
+        frame.time_base = time_base
+        return frame
+
+
 class LidarDepthTrack(VideoStreamTrack):
     def __init__(self, cam: camera_obj):
         super().__init__()
