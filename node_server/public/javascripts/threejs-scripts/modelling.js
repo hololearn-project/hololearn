@@ -27,7 +27,7 @@ const thresh = 40;
 incoming video data. */
 const imgWidth = 400;
 const imgLength = 540;
-const demo = true;
+const demo = false;
 /* Specifies the number of sampling points per row and column
 respectively. These variables depend on the value of subSample as it
 determines the frequency of sampling on both axes. */
@@ -704,7 +704,7 @@ function getPictureVideo() {
   if (demo) {
     return document.getElementById('pictureDemo');
   } else {
-    return document.getElementById('kinectVideo');
+    return document.getElementById('lidarVideoStream1');
   }
 }
 
@@ -716,7 +716,7 @@ function getDepthVideo() {
   if (demo) {
     return document.getElementById('depthDemo');
   } else {
-    return document.getElementById('kinectVideo');
+    return document.getElementById('lidarVideoStream2');
   }
 }
 

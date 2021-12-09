@@ -56,7 +56,6 @@ class kinectcam(camera):
         capture = self.k4a.get_capture()
         # color = capture.transformed_color
         color = capture.color
-        print("color: "+str(color.shape))
         return self.process_frame(color)
 
     def get_frame_unproc(self):
@@ -79,6 +78,5 @@ class kinectcam(camera):
         """
         capture = self.k4a.get_capture()
         depth = capture.transformed_depth
-        print("depth: "+str(depth.shape))
 
         return self.process_depth(depth)
