@@ -72,10 +72,26 @@ function getLecture(lecture) {
  */
 function startRewatch() {
   document.getElementById('lidarVideoStream1').src = URL.createObjectURL(new Blob([imageStreamDataBase]));
+  let url = URL.createObjectURL(new Blob([imageStreamDataBase]));
+  let a = document.createElement('a');
+  document.body.appendChild(a);
+  a.style = 'display: none';
+  a.href = url;
+  a.download = 'VideoRecording.webm';
+  a.click();
+  window.URL.revokeObjectURL(url);
   document.getElementById('lidarVideoStream1').play();
 
   document.getElementById('lidarVideoStream2').src = URL.createObjectURL(new Blob([depthStreamDataBase]));
+  url = URL.createObjectURL(new Blob([depthStreamDataBase]));
+  a = document.createElement('a');
+  document.body.appendChild(a);
+  a.style = 'display: none';
+  a.href = url;
+  a.download = 'DepthRecording.webm';
+  a.click();
+  window.URL.revokeObjectURL(url);
   document.getElementById('lidarVideoStream2').play();
 
-  addScreenShare(URL.createObjectURL(new Blob([screenShareStreamDataBase])), true);
+  // addScreenShare(URL.createObjectURL(new Blob([screenShareStreamDataBase])), true);
 }

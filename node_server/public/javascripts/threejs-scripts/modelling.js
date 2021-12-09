@@ -27,7 +27,7 @@ const thresh = 40;
 incoming video data. */
 const imgWidth = 400;
 const imgLength = 540;
-
+const demo = true;
 /* Specifies the number of sampling points per row and column
 respectively. These variables depend on the value of subSample as it
 determines the frequency of sampling on both axes. */
@@ -363,7 +363,7 @@ function updatePoints(dctx) {
 
   for (y = 0; y < imgLength; y+= subSample) {
     for (x = 0; x < imgWidth; x+= subSample) {
-      const z = 255 - (depthData[getLoc(x, y)] +
+      const z = (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2])/3;
 
@@ -404,7 +404,7 @@ function updatePointsAndColors(dctx, ctx) {
 
   for (y = 0; y < imgLength; y += subSample) {
     for (x = 0; x < imgWidth; x += subSample) {
-      const z = 255 - (depthData[getLoc(x, y)] +
+      const z = (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2]) / 3;
       points[i] = x;
@@ -701,7 +701,11 @@ function removeModel() {
  * @return the element with id=lidarVideoStream1
  */
 function getPictureVideo() {
-  return document.getElementById('kinectVideo');
+  if (demo) {
+    return document.getElementById('pictureDemo');
+  } else {
+    return document.getElementById('kinectVideo');
+  }
 }
 
 /**
@@ -709,7 +713,11 @@ function getPictureVideo() {
  * @return the element with id=lidarVideoStream2
  */
 function getDepthVideo() {
-  return document.getElementById('kinectVideo');
+  if (demo) {
+    return document.getElementById('depthDemo');
+  } else {
+    return document.getElementById('kinectVideo');
+  }
 }
 
 /**

@@ -24,9 +24,9 @@ class camera(ABC):
     point = 1500
     face = (0, 0)
     mapRes = 767
-    dimX = 576
-    dimY = 640
-    cropdimX = 960
+    dimX = 960
+    dimY = 540
+    cropdimX = 400
     cropdimY = 540
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
@@ -44,7 +44,7 @@ class camera(ABC):
     def get_depth(self) -> bytes:
         pass
 
-    def crop(self, image, width=dimX, height=dimY):
+    def crop(self, image, width=cropdimX, height=cropdimY):
         """
         Takes an image and returns a centered slice, of the given dimensions
 
@@ -283,8 +283,8 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        # color_image = self.crop(color_image, width=self.cropdimX)
-
+        color_image = self.crop(color_image)
+        # print(color_image.shape)
         if (self.transpose): color_image = cv2.transpose(color_image)
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
@@ -313,8 +313,8 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
-        # depth_image = self.crop(depth_image)
-
+        depth_image = self.crop(depth_image)
+        # print(depth_image.shape)
         # cv2.imshow("depth before processing", depth_image)
         # cv2.waitKey(0)
 
