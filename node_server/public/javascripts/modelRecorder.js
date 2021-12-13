@@ -166,12 +166,9 @@ function uploadLecture() {
 function record3DClicked() {
   if (recFlag) {
     recording3D = false;
-    if (mediaRecorderDepthStream != undefined) {
-      console.log('stopping recording!!!!!');
-      mediaRecorderDepthStream.stop();
-    }
-    if (mediaRecorderImageStream != undefined) {
+    if (mediaRecorderDepthStream != undefined && mediaRecorderImageStream != undefined) {
       mediaRecorderImageStream.stop();
+      mediaRecorderDepthStream.stop();
     }
     document.getElementById('3DRecordIcon').style.display = 'block';
     document.getElementById('3DStopRecordIcon').style.display = 'none';
