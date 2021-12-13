@@ -37,14 +37,13 @@ function start3DRecording() {
     // mediaRecorderDepthStream.ondataavailable = function(e) {
     //   console.log('flag!!!');
     };
-    mediaRecorderDepthStream.start();
 
     mediaRecorderImageStream = new MediaRecorder(imageStream, options);
     mediaRecorderImageStream.ondataavailable = function(e) {
       handleDataAvailable3DRecorder(e, {chunks: recordedChunksImageStream, name: 'image'});
     };
     mediaRecorderImageStream.start();
-
+    mediaRecorderDepthStream.start();
     // mediaRecorderDepthStream.ondataavailable = function(e) {
     //   console.log('vidFlag!!!');
     // };
