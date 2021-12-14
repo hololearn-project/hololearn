@@ -70,7 +70,7 @@ class camera(ABC):
 
         return image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
         
-    def set_focal_window(self, image, range=700):
+    def set_focal_window(self, image, range=1400):
         """
         takes the depth map and normalises the values in the given range around
         the object's point attribute

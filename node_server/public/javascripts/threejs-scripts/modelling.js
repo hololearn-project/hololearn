@@ -56,8 +56,8 @@ the scene. */
 let modelPresent = false;
 
 /* Specificies which method to use when constructing the 3D model
-[mesh, index, point cloud, point cloud with shaders, hidden] */
-let modelType = 'M1';
+[mesh, point cloud, point cloud with shaders, hidden] */
+let modelType = 'M2';
 
 /* X position of the model. */
 let teacherX = -6;
