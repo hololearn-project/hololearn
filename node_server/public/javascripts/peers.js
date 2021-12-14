@@ -120,6 +120,10 @@ function startConnecting(teacher, name) {
       stream.getAudioTracks()[0].enabled = false;
     }
 
+    if (document.getElementById('Student' + seat) != undefined) {
+      removeVideoElement(seat);
+    }
+
     a = positions[seat].a;
     b = positions[seat].b;
     c = positions[seat].c;
@@ -226,10 +230,8 @@ function startConnecting(teacher, name) {
     // let newPeer = new SimplePeer({ initiator: true, config: peerConfig });
     let newPeer;
     if (seat > selectedPosition || seat == -1) {
-      console.log('inintiator');
       newPeer = new SimplePeer({initiator: true});
     } else {
-      console.log('not initiator');
       newPeer = new SimplePeer();
     }
     newPeer.on('data', (data) => {
@@ -263,6 +265,7 @@ function startConnecting(teacher, name) {
       socket.emit('signal', id, data);
     });
     newPeer.on('stream', (stream) => {
+      console.log('new stream: ' + stream);
       // peer is the teacher
       if (seat == -5) {
         // selectedPosition -7 -> you are the slides player.
@@ -296,7 +299,6 @@ function startConnecting(teacher, name) {
         } else {
           addVideoElement(id, stream, seat);
           start3DAudioUser(seat, stream);
-          addVideoElement(id, stream, seat);
         }
       }
       // make async broadcast call
@@ -602,14 +604,6 @@ function startConnecting(teacher, name) {
         }
         start3DAudioUser(0, stream);
       }
-      console.log('streamId: ' + sid);
-      // if (sid == 'webcamstream') {
-      //   webcamStream = stream;
-      //   cameraMesh.start();
-      //   document.getElementById('webcamVid').srcObject = stream;
-      //   console.log('set it correctly');
-      //   teacherWebcamOn = true;
-      // }
     });
 
     teacherPeer.on('track', (track, stream) => {
