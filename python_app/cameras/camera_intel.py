@@ -51,6 +51,14 @@ class intelcam(camera):
         """
         # Create a pipeline
         self.pipeline = rs.pipeline()
+        self.colorizer = rs.colorizer(1)
+
+        self.thresholder = rs.threshold_filter()
+        self.thresholder.set_option(rs.option.max_distance, 10)
+        self.spacer = rs.spatial_filter()
+        self.temporer = rs.temporal_filter()
+        self.filler = rs.hole_filling_filter()
+
         self.counter = 0
         # Create a config and configure the pipeline to stream
         #  different resolutions of color and depth streams
@@ -79,6 +87,7 @@ class intelcam(camera):
 
         clipping_distance_in_meters = 2
         self.clipping_distance = clipping_distance_in_meters / depth_scale
+        self.enable_dynamic_calibration = True;
 
         # Create an align object
         # rs.align allows us to perform alignment of depth frames to others frames
@@ -128,16 +137,25 @@ class intelcam(camera):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
+
         frames = self.pipeline.wait_for_frames()
 
         aligned_frames = self.align.process(frames)
 
         aligned_depth_frame = aligned_frames.get_depth_frame()
+        
+
+        depth_image = self.thresholder.process(aligned_depth_frame)
+        # depth_image = self.spacer.process(depth_image)
+        # depth_image = self.temporer.process(depth_image)
+        # depth_image = self.filler.process(depth_image)
+
+        depth_image = self.colorizer.colorize(aligned_depth_frame)
 
         if not aligned_depth_frame:
             print("Invalid frame", file=sys.stderr)
 
-        depth_image = np.asanyarray(aligned_depth_frame.get_data())
+        depth_image = np.asanyarray(depth_image.get_data())
 
         return self.process_depth(depth_image)
 
