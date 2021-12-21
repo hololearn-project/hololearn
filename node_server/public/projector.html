@@ -15,7 +15,6 @@
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 		<title>Hololearn Projector Page</title>
 		<style>
-			canvas { width: 100%; height: 100% }
 		</style>
 	</head>
 	<body id="body" class="body">
@@ -50,13 +49,15 @@
         <video autoplay="true" id="teacher" class="rotateUp"></video>
         <video autoplay="true" id="fileCam" style="display: none" loop></video>
 
-        <video id='lidarVideoStream1' style="display: none;" autoplay="true" muted></video>
-        <video id='lidarVideoStream2' style="display: none;" autoplay="true" muted></video>
+        <canvas id="teacherCanvas" width="500" height="720" class="rotateUp"></canvas>
 
-        <canvas id='lidarVideoStream1Canvas'></canvas>
-        <canvas id='lidarVideoStream2Canvas'></canvas>
 
-        <canvas id="teacherCanvas" class="rotateUp"></canvas>
+        <br><br><br><br>
+        <video id='lidarVideoStream1' autoplay="true" muted></video>
+        <video id='lidarVideoStream2' autoplay="true" muted></video>
+
+        <canvas id='lidarVideoStream1Canvas' width="500" height="720" style="display: none"></canvas>
+        <canvas id='lidarVideoStream2Canvas' width="500" height="720" style="display: none"></canvas>
 
         <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 50px;">Log In</button>
         <i id="rotateIcon" style="font-size:18x; color: white;" class="fas fa-redo" onclick="rotateTeacher()"></i>

@@ -11,8 +11,7 @@ let lastRotation = 0;
 let rotationNow = 0;
 let socket = null;
 let newUser = true;
-let lastNoti = '';
-
+let lastNoti
 const servRtcStrms = new Map();
 const servRtcStrmsLidars = ['videostream', 'depthstream'];
 const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
@@ -583,10 +582,12 @@ function startConnecting(teacher, name) {
       teacherIncomingMediaStream = stream;
       // Set video element to be the stream depending on its ID
       const sid = stream.id;
+      console.log('tracks:');
       console.log(stream.getTracks());
       if (servRtcStrmsLidars.includes(sid)) {
         if (stream.id == 'depthstream') {
           depthStream = stream;
+          console.log(stream.getVideoTracks()[0].getSettings())
         } else {
           imageStream = stream;
         }
@@ -617,7 +618,8 @@ function startConnecting(teacher, name) {
       }
       if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
          undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
-        removeBackgroundWithDepth();
+        // removeBackgroundWithDepth();
+
       }
       // if (sid == 'webcamstream') {
       //   webcamStream = stream;

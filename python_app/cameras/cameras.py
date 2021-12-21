@@ -26,8 +26,8 @@ class camera(ABC):
     mapRes = 767
     dimX = 576
     dimY = 640
-    cropdimX = 960
-    cropdimY = 540
+    cropdimX = 500
+    cropdimY = 720
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".jpg"
@@ -44,7 +44,7 @@ class camera(ABC):
     def get_depth(self) -> bytes:
         pass
 
-    def crop(self, image, width=dimX, height=dimY):
+    def crop(self, image, width=cropdimX, height=cropdimY):
         """
         Takes an image and returns a centered slice, of the given dimensions
 
@@ -283,7 +283,7 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        # color_image = self.crop(color_image, width=self.cropdimX)
+        color_image = self.crop(color_image)
 
         if (self.transpose): color_image = cv2.transpose(color_image)
 
@@ -313,7 +313,7 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
-        # depth_image = self.crop(depth_image)
+        depth_image = self.crop(depth_image)
 
         # cv2.imshow("depth before processing", depth_image)
         # cv2.waitKey(0)
@@ -341,6 +341,28 @@ class camera(ABC):
 
 
         return depth_image
+
+    def get_frame_bgr(self):
+        print("removing background...")
+        # frames = np.empty(2)
+        # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
+        # f_thread.start()
+        # d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
+        # d_thread.start()
+        frame = self.get_frame()
+        depth = self.get_depth()
+        # f_thread.join()
+        # d_thread.join()
+        # print(frames[0])
+        ret = self.remove_background(depth, frame)
+
+        cv2.imshow("bgrimg", ret)
+        cv2.waitKey(0)
+        print(ret.shape)
+        
+        return ret
+
+
 
 class camera_wrapper(camera):
 
@@ -452,6 +474,8 @@ class camera_wrapper(camera):
         # d_thread.join()
         # print(frames[0])
         ret = self.remove_background(depth, frame)
+        cv2.imshow("wrapper", ret)
+        cv2.waitKey(0)
         print(ret.shape)
         
         return ret
@@ -461,4 +485,4 @@ class camera_wrapper(camera):
 
 
     def get_unproc_frame(self):
-        return self.crop(self.cam.get_frame_unproc()[:,:,:3], width=self.cropdimX)
+        return self.crop(self.cam.get_frame_unproc()[:,:,:3])
