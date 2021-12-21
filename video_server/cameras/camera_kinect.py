@@ -19,6 +19,7 @@ class kinectcam(camera):
         -------
         none
         """
+        self.name = "kinectcam"
         k4a = PyK4A(
             Config(
                 color_resolution=pyk4a.ColorResolution.RES_720P,
@@ -53,10 +54,8 @@ class kinectcam(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        capture = self.k4a.get_capture()
-        # color = capture.transformed_color
-        color = capture.color
-        print("color: "+str(color.shape))
+        capture = self.k4a.get_capture()        
+        color = capture.color        
         return self.process_frame(color)
 
     def get_frame_unproc(self):
@@ -78,7 +77,5 @@ class kinectcam(camera):
             a 3d array containing the depth data, enoded as BRGA
         """
         capture = self.k4a.get_capture()
-        depth = capture.transformed_depth
-        print("depth: "+str(depth.shape))
-
-        return self.process_depth(depth)
+        depth = capture.transformed_depth        
+        return depth #self.process_depth(depth)

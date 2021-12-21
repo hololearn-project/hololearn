@@ -7,9 +7,16 @@ import sys
 import threading
 import requests
 import os
+import time
+
+import pixellib
+from pixellib.torchbackend.instance import instanceSegmentation
+
 url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f52/raw/07eed8d5486b1abff88d7e34891f1326a9b6a6f5/haarcascade_frontalface_default.xml'
 filename = url.split('/')[-1] # this will take only -1 splitted part of the url
 filepath = ""
+
+
 
 if(not os.path.isfile(filepath + filename)):
     r = requests.get(url)
@@ -17,6 +24,7 @@ if(not os.path.isfile(filepath + filename)):
         output_file.write(r.content)
 
 class camera(ABC):
+    name = ""
     debug = False
     edge_tracking = False
     near_plane = 500
@@ -34,7 +42,36 @@ class camera(ABC):
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
     transpose = False
-    bgr = False
+    bgr = False    
+    
+
+    def __init__(self):
+        self.cap = [np.zeros(1), np.zeros(1)]
+        self.thread_pixelLib = threading.Thread(target=self.thread_segment_fg)
+        self.init_pixellib()
+        self.invalid_fg = None
+        self.person_depth = None
+        self.fg_mask = None        
+
+    def init_pixellib(self):
+        self.ins = instanceSegmentation()
+        self.target_classes = self.ins.select_target_classes(person = True)        
+        self.ins.load_model("../Models/pointrend_resnet50.pkl", detection_speed="rapid")
+
+
+    #make sure self.cap[0] = capture and self.cap[1] = depth are set
+    def thread_segment_fg(self):
+        #get fg mask                
+        segmask, output = self.ins.segmentFrame(self.cap[0][:,:,:3], extract_segmented_objects = True, segment_target_classes = self.target_classes)        
+        self.fg_mask = (1*segmask["masks"][:,:,0]).astype(int)        
+        #get person center depth
+        box = segmask["boxes"][0]
+        box_y_center = round((box[3]-box[1])/2) + box[1]
+        box_x_center = round((box[2]-box[0])/2) + box[0]
+        #depth +1 to avoid it being 0
+        self.person_depth = max(self.cap[1][box_y_center, box_x_center], 1)
+        print("person depth: " + str(self.person_depth))
+        sys.exit()
 
     @abstractmethod
     def get_frame(self) -> bytes:
@@ -179,6 +216,7 @@ class camera(ABC):
         bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
         return bg_rm_frame
+         
 
     def encode_img(self, image, imgFormat=default_format):
         # print(image)
@@ -316,7 +354,7 @@ class camera(ABC):
         # depth_image = self.crop(depth_image)
 
         # cv2.imshow("depth before processing", depth_image)
-        # cv2.waitKey(0)
+        # cv2.waitKey(0)        
 
         if(self.transpose): depth_image = cv2.transpose(depth_image)
 
@@ -338,13 +376,12 @@ class camera(ABC):
         # cv2.imshow("after processing", depth_image)
         # cv2.waitKey(0)
 
-
-
         return depth_image
 
 class camera_wrapper(camera):
 
     def __init__(self):
+        super().__init__()
         """
         Determines which type fo depth sensing camera is connected, if any, and sets its cam
         attribute accordingly
@@ -370,6 +407,7 @@ class camera_wrapper(camera):
                 self.cam.get_frame()
             except Exception as e:
                 print(e)
+        print("Loaded camera")
         # if type == 'intel':
         #     from cameras.camera_intel import intelcam
         #     self.cam = intelcam()
@@ -405,9 +443,8 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        print("working...")
         out[0] = self.cam.get_frame()
-        print(out[0].shape)
+        
     def get_depth(self):
         """
         Calls the get_depth method of the wrapper's camera attribute, and returns the result
@@ -444,12 +481,41 @@ class camera_wrapper(camera):
         # f_thread.start()
         # d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
         # d_thread.start()
-        frame = self.cam.get_frame()
-        depth = self.cam.get_depth()
+
+        #cap[0] = rgb, cap[1] = depth
+        self.get_frame_mt(self.cap)     
+        self.get_depth_mt(self.cap)
+
         # f_thread.join()
         # d_thread.join()
         # print(frames[0])
-        ret = self.remove_background(depth, frame)
+        
+        #fix FG invalid pixels using most recent personMask from the pixellib segmentation            
+        if(self.cam.name == "kinectcam"):            
+            if not self.thread_pixelLib.is_alive():
+                self.thread_pixelLib = threading.Thread(target=self.thread_segment_fg)
+                self.thread_pixelLib.start() 
+
+            if self.fg_mask is not None:                
+                #repair fg       
+                invalid_depth = (self.cap[1] == 0).astype(int)      
+                self.invalid_fg = invalid_depth * self.fg_mask                                                                
+                
+                self.repaired_depth = self.cap[1]
+                self.repaired_depth[self.invalid_fg == 1] = self.person_depth                                                            
+                
+                bg_rm_frame = np.where(np.repeat(self.repaired_depth[:,:,np.newaxis], 3, axis=2) >= self.person_depth+100, 0, np.repeat(self.repaired_depth[:,:,np.newaxis], 3, axis=2))
+                bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel)
+
+                repaired_fg = self.cap[0][:,:,:3] * (bg_rm_frame > 0)
+
+            else:
+                repaired_fg = self.remove_background(self.cap[1], self.cap[0])
+
+        
+
+        ret = self.encode_img(repaired_fg)
+
         return ret
 
     def get_unproc_frame(self):
