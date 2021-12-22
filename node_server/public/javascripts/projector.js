@@ -130,8 +130,6 @@ function hideShowInput() {
   }
 }
 
-let hello = true;
-
 /**
  * Removes the background of the teacher with both lidar streams.
  */
@@ -139,18 +137,18 @@ async function removeBackgroundWithDepth() {
   // console.log('In the loop')
   requestAnimationFrame( removeBackgroundWithDepth );
   pictureCtx.drawImage(document.getElementById('lidarVideoStream1'),
-      0, 0, 500, 720);
+      0, 0, 400, 540);
   depthCtx.drawImage(document.getElementById('lidarVideoStream2'),
-      0, 0, 500, 720);
+      0, 0, 400, 540);
 
   const pictureData = await pictureCtx.getImageData(0,
-      0, 500, 720);
+      0, 400, 540);
   const temp = pictureData;
   const depthData = await depthCtx.getImageData(0,
-      0, 500, 720);
+      0, 400, 540);
 
   for (let i = 0; i < pictureData.data.length; i = i + 4) {
-    if (depthData.data[i+2] > 250) {
+    if (depthData.data[i+2] > 230) {
       pictureData.data[i + 3] = 0;
     }
   }

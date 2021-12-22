@@ -69,11 +69,13 @@ class intelcam(camera):
             print("Using L5XX camera")
         else:
             config.enable_stream(rs.stream.color, 1024, 768, rs.format.bgr8, 30)
+        print("flag")
 
         profile = self.pipeline.start(config)
-
+        print("flag")
         # Getting the depth sensor's depth scale (see rs-align example for explanation)
         depth_sensor = profile.get_device().first_depth_sensor()
+        print("flag")
         depth_scale = depth_sensor.get_depth_scale()
         print("Depth Scale is: " , depth_scale)
 
@@ -100,7 +102,6 @@ class intelcam(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-
         frames = self.pipeline.wait_for_frames()
 
         aligned_frames = self.align.process(frames)

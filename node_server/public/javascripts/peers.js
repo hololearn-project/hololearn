@@ -587,7 +587,7 @@ function startConnecting(teacher, name) {
       if (servRtcStrmsLidars.includes(sid)) {
         if (stream.id == 'depthstream') {
           depthStream = stream;
-          console.log(stream.getVideoTracks()[0].getSettings())
+          console.log(stream.getVideoTracks()[0].getSettings());
         } else {
           imageStream = stream;
         }
@@ -595,6 +595,7 @@ function startConnecting(teacher, name) {
         // add to the right element
         const videoToAdd = document.getElementById(servRtcStrms.get(sid));
         videoToAdd.srcObject = stream;
+        console.log(stream);
         videoToAdd.play();
         if (table == -2) {
           start3DRecording();
@@ -616,11 +617,11 @@ function startConnecting(teacher, name) {
         }
         start3DAudioUser(0, stream);
       }
-      if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
-         undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
-        // removeBackgroundWithDepth();
+      // if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
+      //    undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
+      //   removeBackgroundWithDepth();
 
-      }
+      // }
       // if (sid == 'webcamstream') {
       //   webcamStream = stream;
       //   cameraMesh.start();

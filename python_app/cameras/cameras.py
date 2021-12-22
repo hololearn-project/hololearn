@@ -26,8 +26,8 @@ class camera(ABC):
     mapRes = 767
     dimX = 576
     dimY = 640
-    cropdimX = 500
-    cropdimY = 720
+    cropdimX = 400
+    cropdimY = 540
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".jpg"
@@ -63,12 +63,12 @@ class camera(ABC):
             a slice of the given image, centered in the middle
         """
 
-        # print(image.shape)
 
         midY = int(image.shape[0]/2)
         midX = int(image.shape[1]/2)
 
-        return image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
+        ret = image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
+        return ret
         
     def set_focal_window(self, image, range=700):
         """
@@ -296,7 +296,6 @@ class camera(ABC):
                 cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
                 self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
                 break
-            
         return color_image
     
     def process_depth(self, depth_image):
@@ -343,7 +342,7 @@ class camera(ABC):
         return depth_image
 
     def get_frame_bgr(self):
-        print("removing background...")
+        # print("removing background...")
         # frames = np.empty(2)
         # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
         # f_thread.start()
@@ -356,9 +355,9 @@ class camera(ABC):
         # print(frames[0])
         ret = self.remove_background(depth, frame)
 
-        cv2.imshow("bgrimg", ret)
-        cv2.waitKey(0)
-        print(ret.shape)
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+        # print(ret.shape)
         
         return ret
 
@@ -384,6 +383,7 @@ class camera_wrapper(camera):
             from cameras.camera_intel import intelcam
             self.cam = intelcam()
             self.cam.get_frame()
+            print("intel cam connected")
         except Exception as e:
             print(e)
             try:
@@ -463,6 +463,7 @@ class camera_wrapper(camera):
         out[1] = self.cam.get_depth()
 
     def get_frame_bgr(self):
+        print("removing background... in wrapper")
         # frames = np.empty(2)
         # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
         # f_thread.start()
@@ -474,13 +475,12 @@ class camera_wrapper(camera):
         # d_thread.join()
         # print(frames[0])
         ret = self.remove_background(depth, frame)
-        cv2.imshow("wrapper", ret)
-        cv2.waitKey(0)
         print(ret.shape)
         
         return ret
 
     def get_frame_bgr_encoded(self):
+        print("removing background... encoded")
         return self.encode_img(self.cam.get_frame_bgr())
 
 
