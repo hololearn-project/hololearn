@@ -1,15 +1,18 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import math
+import time
 # Import OpenCV for easy image rendering
 import cv2 
 import sys
-import threading
+from threading import Thread
 import requests
 import os
 url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f52/raw/07eed8d5486b1abff88d7e34891f1326a9b6a6f5/haarcascade_frontalface_default.xml'
 filename = url.split('/')[-1] # this will take only -1 splitted part of the url
 filepath = ""
+
+start_time = time.time()
 
 if(not os.path.isfile(filepath + filename)):
     r = requests.get(url)
@@ -23,19 +26,23 @@ class camera(ABC):
     far_plane = 100000
     point = 1500
     face = (0, 0)
-    mapRes = 767
+    mapRes = 255
+    mapResRemovalThres = mapRes - 10
     dimX = 576
     dimY = 640
-    cropdimX = 400
-    cropdimY = 540
+    cropdimX = 550
+    cropdimY = 300
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".jpg"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
-    transpose = False
-    bgr = False
+    transpose = True
+    bgr = True
+    totalTime = 0
+    steps = 0
 
+    
     @abstractmethod
     def get_frame(self) -> bytes:
         pass
@@ -172,13 +179,52 @@ class camera(ABC):
         frame = np.delete(frame, 3, 2)
 
         if frame.shape != depth.shape:
+            print('frame and depth are not the same shape!')
             return frame
         
-        bg_rm_frame = np.where(depth >= self.mapRes - 10, 0, frame)
+        bg_rm_frame = np.where(depth >= self.mapResRemovalThres, 0, frame)
   
         bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
         return bg_rm_frame
+
+
+    def removeWhere(self, depth, frame, index, arr):
+        arr[index] = np.where(depth[index * depth.length / 4:((index + 1) * depth.length / 4) - 1] >= self.mapResRemovalThres, 0, frame[index * frame.length / 4: (index + 1) * frame.length / 4])
+        
+    def remove_background_mt(self, depth, frame):
+
+        frame = np.delete(frame, 3, 2)
+
+        if frame.shape != depth.shape:
+            print('frame and depth are not the same shape!')
+            return frame
+
+
+        bg_rm_frame = [None] * 4
+        thread1 = Thread(target = self.removeWhere, args = (self, depth, frame, 0, bg_rm_frame))
+        thread1.start()
+
+        thread2 = Thread(target = self.removeWhere, args = (self, depth, frame, 1, bg_rm_frame))
+        thread2.start()
+
+        thread3 = Thread(target = self.removeWhere, args = (self, depth, frame, 2, bg_rm_frame))
+        thread3.start()
+        
+        thread4 = Thread(target = self.removeWhere, args = (self, depth, frame, 3, bg_rm_frame))
+        thread4.start()
+
+        thread1.join()
+        thread2.join()
+        thread3.join()
+        thread4.join()
+
+        bg_rm_frame = np.concatenate(bg_rm_frame[0], bg_rm_frame[1], bg_rm_frame[2], bg_rm_frame[3])
+  
+        # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
+
+        return bg_rm_frame
+
 
     def encode_img(self, image, imgFormat=default_format):
         # print(image)
@@ -341,17 +387,35 @@ class camera(ABC):
 
         return depth_image
 
+
+    def get_frame_mt(self, test, frames):
+        ret = self.get_frame()
+        frames[0] = np.copy(ret)
+
+    def get_depth_mt(self, test, frames):
+        ret = self.get_depth()
+        frames[1] = np.copy(ret)
+
+
+    def get_frame_bgr_mt(self):
+        frames1 = [None] * 2
+        f_thread = Thread(target = self.get_frame_mt, args = (self, frames1))
+        f_thread.start()
+        d_thread = Thread(target=self.get_depth_mt, args=(self, frames1))
+        d_thread.start()
+        f_thread.join()
+        d_thread.join()
+        ret = self.remove_background(frames1[1], frames1[0])
+        # if (self.steps % 100 == 0):
+        #     print("--- %s seconds ---" % (start_time - time.time / self.steps))
+        return ret
+
+
     def get_frame_bgr(self):
-        # print("removing background...")
-        # frames = np.empty(2)
-        # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
-        # f_thread.start()
-        # d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
-        # d_thread.start()
+
         frame = self.get_frame()
         depth = self.get_depth()
-        # f_thread.join()
-        # d_thread.join()
+
         # print(frames[0])
         ret = self.remove_background(depth, frame)
 
@@ -360,8 +424,6 @@ class camera(ABC):
         # print(ret.shape)
         
         return ret
-
-
 
 class camera_wrapper(camera):
 
