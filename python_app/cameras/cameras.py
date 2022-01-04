@@ -40,7 +40,7 @@ class camera(ABC):
     transpose = True
     bgr = True
     totalTime = 0
-    steps = 0
+    steps = 1
 
     
     @abstractmethod
@@ -406,8 +406,6 @@ class camera(ABC):
         f_thread.join()
         d_thread.join()
         ret = self.remove_background(frames1[1], frames1[0])
-        # if (self.steps % 100 == 0):
-        #     print("--- %s seconds ---" % (start_time - time.time / self.steps))
         return ret
 
 

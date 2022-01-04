@@ -9,7 +9,7 @@ from aiortc import RTCPeerConnection, RTCSessionDescription
 from data_streams.StreamingTrack import StreamingTrack
 
 # Socket.io details
-NODEJS_URL = 'localhost'
+NODEJS_URL = 'https://hololearn.tudelft.nl/'
 NODEJS_PORT = '4000'
 ROOT = os.path.dirname(__file__)
 CLASSROOM_ID = "defaultClassroom"
