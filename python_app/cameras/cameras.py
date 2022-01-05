@@ -190,7 +190,7 @@ class camera(ABC):
 
 
     def removeWhere(self, depth, frame, index, arr):
-        arr[index] = np.where(depth[index * depth.length / 4:((index + 1) * depth.length / 4) - 1] >= self.mapResRemovalThres, 0, frame[index * frame.length / 4: (index + 1) * frame.length / 4])
+        arr[0] = np.where(depth[int(index * depth.size / 4):int(((index + 1) * depth.size / 4))] >= self.mapResRemovalThres, 0, frame[int(index * frame.size / 4): int((index + 1) * frame.size / 4)])
         
     def remove_background_mt(self, depth, frame):
 
@@ -201,17 +201,23 @@ class camera(ABC):
             return frame
 
 
-        bg_rm_frame = [None] * 4
-        thread1 = Thread(target = self.removeWhere, args = (self, depth, frame, 0, bg_rm_frame))
+        bg_rm_frame1 = [None]
+        bg_rm_frame2 = [None]
+        bg_rm_frame3 = [None]
+        bg_rm_frame4 = [None]
+        depth = depth.flatten()
+        frame = frame.flatten()
+
+        thread1 = Thread(target = self.removeWhere, args = (depth, frame, 0, bg_rm_frame1))
         thread1.start()
 
-        thread2 = Thread(target = self.removeWhere, args = (self, depth, frame, 1, bg_rm_frame))
+        thread2 = Thread(target = self.removeWhere, args = (depth, frame, 1, bg_rm_frame2))
         thread2.start()
 
-        thread3 = Thread(target = self.removeWhere, args = (self, depth, frame, 2, bg_rm_frame))
+        thread3 = Thread(target = self.removeWhere, args = (depth, frame, 2, bg_rm_frame3))
         thread3.start()
         
-        thread4 = Thread(target = self.removeWhere, args = (self, depth, frame, 3, bg_rm_frame))
+        thread4 = Thread(target = self.removeWhere, args = (depth, frame, 3, bg_rm_frame4))
         thread4.start()
 
         thread1.join()
@@ -219,7 +225,11 @@ class camera(ABC):
         thread3.join()
         thread4.join()
 
-        bg_rm_frame = np.concatenate(bg_rm_frame[0], bg_rm_frame[1], bg_rm_frame[2], bg_rm_frame[3])
+        bg_rm_frame = np.concatenate([bg_rm_frame1, bg_rm_frame2])
+        bg_rm_frame = np.concatenate([bg_rm_frame, bg_rm_frame3])
+        bg_rm_frame = np.concatenate([bg_rm_frame, bg_rm_frame4])
+        bg_rm_frame = bg_rm_frame.flatten().reshape((550, 300, 3))
+
   
         # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
@@ -405,7 +415,15 @@ class camera(ABC):
         d_thread.start()
         f_thread.join()
         d_thread.join()
-        ret = self.remove_background(frames1[1], frames1[0])
+        ret = self.remove_background_mt(frames1[1], frames1[0])
+
+        if self.steps % 100 == 0:
+            print(1 / ((time.time() - start_time) / self.steps))
+        self.steps += 1
+        # print(ret.shape)
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+
         return ret
 
 

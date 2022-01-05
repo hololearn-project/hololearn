@@ -582,8 +582,6 @@ function startConnecting(teacher, name) {
       teacherIncomingMediaStream = stream;
       // Set video element to be the stream depending on its ID
       const sid = stream.id;
-      console.log('tracks:');
-      console.log(stream.getTracks());
       if (servRtcStrmsLidars.includes(sid)) {
         if (stream.id == 'depthstream') {
           depthStream = stream;
@@ -593,12 +591,19 @@ function startConnecting(teacher, name) {
         }
         // if it's a lidar stream, figure out which one it is and
         // add to the right element
-        const videoToAdd = document.getElementById(servRtcStrms.get(sid));
-        videoToAdd.srcObject = stream;
-        console.log(stream);
-        videoToAdd.play();
-        if (table == -2) {
-          start3DRecording();
+
+        // selected position == -6 -> user is the projector
+        if (selectedPosition == -6) {
+          if (stream.id == 'videostream') {
+            document.getElementById('teacher').srcObject = stream;
+          }
+        } else {
+          const videoToAdd = document.getElementById(servRtcStrms.get(sid));
+          videoToAdd.srcObject = stream;
+          videoToAdd.play();
+          if (table == -2) {
+            start3DRecording();
+          }
         }
       }
       if (servRtcStrmsScrnsh.includes(sid)) {

@@ -13,15 +13,6 @@ let chatConnected = false;
 // eslint-disable-next-line prefer-const
 let removedBackgroundId = undefined;
 
-const pictureStream = document.getElementById('lidarVideoStream1Canvas');
-const pictureCtx = pictureStream.getContext('2d');
-
-const depthStreamRetrieved = document.getElementById('lidarVideoStream2Canvas');
-const depthCtx = depthStreamRetrieved.getContext('2d');
-
-const teacherCanvas = document.getElementById('teacherCanvas');
-const teacherCtx = teacherCanvas.getContext('2d');
-
 document.getElementById('teacher').style.width = window.innerWidth * 0.9;
 document.getElementById('teacher').style.marginLeft = window.innerWidth * 0.05;
 
