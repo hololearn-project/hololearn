@@ -11,7 +11,7 @@ getCamerasAndMics();
 document.getElementById('camText').style.display = 'block';
 document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
-document.getElementById('select').style.display = 'block';
+// document.getElementById('select').style.display = 'block';
 document.getElementById('buttonGroup').style.width = '60px';
 document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
 

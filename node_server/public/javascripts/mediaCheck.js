@@ -78,7 +78,7 @@ function gotDevicesCamera(mediaDevicesNew, inLecture) {
     selectCamInLecture.style.display = 'block';
     document.getElementById('selectMicInLecture').style.display = 'none';
   } else {
-    select.style.display = 'block';
+    console.log('making block');
   }
   let count = 1;
   mediaDevices.forEach((mediaDevice) => {

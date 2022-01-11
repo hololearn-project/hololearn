@@ -41,6 +41,7 @@ class camera(ABC):
     bgr = True
     totalTime = 0
     steps = 1
+    numThreads = 3
 
     
     @abstractmethod
@@ -70,6 +71,8 @@ class camera(ABC):
             a slice of the given image, centered in the middle
         """
 
+        width = self.cropdimX
+        height = self.cropdimY
 
         midY = int(image.shape[0]/2)
         midX = int(image.shape[1]/2)
@@ -193,16 +196,22 @@ class camera(ABC):
         arr[index] = np.where(depth[int(index * rows / 4):int(((index + 1) * rows / 4))] >= self.mapResRemovalThres, 0, frame[int(index * rows / 4):int(((index + 1) * rows / 4))])
         
     def remove_background_mt(self, depth, frame):
-
         frame = np.delete(frame, 3, 2)
 
         if frame.shape != depth.shape:
             print('frame and depth are not the same shape!')
             return frame
 
-
         bg_rm_frame = [None] * 4
+        # threads = [None] * self.numThreads
+
         rows = depth.shape[0]
+
+        # for i in range(self.numThreads):
+        #     threads[i] = Thread(target = self.removeWhere, args = (depth, frame, i, bg_rm_frame, rows))
+        #     threads[i].start()
+
+
         thread1 = Thread(target = self.removeWhere, args = (depth, frame, 0, bg_rm_frame, rows))
         thread1.start()
 
@@ -215,12 +224,17 @@ class camera(ABC):
         thread4 = Thread(target = self.removeWhere, args = (depth, frame, 3, bg_rm_frame, rows))
         thread4.start()
 
+        # for i in range(self.numThreads):
+        #     threads[i].join()
+
         thread1.join()
         thread2.join()
         thread3.join()
         thread4.join()
 
-        bg_rm_frame = np.concatenate((bg_rm_frame[0], bg_rm_frame[1], bg_rm_frame[2], bg_rm_frame[3]), axis=0)
+        bg_rm_frame = np.concatenate(bg_rm_frame, axis=0)
+
+        # bg_rm_frame = np.concatenate((bg_rm_frame[0], bg_rm_frame[1], bg_rm_frame[2], bg_rm_frame[3]), axis=0)
   
         # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
@@ -407,6 +421,14 @@ class camera(ABC):
         f_thread.join()
         d_thread.join()
         ret = self.remove_background_mt(frames1[1], frames1[0])
+
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+        # print(ret.shape)
+        # print(self.cropdimX)
+        # print(self.dimX)
+        # print(self.cropdimY)
+        # print(self.dimY)
 
         if self.steps % 100 == 0:
             print(1 / ((time.time() - start_time) / self.steps))

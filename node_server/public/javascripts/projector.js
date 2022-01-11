@@ -19,8 +19,8 @@ document.getElementById('teacher').style.marginLeft = window.innerWidth * 0.05;
 getCamerasAndMics();
 document.getElementById('camText').style.display = 'block';
 document.getElementById('micText').style.display = 'block';
-document.getElementById('selectMic').style.display = 'block';
-document.getElementById('select').style.display = 'block';
+// document.getElementById('selectMic').style.display = 'block';
+// document.getElementById('select').style.display = 'block';
 
 /**
  * starts sending the vid.

@@ -36,10 +36,10 @@ class kinectcam(camera):
 
         self.clipping_distance = 2000
         self.k4a = k4a
-        self.dimY = 720
-        self.dimX = 1280
-        self.cropdimX = self.dimX
-        self.cropdimY = self.dimY
+        self.dimY = 400
+        self.dimX = 800
+        self.cropdimX = 800
+        self.cropdimY = 400
 
     def get_frame(self):
         """
