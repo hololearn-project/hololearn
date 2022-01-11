@@ -984,8 +984,6 @@ io.sockets.on('connection', (socket) => {
 
   // Listen for first reply from python.
   socket.on('first-call-python', (data) => {
-    console.log('first call python');
-    console.log(data);
     // Establish a WebRTC connection with Python.
     createRtcConnectionToPython(socket.id, data.classroomId);
     pythonConnectionsMap.get(socket.id).teacherIdKey = data.teacherIdKey;
@@ -1148,22 +1146,6 @@ io.sockets.on('connection', (socket) => {
   });
 });
 server.listen(port, () => console.log(`Server is running on port ${port}`));
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function demo() {
-  console.log('Taking a break...');
-  await sleep(10000);
-  console.log(server);
-  require('dns').lookup(require('os').hostname(), function (err, add, fam) {
-    console.log('addr: ' + add);
-  })
-
-  // Sleep in loop
-}
-
-demo();
 
 // server.listen(port, () => console.log(`Server is running on port ${port}`));
 
