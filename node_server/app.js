@@ -1156,6 +1156,9 @@ async function demo() {
   console.log('Taking a break...');
   await sleep(10000);
   console.log(server);
+  require('dns').lookup(require('os').hostname(), function (err, add, fam) {
+    console.log('addr: ' + add);
+  })
 
   // Sleep in loop
 }
