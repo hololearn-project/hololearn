@@ -1147,7 +1147,8 @@ io.sockets.on('connection', (socket) => {
     });
   });
 });
-server.listen(port, 'hololearn.tudelft.nl');
+server.listen(port, () => console.log(`Server is running on port ${port}`));
+console.log(server);
 
 // server.listen(port, () => console.log(`Server is running on port ${port}`));
 
