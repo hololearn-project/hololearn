@@ -12,7 +12,6 @@ url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f5
 filename = url.split('/')[-1] # this will take only -1 splitted part of the url
 filepath = ""
 
-start_time = time.time()
 
 if(not os.path.isfile(filepath + filename)):
     r = requests.get(url)
@@ -42,6 +41,7 @@ class camera(ABC):
     totalTime = 0
     steps = 1
     numThreads = 3
+    start_time = time.time()
 
     
     @abstractmethod
@@ -80,7 +80,7 @@ class camera(ABC):
         ret = image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
         return ret
         
-    def set_focal_window(self, image, range=700):
+    def set_focal_window(self, image, range=400):
         """
         takes the depth map and normalises the values in the given range around
         the object's point attribute
@@ -420,7 +420,7 @@ class camera(ABC):
         d_thread.start()
         f_thread.join()
         d_thread.join()
-        ret = self.remove_background_mt(frames1[1], frames1[0])
+        ret = self.remove_background(frames1[1], frames1[0])
 
         # cv2.imshow("bgrimg", ret)
         # cv2.waitKey(0)
@@ -431,7 +431,9 @@ class camera(ABC):
         # print(self.dimY)
 
         if self.steps % 100 == 0:
-            print(1 / ((time.time() - start_time) / self.steps))
+            print(1 / ((time.time() - self.start_time) / self.steps))
+            self.start_time = time.time()
+            self.steps = 0
         self.steps += 1
         # print(ret.shape)
 

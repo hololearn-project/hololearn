@@ -60,15 +60,19 @@ function rotateTeacher() {
   switch (currentClass) {
     case 'rotateRight':
       output.classList.add('rotateDown');
+      output.width = window.screen.height*0.9;
       break;
     case 'rotateDown':
       output.classList.add('rotateLeft');
+      output.height = window.screen.width*0.9;
       break;
     case 'rotateLeft':
       output.classList.add('rotateUp');
+      output.width = window.screen.height*0.9;
       break;
     case 'rotateUp':
       output.classList.add('rotateRight');
+      output.height = window.screen.width*0.9;
       break;
   }
 }
