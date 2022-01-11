@@ -984,6 +984,7 @@ io.sockets.on('connection', (socket) => {
 
   // Listen for first reply from python.
   socket.on('first-call-python', (data) => {
+    console.log('first call python');
     console.log(data);
     // Establish a WebRTC connection with Python.
     createRtcConnectionToPython(socket.id, data.classroomId);
