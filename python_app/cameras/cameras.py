@@ -192,6 +192,20 @@ class camera(ABC):
         return bg_rm_frame
 
 
+    def remove_background_set(self, depth, frame):
+
+        frame = np.delete(frame, 3, 2)
+        # depth = np.where(depth > -1, [depth], [depth])
+        # print(depth[400])
+        depth = np.reshape(depth, (self.cropdimX, self.cropdimY, 1))
+        bg_rm_frame = np.where(depth >= 1500, [0,0,0], frame)
+        # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
+
+        # cv2.imshow("bgrimg", bg_rm_frame)
+        # cv2.waitKey(0)
+        return bg_rm_frame
+
+
     def removeWhere(self, depth, frame, index, arr, rows):
         arr[index] = np.where(depth[int(index * rows / 4):int(((index + 1) * rows / 4))] >= self.mapResRemovalThres, 0, frame[int(index * rows / 4):int(((index + 1) * rows / 4))])
         
@@ -359,6 +373,26 @@ class camera(ABC):
                 break
         return color_image
     
+    def process_frame_set(self, color_image):
+        """
+        Takes an image, crops it to a certain size
+
+        Parameters
+        ----------
+        image: [int, int]
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the image data, enoded as BRGA
+        """
+        color_image = self.crop(color_image)
+
+        if (self.transpose): color_image = cv2.transpose(color_image)
+
+        return color_image
+    
+
     def process_depth(self, depth_image):
         """
         Removes background noise, normalises the data around a central point, 
@@ -402,6 +436,23 @@ class camera(ABC):
 
         return depth_image
 
+    def process_depth_set(self, depth_image):
+        """
+        Parameters
+        ----------
+        image: [int, int]
+        
+        Returns
+        -------
+        [int, int]
+            a 3d array containing the depth data, enoded as BRGA
+        """
+        depth_image = self.crop(depth_image)
+
+        if(self.transpose): depth_image = cv2.transpose(depth_image)
+
+        return depth_image
+
 
     def get_frame_mt(self, test, frames):
         ret = self.get_frame()
@@ -409,6 +460,15 @@ class camera(ABC):
 
     def get_depth_mt(self, test, frames):
         ret = self.get_depth()
+        frames[1] = np.copy(ret)
+
+
+    def get_frame_mt_set(self, test, frames):
+        ret = self.get_frame_set()
+        frames[0] = np.copy(ret)
+
+    def get_depth_mt_set(self, test, frames):
+        ret = self.get_depth_set()
         frames[1] = np.copy(ret)
 
 
@@ -421,6 +481,34 @@ class camera(ABC):
         f_thread.join()
         d_thread.join()
         ret = self.remove_background(frames1[1], frames1[0])
+
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+        # print(ret.shape)
+        # print(self.cropdimX)
+        # print(self.dimX)
+        # print(self.cropdimY)
+        # print(self.dimY)
+
+        if self.steps % 100 == 0:
+            print(1 / ((time.time() - self.start_time) / self.steps))
+            self.start_time = time.time()
+            self.steps = 0
+        self.steps += 1
+        # print(ret.shape)
+
+        return ret
+
+
+    def get_frame_bgr_mt_set(self):
+        frames1 = [None] * 2
+        f_thread = Thread(target = self.get_frame_mt_set, args = (self, frames1))
+        f_thread.start()
+        d_thread = Thread(target=self.get_depth_mt_set, args=(self, frames1))
+        d_thread.start()
+        f_thread.join()
+        d_thread.join()
+        ret = self.remove_background_set(frames1[1], frames1[0])
 
         # cv2.imshow("bgrimg", ret)
         # cv2.waitKey(0)

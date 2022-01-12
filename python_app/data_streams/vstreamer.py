@@ -130,7 +130,7 @@ class LidarBGRTrack(VideoStreamTrack):
 
     async def recv(self) -> Frame:
         pts, time_base = await self.next_timestamp()
-        cvframe = self.cam.get_frame_bgr_mt()
+        cvframe = self.cam.get_frame_bgr_mt_set()
         cvframe = np.array(cvframe, dtype=np.uint8)
         frame = VideoFrame.from_ndarray(cvframe, format='bgr24')
         frame.pts = pts
