@@ -88,7 +88,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // initiating the socket server
-const port = 5004;
+const port = 4000;
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 app.use(express.static(__dirname + '/public'));
