@@ -34,12 +34,12 @@ class kinectcam(camera):
         k4a.whitebalance = 4510
         assert k4a.whitebalance == 4510
 
-        self.clipping_distance = 1500
+        self.clipping_distance = 2000
         self.k4a = k4a
         self.dimY = 400
         self.dimX = 800
-        self.cropdimX = 1500
-        self.cropdimY = 500
+        self.cropdimX = 1400
+        self.cropdimY = 400
 
     def get_frame(self):
         """

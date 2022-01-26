@@ -290,6 +290,7 @@ function startConnecting(teacher, name) {
           const AudioContext = window.AudioContext || window.webkitAudioContext;
           const audioContext = new AudioContext();
           delayNode = audioContext.createDelay();
+          // Set time of delay.
           delayNode.delayTime.value = 0.5;
           audioSourceNode = audioContext.createMediaStreamSource(stream);
           audioSourceNode.connect(delayNode);
