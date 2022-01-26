@@ -283,6 +283,18 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').play();
         } else {
           // You are the projector and you are adding the teacher to the page.
+          console.log(seat);
+          console.log(stream.getTracks());
+          audioStreamTeacher = new MediaStream();
+          audioStreamTeacher.addTrack(stream.getAudioTracks()[0]);
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          const audioContext = new AudioContext();
+          delayNode = audioContext.createDelay();
+          delayNode.delayTime.value = 0.5;
+          audioSourceNode = audioContext.createMediaStreamSource(stream);
+          audioSourceNode.connect(delayNode);
+          delayNode.connect(audioContext.destination);
+          // document.getElementById('audioTeacher').srcObject = audioSourceNode;
           document.getElementById('teacher').srcObject = stream;
         }
       } else {
@@ -363,6 +375,7 @@ function startConnecting(teacher, name) {
         if (localMediaStreamWebcam.getAudioTracks()[0] != undefined) {
           teacherStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
         }
+        console.log(seat);
         newPeer.addStream(teacherStream);
       }
     }

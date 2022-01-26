@@ -21,7 +21,7 @@ class kinectcam(camera):
         """
         k4a = PyK4A(
             Config(
-                color_resolution=pyk4a.ColorResolution.RES_1080P,
+                color_resolution=pyk4a.ColorResolution.RES_1440P,
                 depth_mode=pyk4a.DepthMode.NFOV_UNBINNED,
                 synchronized_images_only=True,
             )
@@ -34,12 +34,12 @@ class kinectcam(camera):
         k4a.whitebalance = 4510
         assert k4a.whitebalance == 4510
 
-        self.clipping_distance = 2000
+        self.clipping_distance = 1500
         self.k4a = k4a
         self.dimY = 400
         self.dimX = 800
-        self.cropdimX = 1200
-        self.cropdimY = 400
+        self.cropdimX = 1500
+        self.cropdimY = 500
 
     def get_frame(self):
         """

@@ -65,6 +65,17 @@ async function getCamerasAndMics() {
   });
 }
 
+/**
+ * gets the available mics
+ */
+async function getMics() {
+  await getCameraPermission();
+  await getMicPermission();
+  navigator.mediaDevices.enumerateDevices().then((devices) => {
+    gotDevicesMic(devices);
+  });
+}
+
 
 /**
  * Sets the options in the select tag for cameras.
@@ -79,6 +90,7 @@ function gotDevicesCamera(mediaDevicesNew, inLecture) {
     document.getElementById('selectMicInLecture').style.display = 'none';
   } else {
     console.log('making block');
+    document.getElementById('select').style.display = 'block';
   }
   let count = 1;
   mediaDevices.forEach((mediaDevice) => {
@@ -193,9 +205,9 @@ function cameraChosen(inLecture, deviceId) {
  * @param {string} id id of the chosen device.
  */
 function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
-  if (!isTeacher && !inLecture) {
-    webcam.style.display = 'block';
-  }
+  // if (!isTeacher && !inLecture) {
+  //   webcam.style.display = 'block';
+  // }
   const audioConstraints = {};
   if (inLecture) {
     audioConstraints.deviceId = {exact: id.id};
