@@ -287,16 +287,14 @@ function startConnecting(teacher, name) {
           console.log(stream.getTracks());
           audioStreamTeacher = new MediaStream();
           audioStreamTeacher.addTrack(stream.getAudioTracks()[0]);
-          const AudioContext = window.AudioContext || window.webkitAudioContext;
-          const audioContext = new AudioContext();
-          delayNode = audioContext.createDelay();
-          // Set time of delay.
-          delayNode.delayTime.value = 0.5;
-          audioSourceNode = audioContext.createMediaStreamSource(stream);
-          audioSourceNode.connect(delayNode);
-          delayNode.connect(audioContext.destination);
-          // document.getElementById('audioTeacher').srcObject = audioSourceNode;
-          document.getElementById('teacher').srcObject = stream;
+          // const AudioContext = window.AudioContext || window.webkitAudioContext;
+          // const audioContext = new AudioContext();
+          // delayNode = audioContext.createDelay();
+          // delayNode.delayTime.value = 0.5;
+          // audioSourceNode = audioContext.createMediaStreamSource(stream);
+          // audioSourceNode.connect(delayNode);
+          // delayNode.connect(audioContext.destination);
+          document.getElementById('audioTeacher').srcObject = audioStreamTeacher;
         }
       } else {
         if (seat == -6) {
