@@ -181,3 +181,20 @@ function utf8ArrayToStr(array) {
 
   return out;
 }
+
+const rangeSlider = document.getElementById('rs-range-line');
+const rangeBullet = document.getElementById('rs-bullet');
+
+rangeSlider.addEventListener('input', showSliderValue, false);
+
+/**
+ * shows slider value on the screen
+ */
+function showSliderValue() {
+  rangeBullet.innerHTML = rangeSlider.value + '%';
+  const bulletPosition = (rangeSlider.value /rangeSlider.max);
+  rangeBullet.style.left = (bulletPosition * 578) + 'px';
+}
+
+document.getElementById('container').style.display = 'block';
+
