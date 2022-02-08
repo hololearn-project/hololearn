@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+import multiprocessing
+from multiprocessing.dummy import Process
 import numpy as np
 import math
 import time
@@ -8,6 +10,9 @@ import sys
 from threading import Thread
 import requests
 import os
+import multiprocessing
+
+
 url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f52/raw/07eed8d5486b1abff88d7e34891f1326a9b6a6f5/haarcascade_frontalface_default.xml'
 filename = url.split('/')[-1] # this will take only -1 splitted part of the url
 filepath = ""
@@ -41,8 +46,9 @@ class camera(ABC):
     bgr = True
     totalTime = 0
     steps = 1
-    numThreads = 3
+    numThreads = 6
     start_time = time.time()
+    frames = []
 
     
     @abstractmethod
@@ -246,6 +252,34 @@ class camera(ABC):
         thread2.join()
         thread3.join()
         thread4.join()
+
+        bg_rm_frame = np.concatenate(bg_rm_frame, axis=0)
+
+        # bg_rm_frame = np.concatenate((bg_rm_frame[0], bg_rm_frame[1], bg_rm_frame[2], bg_rm_frame[3]), axis=0)
+  
+        # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
+
+        return bg_rm_frame
+
+    def remove_background_set_mp(self, depth, frame):
+        frame = np.delete(frame, 3, 2)
+
+        if frame.shape != depth.shape:
+            print('frame and depth are not the same shape!')
+            return frame
+
+        bg_rm_frame = [None] * self.numThreads
+        threads = [None] * self.numThreads
+
+        rows = depth.shape[0]
+
+        for i in range(self.numThreads):
+            threads[i] = multiprocessing.Process(target = self.removeWhere, args = (depth, frame, i, bg_rm_frame, rows))
+            threads[i].start()
+
+        for i in range(self.numThreads):
+            threads[i].join()
+
 
         bg_rm_frame = np.concatenate(bg_rm_frame, axis=0)
 
@@ -468,9 +502,17 @@ class camera(ABC):
         ret = self.get_frame_set()
         frames[0] = np.copy(ret)
 
+    def get_frame_mp_set(self):
+        ret = self.get_frame_set()
+        self.frames[0] = np.copy(ret)
+
     def get_depth_mt_set(self, test, frames):
         ret = self.get_depth_set()
         frames[1] = np.copy(ret)
+
+    def get_depth_mp_set(self):
+        ret = self.get_frame_set()
+        self.frames[1] = np.copy(ret)
 
 
     def get_frame_bgr_mt(self):
@@ -527,6 +569,31 @@ class camera(ABC):
         # print(ret.shape)
 
         return ret
+
+    def getPictureFrameContiniously(self):
+        p1 = multiprocessing.Process(target= self.get_frame_mp_set, args=self)
+
+    def getDepthFrameContiniously(self):
+        p1 = multiprocessing.Process(target= self.get_depth_mp_set, args=self)
+        
+    
+
+    def get_frame_bgr_mp_set(self):
+        ret = self.remove_background_set(self.frames[1], self.frames[0])
+
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+        # print(ret.shape)
+
+        if self.steps % 100 == 0:
+            print(1 / ((time.time() - self.start_time) / self.steps))
+            self.start_time = time.time()
+            self.steps = 0
+        self.steps += 1
+        # print(ret.shape)
+
+        return ret
+
 
 
     def get_frame_bgr(self):

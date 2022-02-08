@@ -1,3 +1,4 @@
+import multiprocessing
 from aiortc import VideoStreamTrack
 from av.frame import Frame
 from av import VideoFrame
@@ -107,7 +108,6 @@ class FlagVideoStreamTrack(VideoStreamTrack):
         data_bgr[:, :] = color
         return data_bgr
 
-
 class LidarVideoTrack(VideoStreamTrack):
     def __init__(self, cam: camera_obj):
         super().__init__()
@@ -122,15 +122,19 @@ class LidarVideoTrack(VideoStreamTrack):
         frame.time_base = time_base
         return frame
 
-
 class LidarBGRTrack(VideoStreamTrack):
     def __init__(self, cam: camera_obj):
         super().__init__()
         self.cam = cam
+        frameGetter = multiprocessing.Process(target=self.cam.getPictureFrameContiniously)
+        frameGetter.start()
+        depthGetter = multiprocessing.Process(target=self.cam.getDepthFrameContiniously)
+        depthGetter.start()
+
 
     async def recv(self) -> Frame:
         pts, time_base = await self.next_timestamp()
-        cvframe = self.cam.get_frame_bgr_mt_set()
+        cvframe = self.cam.get_frame_bgr_mp_set()
         cvframe = np.array(cvframe, dtype=np.uint8)
         frame = VideoFrame.from_ndarray(cvframe, format='bgr24')
         frame.pts = pts
