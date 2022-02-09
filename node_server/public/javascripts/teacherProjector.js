@@ -198,3 +198,12 @@ function showSliderValue() {
 
 document.getElementById('container').style.display = 'block';
 
+/**
+ * Changes the cut out distance on python side.
+ */
+function pointChange() {
+  console.log('pointChange');
+  newPoint = document.getElementById('rs-range-line').value;
+  socket.emit('pointChange', newPoint);
+}
+

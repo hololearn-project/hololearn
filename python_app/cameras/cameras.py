@@ -11,7 +11,6 @@ import os
 url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f52/raw/07eed8d5486b1abff88d7e34891f1326a9b6a6f5/haarcascade_frontalface_default.xml'
 filename = url.split('/')[-1] # this will take only -1 splitted part of the url
 filepath = ""
-cutOutDistance = 1850
 
 
 if(not os.path.isfile(filepath + filename)):
@@ -199,7 +198,7 @@ class camera(ABC):
         # depth = np.where(depth > -1, [depth], [depth])
         # print(depth[400])
         depth = np.reshape(depth, (self.cropdimX, self.cropdimY, 1))
-        bg_rm_frame = np.where(depth >= cutOutDistance, [0,0,0], frame)
+        bg_rm_frame = np.where(depth >= self.point, [0,0,0], frame)
         # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
         # cv2.imshow("bgrimg", bg_rm_frame)
@@ -542,6 +541,11 @@ class camera(ABC):
         # print(ret.shape)
         
         return ret
+        
+    def setPoint(self, newPoint):
+        print('we want to change point')
+        self.point = newPoint
+        print("point=", self.point)
 
 class camera_wrapper(camera):
 
