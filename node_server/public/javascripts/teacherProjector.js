@@ -10,8 +10,11 @@ let rotate = 'right';
 getMics();
 document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
-// document.getElementById('buttonGroup').style.width = '60px';
-// document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
+document.getElementById('buttonGroup').style.width = '60px';
+document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
+document.getElementById('buttonGroup').style.position = 'relative';
+document.getElementById('buttonGroup').style.marginTop = '50px';
+
 
 let teacherProjectorScreenShare = undefined;
 
@@ -232,3 +235,14 @@ function rangeChange() {
   socket.emit('rangeChange', newRange);
 }
 
+/**
+ * Opens or closes the video settings for the python side.
+ */
+function openCloseVideoSettings() {
+  const videoSettings = document.getElementById('videoSettings');
+  if (videoSettings.style.display == 'block') {
+    videoSettings.style.display = 'none';
+  } else {
+    videoSettings.style.display = 'block';
+  }
+}

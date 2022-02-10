@@ -50,6 +50,7 @@
         </ul>
       </div>
 
+      
       <div class="container">
         <video id="input_video" class="input_video" muted></video>
         <canvas class="output_canvas" id="output_canvas" width="1280px" height="720px" style="display: none;" muted></canvas>
@@ -63,43 +64,54 @@
         <br>
         <video autoplay="true" id="projectorInput" width="80%" style="display: none; padding-bottom: 10px; max-height: 80%; margin-left: 10%;"></video>
 
-        <h3 id="cutOutText" >Select cut-out distance</h3>        
-  
-        <div id='cutOutContainer' class="container">
+        <div id="buttonGroup" class="buttonGroup">
+          <div class="buttonInGroup" id="settingsButton" onclick="openCloseVideoSettings()">
+            <i id="settingsButton" style="font-size:24px; color: white;" class='fa fa-gear'></i>
+          </div>
+        </div>
+         
+        <div id="videoSettings" style="display: none;">
+
+          <h3 id="cutOutText" >Select cut-out distance</h3>        
     
-          <div class="range-slider">
-            <span style="color: black;" id="rs-bullet" class="rs-label">50%</span>
-            <input onchange="pointChange()" id="rs-range-line-cutOut" class="rs-range" type="range" value="50" min="0" max="100">
+          <div id='cutOutContainer' class="container">
+      
+            <div class="range-slider">
+              <span style="color: black;" id="rs-bullet" class="rs-label">50%</span>
+              <input onchange="pointChange()" id="rs-range-line-cutOut" class="rs-range" type="range" value="50" min="0" max="100">
+              
+            </div>
+            
+            <div class="box-minmax">
+              <span style="color: black;">0%</span><span style="color: black;">100%</span>
+            </div>
             
           </div>
-          
-          <div class="box-minmax">
-            <span style="color: black;">0%</span><span style="color: black;">100%</span>
-          </div>
-          
-        </div>
 
-        <br><br><br>
+          <br><br><br>
 
-        <h3 id="cutOutTextRange" >Select range of foreground</h3>  
+          <h3 id="cutOutTextRange" >Select range of foreground</h3>  
 
-        <div id='rangeContainer' class="container">
-    
-          <div class="range-slider">
-            <span style="color: black;" id="rs-bullet-range" class="rs-label">50%</span>
-            <input onchange="rangeChange()" id="rs-range-line-range" class="rs-range" type="range" value="50" min="0" max="100">
+          <div id='rangeContainer' class="container">
+      
+            <div class="range-slider">
+              <span style="color: black;" id="rs-bullet-range" class="rs-label">50%</span>
+              <input onchange="rangeChange()" id="rs-range-line-range" class="rs-range" type="range" value="50" min="0" max="100">
+            </div>
+            
+            <div class="box-minmax">
+              <span style="color: black;">0%</span><span style="color: black;">100%</span>
+            </div>
             
           </div>
-          
-          <div class="box-minmax">
-            <span style="color: black;">0%</span><span style="color: black;">100%</span>
-          </div>
-          
-        </div>
 
-        <br><br><br><br>
+          <br><br><br><br>
+          <button id="screenShareOption" onclick="startScreenShare()">Share your screen</button>
 
-      <button id="screenShareOption" onclick="startScreenShare()">Share your screen</button>
+          <br><br><br>
+
+      </div>
+
       <!-- <div id="seperationDiv"></div> -->
 
       
@@ -109,7 +121,7 @@
         <video autoplay="true" id="lidarVideoStream1" class="rotateRight" muted></video>
         <i id="rotateIcon" style="font-size:18x; color: white;" class="fas fa-redo" onclick="rotateSelfView()"></i>
 
-        <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 100px;">Log In</button>
+        <button id="logInButton"  onclick="startProjecting()" style="width: 350px; position: absolute; left: calc((100% - 350px) / 2); margin-top: 10px;">Log In</button>
 
       <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
       <script src="./javascripts/getCameraAndMicPerm.js"></script>
