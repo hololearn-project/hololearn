@@ -31,12 +31,12 @@
       <button href="#" onclick="uploadLecture()" id="uploadLectureButton" style="margin-top: 40px;"><span id="save"><i id="saveIcon" style="font-size:24px; position: relative;" class="fa">&#xf093;</i></span></button>
     </div>
 
-    <div id="buttonGroup" class="buttonGroup" style="display: none;">
+    <!-- <div id="buttonGroup" class="buttonGroup" style="display: none;">
       <div class="buttonInGroup" id="3DRecordButton" onclick="record3DClicked()">
           <i id="3DRecordIcon" style="font-size:24px; color: white;" class='fas fa-film'></i>
           <i id="3DStopRecordIcon" style="font-size:24px; color: white; display: none;" class='far fa-stop-circle'></i>
       </div>
-    </div>
+    </div> -->
       <a href="#menu" id="toggle"><span></span></a>
 
       <div id="menu" style="display: none;">
@@ -65,11 +65,29 @@
 
         <h3 id="cutOutText" >Select cut-out distance</h3>        
   
-        <div id='container' class="container">
+        <div id='cutOutContainer' class="container">
     
           <div class="range-slider">
             <span style="color: black;" id="rs-bullet" class="rs-label">50%</span>
-            <input onchange="pointChange()" id="rs-range-line" class="rs-range" type="range" value="50" min="0" max="100">
+            <input onchange="pointChange()" id="rs-range-line-cutOut" class="rs-range" type="range" value="50" min="0" max="100">
+            
+          </div>
+          
+          <div class="box-minmax">
+            <span style="color: black;">0%</span><span style="color: black;">100%</span>
+          </div>
+          
+        </div>
+
+        <br><br><br>
+
+        <h3 id="cutOutTextRange" >Select range of foreground</h3>  
+
+        <div id='rangeContainer' class="container">
+    
+          <div class="range-slider">
+            <span style="color: black;" id="rs-bullet-range" class="rs-label">50%</span>
+            <input onchange="rangeChange()" id="rs-range-line-range" class="rs-range" type="range" value="50" min="0" max="100">
             
           </div>
           

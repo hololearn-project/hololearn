@@ -42,7 +42,7 @@ class camera(ABC):
     steps = 1
     numThreads = 3
     start_time = time.time()
-    range = 750
+    range = 1200
 
     
     @abstractmethod
@@ -549,6 +549,9 @@ class camera(ABC):
         print('we want to change point')
         self.point = newPoint
         print("point=", self.point)
+
+    def setRange(self, newRange):
+        self.range = newRange
 
 class camera_wrapper(camera):
 

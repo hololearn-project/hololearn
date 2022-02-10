@@ -282,19 +282,21 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
-          // You are the projector and you are adding the teacher to the page.
-          console.log(seat);
-          console.log(stream.getTracks());
-          audioStreamTeacher = new MediaStream();
-          audioStreamTeacher.addTrack(stream.getAudioTracks()[0]);
-          // const AudioContext = window.AudioContext || window.webkitAudioContext;
-          // const audioContext = new AudioContext();
-          // delayNode = audioContext.createDelay();
-          // delayNode.delayTime.value = 0.5;
-          // audioSourceNode = audioContext.createMediaStreamSource(stream);
-          // audioSourceNode.connect(delayNode);
-          // delayNode.connect(audioContext.destination);
-          document.getElementById('audioTeacher').srcObject = audioStreamTeacher;
+          const video = document.getElementById('lidarVideoStream1');
+
+          video.srcObject = stream;
+          video.onloadedmetadata = function(e) {
+            video.play();
+            video.muted = true;
+          };
+          const audioCtx = new AudioContext();
+          const source = audioCtx.createMediaStreamSource(stream);
+
+          delayNode = audioCtx.createDelay();
+          delayNode.delayTime.value = 0.2;
+
+          source.connect(delayNode);
+          delayNode.connect(audioCtx.destination);
         }
       } else {
         if (seat == -6) {
@@ -302,9 +304,9 @@ function startConnecting(teacher, name) {
           switch (stream.id) {
             case removedBackgroundStream:
               document.getElementById('projectorInput').srcObject = stream;
-              document.getElementById('selfView').muted = true;
-              document.getElementById('selfView').style.position = 'absolute';
-              document.getElementById('selfView').style.display = 'block';
+              document.getElementById('lidarVideoStream1').muted = true;
+              document.getElementById('lidarVideoStream1').style.position = 'absolute';
+              document.getElementById('lidarVideoStream1').style.display = 'block';
               break;
             default:
               document.getElementById('projectorInput').srcObject = stream;
@@ -609,6 +611,7 @@ function startConnecting(teacher, name) {
             document.getElementById('teacher').srcObject = stream;
           }
         } else {
+          console.log(servRtcStrms.get(sid));
           const videoToAdd = document.getElementById(servRtcStrms.get(sid));
           videoToAdd.srcObject = stream;
           videoToAdd.play();
