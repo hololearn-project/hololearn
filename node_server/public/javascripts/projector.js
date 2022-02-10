@@ -26,18 +26,39 @@ document.getElementById('micText').style.display = 'block';
  * starts sending the vid.
  */
 function startProjecting() {
-  document.getElementById('selectMic').style.display = 'none';
   if (document.getElementById('input') != null) {
     document.getElementById('input').style.display = 'none';
   }
   document.getElementById('select').style.display = 'none';
+  document.getElementById('selectMic').style.display = 'none';
   document.getElementById('camText').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
-  document.getElementById('webcam').style.display = 'none';
+
+  // document.getElementById('webcam').style.display = 'none';
   document.getElementById('webcam').muted = true;
+
+  // Create self-view
+  if (document.getElementById('webcam').srcObject != undefined) {
+    const webcamWidth = document.getElementById('webcam').srcObject.getVideoTracks()[0].getSettings().width;
+    const webcamHeight = document.getElementById('webcam').srcObject.getVideoTracks()[0].getSettings().height;
+
+    if (webcamWidth > webcamHeight) {
+      document.getElementById('webcam').width = 200;
+    } else {
+      document.getElementById('webcam').height = 200;
+    }
+  }
+
+
+  document.getElementById('webcam').style.position = 'absolute';
+  document.getElementById('webcam').style.right = '20px';
+  document.getElementById('webcam').style.bottom = '20px';
+
+
   document.getElementById('logInButton').style.display = 'none';
   document.getElementById('replayButton').style.display = 'none';
   document.getElementById('body').style.background = 'black';
+
   startConnecting(false, 'projector');
 }
 

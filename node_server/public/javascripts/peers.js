@@ -597,7 +597,6 @@ function startConnecting(teacher, name) {
       if (servRtcStrmsLidars.includes(sid)) {
         if (stream.id == 'depthstream') {
           depthStream = stream;
-          console.log(stream.getVideoTracks()[0].getSettings());
         } else {
           imageStream = stream;
         }

@@ -42,6 +42,7 @@ class camera(ABC):
     steps = 1
     numThreads = 3
     start_time = time.time()
+    range = 750
 
     
     @abstractmethod
@@ -198,7 +199,9 @@ class camera(ABC):
         # depth = np.where(depth > -1, [depth], [depth])
         # print(depth[400])
         depth = np.reshape(depth, (self.cropdimX, self.cropdimY, 1))
-        bg_rm_frame = np.where(depth >= self.point, [0,0,0], frame)
+        # bg_rm_frame = np.where(depth >= self.point, [0,0,0], frame)
+        bg_rm_frame = np.where(abs(depth - self.point) > self.range, [0,0,0], frame)
+
         # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
         # cv2.imshow("bgrimg", bg_rm_frame)

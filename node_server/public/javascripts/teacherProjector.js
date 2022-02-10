@@ -19,6 +19,10 @@ let teacherProjectorScreenShare = undefined;
  * starts sending the vid.
  */
 function startProjecting() {
+  if (typeof localMediaStreamWebcam === 'undefined') {
+    alert('Please select a microphone.');
+    return;
+  }
   document.getElementById('input_video').srcObject = localMediaStreamWebcam;
   webcam.muted = true;
   document.getElementById('selectMic').style.display = 'none';
@@ -27,9 +31,7 @@ function startProjecting() {
   document.getElementById('buttonGroup').style.display = 'block';
 
   document.getElementById('logInButton').style.display = 'none';
-  teacherStream = document.getElementById('output_canvas').captureStream(25);
   teacherStream.addTrack(webcam.srcObject.getAudioTracks()[0]);
-  document.getElementById('selfView').srcObject = teacherStream;
 
   // eslint-disable-next-line max-len
   if (document.getElementById('selfView').classList[0] == 'rotateLeft' || document.getElementById('selfView').classList[0] == 'rotateRight') {

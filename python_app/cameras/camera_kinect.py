@@ -39,7 +39,7 @@ class kinectcam(camera):
         self.dimY = 400
         self.dimX = 800
         self.cropdimX = 1400
-        self.cropdimY = 400
+        self.cropdimY = 500
 
     def get_frame(self):
         """
