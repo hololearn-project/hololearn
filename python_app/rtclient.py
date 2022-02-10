@@ -10,7 +10,7 @@ from data_streams.StreamingTrack import StreamingTrack
 
 # Socket.io details
 NODEJS_URL = 'localhost'
-NODEJS_PORT = '80'
+NODEJS_PORT = '5004'
 ROOT = os.path.dirname(__file__)
 CLASSROOM_ID = "defaultClassroom"
 

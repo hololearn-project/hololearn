@@ -89,13 +89,21 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // initiating the socket server
-const port = 80;
+const port = 4000;
+const pyPort = 5004;
 const server = http.createServer(app);
+const pyServer = http.createServer();
 const io = require('socket.io')(server);
+const pyIo = require('socket.io')(pyServer);
 app.use(express.static(__dirname + '/public'));
 
 io.sockets.on('error', (e) => console.log(e));
 io.sockets.on('connect_error', (err) => {
+  console.log(`connect_error due to ${err.message}`);
+});
+
+pyIo.sockets.on('error', (e) => console.log(e));
+pyIo.sockets.on('connect_error', (err) => {
   console.log(`connect_error due to ${err.message}`);
 });
 
@@ -1152,7 +1160,8 @@ io.sockets.on('connection', (socket) => {
     });
   });
 });
-server.listen(port, () => console.log(`Server is running on port ${port}`));
+server.listen(port, () => console.log(`(app)Server is running on port ${port}`));
+pyServer.listen(pyPort, () => console.log(`pyServer is running on port ${pyPort}`));
 
 // server.listen(port, () => console.log(`Server is running on port ${port}`));
 
