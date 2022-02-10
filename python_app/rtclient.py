@@ -123,12 +123,17 @@ async def main(pc, mediatracks):
             -------
             none
             """
+            print("message received: ", msg)
             if isinstance(msg, str) and msg.startswith("ping"):
                 reply = "pong" + msg[4:]
                 channel.send(reply)
                 print(msg)
                 print(reply)
 
+            if isinstance(msg, str) and msg.startswith("pointChange"):
+                newPoint = int(msg[12:])
+                streamingTrack.cam.setPoint(newPoint)
+                print("updated camera point to ", streamingTrack.cam.point)
     @pc.on("connectionstatechange")
     async def state_change():
         """

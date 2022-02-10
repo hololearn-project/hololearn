@@ -198,7 +198,7 @@ class camera(ABC):
         # depth = np.where(depth > -1, [depth], [depth])
         # print(depth[400])
         depth = np.reshape(depth, (self.cropdimX, self.cropdimY, 1))
-        bg_rm_frame = np.where(depth >= 1500, [0,0,0], frame)
+        bg_rm_frame = np.where(depth >= self.point, [0,0,0], frame)
         # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
         # cv2.imshow("bgrimg", bg_rm_frame)
@@ -541,6 +541,11 @@ class camera(ABC):
         # print(ret.shape)
         
         return ret
+        
+    def setPoint(self, newPoint):
+        print('we want to change point')
+        self.point = newPoint
+        print("point=", self.point)
 
 class camera_wrapper(camera):
 
