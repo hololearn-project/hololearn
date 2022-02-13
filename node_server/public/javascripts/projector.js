@@ -19,8 +19,11 @@ document.getElementById('teacher').style.marginLeft = window.innerWidth * 0.05;
 getCamerasAndMics();
 document.getElementById('camText').style.display = 'block';
 document.getElementById('micText').style.display = 'block';
-// document.getElementById('selectMic').style.display = 'block';
-// document.getElementById('select').style.display = 'block';
+
+document.getElementById('buttonGroup').style.width = '60px';
+document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
+document.getElementById('buttonGroup').style.marginTop = '50px';
+
 
 /**
  * starts sending the vid.
@@ -36,6 +39,7 @@ function startProjecting() {
 
   // document.getElementById('webcam').style.display = 'none';
   document.getElementById('webcam').muted = true;
+  document.getElementById('delayContainer').style.display = 'block';
 
   // Create self-view
   if (document.getElementById('webcam').srcObject != undefined) {
@@ -170,4 +174,40 @@ async function removeBackgroundWithDepth() {
   }
 
   teacherCtx.putImageData(pictureData, 0, 0);
+}
+
+const delaySliderRange = document.getElementById('rs-range-line-delay');
+const rangeBulletRange = document.getElementById('rs-bullet-delay');
+
+delaySliderRange.addEventListener('input', showSliderValueRange, false);
+
+/**
+ * shows slider value on the screen
+ */
+function showSliderValueRange() {
+  rangeBulletRange.innerHTML = delaySliderRange.value/100 + 's';
+  const bulletpositionDelay = (delaySliderRange.value /delaySliderRange.max);
+  rangeBulletRange.style.left = (bulletpositionDelay * 578) + 'px';
+}
+
+/**
+ * Changes the delay of audio of the teacher.
+ */
+function delayChange() {
+  newDelay = document.getElementById('rs-range-line-delay').value/100;
+  if (delayNode != undefined) {
+    delayNode.delayTime.value = newDelay;
+  }
+}
+
+/**
+ * Opens or closes the video settings for the python side.
+ */
+function openCloseVideoSettings() {
+  const videoSettings = document.getElementById('motherOfContainers');
+  if (videoSettings.style.display == 'block') {
+    videoSettings.style.display = 'none';
+  } else {
+    videoSettings.style.display = 'block';
+  }
 }

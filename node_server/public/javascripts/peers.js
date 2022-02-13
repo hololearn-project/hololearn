@@ -5,13 +5,14 @@ let teacherPeer = null;
 let teacherWebcam = undefined;
 const activeconnections = new Map();
 positionalHearing = false;
+let delayNode = undefined;
 
 let lastRotation = 0;
 // eslint-disable-next-line prefer-const
 let rotationNow = 0;
 let socket = null;
 let newUser = true;
-let lastNoti
+let lastNoti = undefined;
 const servRtcStrms = new Map();
 const servRtcStrmsLidars = ['videostream', 'depthstream'];
 const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
@@ -293,10 +294,11 @@ function startConnecting(teacher, name) {
           const source = audioCtx.createMediaStreamSource(stream);
 
           delayNode = audioCtx.createDelay();
-          delayNode.delayTime.value = 0.2;
+          delayNode.delayTime.value = 0.5;
 
           source.connect(delayNode);
           delayNode.connect(audioCtx.destination);
+          document.getElementById('buttonGroup').style.display = 'block';
         }
       } else {
         if (seat == -6) {

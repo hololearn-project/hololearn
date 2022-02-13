@@ -223,7 +223,7 @@ document.getElementById('rangeContainer').style.display = 'block';
  * Changes the cut out distance on python side.
  */
 function pointChange() {
-  newPoint = document.getElementById('rs-range-line').value;
+  newPoint = document.getElementById('rs-range-line-cutOut').value;
   socket.emit('pointChange', newPoint);
 }
 

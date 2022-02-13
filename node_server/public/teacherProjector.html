@@ -70,51 +70,49 @@
           </div>
         </div>
          
-        <div id="videoSettings" style="display: none;">
-
-          <h3 id="cutOutText" >Select cut-out distance</h3>        
-    
-          <div id='cutOutContainer' class="container">
+        <div id="videoSettings" style="display: none; margin-left: calc((100% - 650px) / 2); background: rgba(0, 0, 0, 0.2); width: 650px; padding: 20px; border-radius: 10px; border: 1px solid black;">
+          <div style="border: 1px solid black; border-radius: 10px; width: 615px; background: rgba(255, 255, 255, 0.2); padding-bottom: 10px;">
+            <h3 id="cutOutText" >Select cut-out distance</h3>        
       
-            <div class="range-slider">
-              <span style="color: black;" id="rs-bullet" class="rs-label">50%</span>
-              <input onchange="pointChange()" id="rs-range-line-cutOut" class="rs-range" type="range" value="50" min="0" max="100">
+            <div id='cutOutContainer' class="container">
+        
+              <div class="range-slider">
+                <span style="color: black;" id="rs-bullet" class="rs-label">50%</span>
+                <input onchange="pointChange()" id="rs-range-line-cutOut" class="rs-range" type="range" value="50" min="0" max="100">
+                
+              </div>
+              
+              <div class="box-minmax">
+                <span style="color: black;">0%</span><span style="color: black;">100%</span>
+              </div>
               
             </div>
-            
-            <div class="box-minmax">
-              <span style="color: black;">0%</span><span style="color: black;">100%</span>
+          </div>
+          <br><br><br>
+
+          <div style="border: 1px solid black; border-radius: 10px; width: 615px; background: rgba(255, 255, 255, 0.2); padding-bottom: 10px;">
+
+            <h3 id="cutOutTextRange" >Select range of foreground</h3>  
+
+            <div id='rangeContainer' class="container">
+        
+              <div class="range-slider">
+                <span style="color: black;" id="rs-bullet-range" class="rs-label">50%</span>
+                <input onchange="rangeChange()" id="rs-range-line-range" class="rs-range" type="range" value="50" min="0" max="100">
+              </div>
+              
+              <div class="box-minmax">
+                <span style="color: black;">0%</span><span style="color: black;">100%</span>
+              </div>
+              
             </div>
-            
           </div>
 
           <br><br><br>
-
-          <h3 id="cutOutTextRange" >Select range of foreground</h3>  
-
-          <div id='rangeContainer' class="container">
-      
-            <div class="range-slider">
-              <span style="color: black;" id="rs-bullet-range" class="rs-label">50%</span>
-              <input onchange="rangeChange()" id="rs-range-line-range" class="rs-range" type="range" value="50" min="0" max="100">
-            </div>
-            
-            <div class="box-minmax">
-              <span style="color: black;">0%</span><span style="color: black;">100%</span>
-            </div>
-            
-          </div>
-
-          <br><br><br><br>
           <button id="screenShareOption" onclick="startScreenShare()">Share your screen</button>
 
-          <br><br><br>
-
-      </div>
-
-      <!-- <div id="seperationDiv"></div> -->
-
-      
+        </div>
+        <br><br><br>
 
         <video autoplay="true" id="webcam" class="rotateRight" style="display: none; height: 300px;"></video>
 

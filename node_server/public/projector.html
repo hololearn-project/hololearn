@@ -1,6 +1,7 @@
 <html>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 	<head>
+    <link rel="stylesheet" href="stylesheets/rangeSliderDepthRemoval.css">
     <link rel="stylesheet" href="stylesheets/toggleMenu.css">
 		<link rel="stylesheet" href="stylesheets/style.css">
     <link rel="stylesheet" href="stylesheets/mediaCheck.css">
@@ -55,6 +56,27 @@
         <video id='lidarVideoStream1' autoplay="true" muted style="display: none"></video>
         <video id='lidarVideoStream2' autoplay="true" muted style="display: none"></video>
 
+        <div id="motherOfContainers" style="display: none; margin-left: calc((100% - 650px) / 2); background: rgba(255, 255, 255, 0.2); width: 650px; padding: 20px; border-radius: 5px; border: 1px solid white;">
+        <div id='delayContainer' class="container" style="align-self: center;">
+          <h3 id="cutOutTextRange" >Select the delay</h3>  
+
+    
+          <div class="range-slider">
+            <span style="color: black;" id="rs-bullet-delay" class="rs-label">0.5s</span>
+            <input onchange="delayChange()" id="rs-range-line-delay" class="rs-range" type="range" value="50" min="0" max="100">
+          </div>
+          
+          <div class="box-minmax">
+            <span style="color: black;">0%</span><span style="color: black;">100%</span>
+          </div>
+          
+        </div>
+      </div>
+      <div id="buttonGroup" class="buttonGroup" style="position: absolute; bottom: 50px; display: none;">
+        <div class="buttonInGroup" id="settingsButton" onclick="openCloseVideoSettings()">
+          <i id="settingsButton" style="font-size:24px; color: white;" class='fa fa-gear'></i>
+        </div>
+      </div>
         <!-- <canvas id='lidarVideoStream1Canvas' width="500" height="540" style="display: none"></canvas>
         <canvas id='lidarVideoStream2Canvas' width="500" height="540" style="display: none"></canvas> -->
 
