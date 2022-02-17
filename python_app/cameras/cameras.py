@@ -551,6 +551,7 @@ class camera(ABC):
         print("point=", self.point)
 
     def setRange(self, newRange):
+        newRange = 600 + newRange/100 * 1200
         self.range = newRange
 
 class camera_wrapper(camera):
