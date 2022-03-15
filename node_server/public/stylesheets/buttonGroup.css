@@ -16,12 +16,12 @@
     width: 60px;
     float: left;
     /* border-left: solid white 1px; */
-    border-radius: 2px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
 .buttonInGroup:hover {
-    background: rgba(80, 80, 80, 0.6);
+    background: rgba(180, 180, 180, 1);
 }
 
 .dropUpButton, #newMessage {

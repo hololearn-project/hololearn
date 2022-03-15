@@ -8,6 +8,7 @@ const cors = require('cors');
 const http = require('http');
 const wrtc = require('wrtc');
 const Peer = require('simple-peer');
+let pythonWhisperer = undefined;
 
 const sqlite3 = require('sqlite3').verbose();
 
@@ -228,6 +229,7 @@ function createRtcConnectionToPython(id, classroomId) {
 
   // Create a data channel in the peer connection.
   const dc = pc.createDataChannel('chat');
+  pythonWhisperer = dc;
 
   /**
    * Define data channel routes.
@@ -388,6 +390,14 @@ console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
   let screenLectureUploadTeacher = undefined;
   let screenLectureUploadScreenShare = undefined;
+  socket.on('pointChange', (newPoint) => {
+    newPoint = newPoint / 100 * 2000 + 1000;
+    pythonWhisperer.send('pointChange ' + newPoint);
+  });
+  socket.on('rangeChange', (newRange) => {
+    newPoint = newRange / 100 * 2000 + 200;
+    pythonWhisperer.send('rangeChange ' + newRange);
+  });
   socket.on('uploadCurrentLecture', (lectureName) => {
     if (screenLectureUploadTeacher == undefined || screenLectureUploadTeacher == '') {
       return;

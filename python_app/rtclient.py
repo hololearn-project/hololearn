@@ -9,7 +9,7 @@ from aiortc import RTCPeerConnection, RTCSessionDescription
 from data_streams.StreamingTrack import StreamingTrack
 
 # Socket.io details
-NODEJS_URL = 'localhost'
+NODEJS_URL = '145.94.148.186'
 NODEJS_PORT = '4000'
 ROOT = os.path.dirname(__file__)
 CLASSROOM_ID = "defaultClassroom"
@@ -126,8 +126,15 @@ async def main(pc, mediatracks):
             if isinstance(msg, str) and msg.startswith("ping"):
                 reply = "pong" + msg[4:]
                 channel.send(reply)
-                print(msg)
-                print(reply)
+
+            if isinstance(msg, str) and msg.startswith("pointChange"):
+                newPoint = int(msg[12:])
+                streamingTrack.cam.setPoint(newPoint)
+            
+            if isinstance(msg, str) and msg.startswith("rangeChange"):
+                newRange= int(msg[12:])
+                streamingTrack.cam.setRange(newRange)
+
 
     @pc.on("connectionstatechange")
     async def state_change():
@@ -213,9 +220,10 @@ if __name__ == "__main__":
     mediatracks = []
     # mediatracks.append(webcam)
     # mediatracks.append(flagstream)
-    mediatracks.append(streamingTrack.depthTrack)
-    mediatracks.append(streamingTrack.videoTrack)
+    # mediatracks.append(streamingTrack.depthTrack)
     # mediatracks.append(streamingTrack.videoTrack)
+    mediatracks.append(streamingTrack.flag)
+    mediatracks.append(streamingTrack.BGRTrack)
 
     # Keep the asyncio loop running until connection closed or
     # keyboard interrupt found.

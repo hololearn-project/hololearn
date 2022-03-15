@@ -7,13 +7,14 @@ removedBackgroundStream = '';
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 userClassroomId = 'defaultClassroom';
 let rotate = 'right';
-getCamerasAndMics();
-document.getElementById('camText').style.display = 'block';
+getMics();
 document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
-document.getElementById('select').style.display = 'block';
 document.getElementById('buttonGroup').style.width = '60px';
 document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
+document.getElementById('buttonGroup').style.position = 'relative';
+document.getElementById('buttonGroup').style.marginTop = '50px';
+
 
 let teacherProjectorScreenShare = undefined;
 
@@ -21,28 +22,28 @@ let teacherProjectorScreenShare = undefined;
  * starts sending the vid.
  */
 function startProjecting() {
+  if (typeof localMediaStreamWebcam === 'undefined') {
+    alert('Please select a microphone.');
+    return;
+  }
   document.getElementById('input_video').srcObject = localMediaStreamWebcam;
   webcam.muted = true;
   document.getElementById('selectMic').style.display = 'none';
-  document.getElementById('select').style.display = 'none';
-  document.getElementById('camText').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
   document.getElementById('webcam').style.display = 'none';
-  document.getElementById('buttonGroup').style.display = 'block';
+  // document.getElementById('buttonGroup').style.display = 'block';
 
   document.getElementById('logInButton').style.display = 'none';
-  teacherStream = document.getElementById('output_canvas').captureStream(25);
-  teacherStream.addTrack(webcam.srcObject.getAudioTracks()[0]);
-  document.getElementById('selfView').srcObject = teacherStream;
+  teacherStream = webcam.srcObject;
 
   // eslint-disable-next-line max-len
-  if (document.getElementById('selfView').classList[0] == 'rotateLeft' || document.getElementById('selfView').classList[0] == 'rotateRight') {
+  if (document.getElementById('lidarVideoStream1').classList[0] == 'rotateLeft' || document.getElementById('lidarVideoStream1').classList[0] == 'rotateRight') {
     const ratio = 1280 / 720;
-    document.getElementById('selfView').style.right = 10 - (ratio * 300 - 300) / 2;
-    document.getElementById('selfView').style.bottom = 10 + (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.right = 10 - (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.bottom = 10 + (ratio * 300 - 300) / 2;
   } else {
-    document.getElementById('selfView').style.right = 10;
-    document.getElementById('selfView').style.bottom = 10;
+    document.getElementById('lidarVideoStream1').style.right = 10;
+    document.getElementById('lidarVideoStream1').style.bottom = 10;
   }
 
   startConnecting(false, 'teacherProjector');
@@ -52,7 +53,7 @@ function startProjecting() {
  * Rotates the video of the teacher.
  */
 function rotateSelfView() {
-  const selfView = document.getElementById('selfView');
+  const selfView = document.getElementById('lidarVideoStream1');
   const currentClass = selfView.classList[0];
   selfView.classList.remove(currentClass);
   switch (currentClass) {
@@ -71,13 +72,13 @@ function rotateSelfView() {
   }
 
   // eslint-disable-next-line max-len
-  if (document.getElementById('selfView').classList[0] == 'rotateLeft' || document.getElementById('selfView').classList[0] == 'rotateRight') {
+  if (document.getElementById('lidarVideoStream1').classList[0] == 'rotateLeft' || document.getElementById('lidarVideoStream1').classList[0] == 'rotateRight') {
     const ratio = 1280 / 720;
-    document.getElementById('selfView').style.right = 10 - (ratio * 300 - 300) / 2;
-    document.getElementById('selfView').style.bottom = 10 + (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.right = 10 - (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.bottom = 10 + (ratio * 300 - 300) / 2;
   } else {
-    document.getElementById('selfView').style.right = 10;
-    document.getElementById('selfView').style.bottom = 10;
+    document.getElementById('lidarVideoStream1').style.right = 10;
+    document.getElementById('lidarVideoStream1').style.bottom = 10;
   }
 }
 
@@ -186,64 +187,62 @@ function utf8ArrayToStr(array) {
   return out;
 }
 
-const videoElement = document.getElementsByClassName('input_video')[0];
-const canvasElement = document.getElementsByClassName('output_canvas')[0];
-const canvasCtx = canvasElement.getContext('2d');
-const landmarkContainer = document.getElementsByClassName('landmark-grid-container')[0];
-// const grid = new LandmarkGrid(landmarkContainer);
+const rangeSlider = document.getElementById('rs-range-line-cutOut');
+const rangeBullet = document.getElementById('rs-bullet');
 
-// eslint-disable-next-line require-jsdoc
+rangeSlider.addEventListener('input', showSliderValue, false);
+
 /**
- * Gets the results
- * @param {Object} results the results
+ * shows slider value on the screen
  */
-function onResults(results) {
-  if (!results.poseLandmarks) {
-    // grid.updateLandmarks([]);
-    return;
-  }
-
-  canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  canvasCtx.drawImage(results.segmentationMask, 0, 0,
-      canvasElement.width, canvasElement.height);
-
-  // Only overwrite existing pixels.
-  canvasCtx.globalCompositeOperation = 'source-out';
-  canvasCtx.fillStyle = '#000000';
-  canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
-
-  // Only overwrite missing pixels.
-  canvasCtx.globalCompositeOperation = 'destination-atop';
-  canvasCtx.drawImage(
-      results.image, 0, 0, canvasElement.width, canvasElement.height);
-
-  // canvasCtx.globalCompositeOperation = 'source-over';
-  // drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS,
-  //     {color: '#00FF00', lineWidth: 4});
-  // drawLandmarks(canvasCtx, results.poseLandmarks,
-  //     {color: '#FF0000', lineWidth: 2});
-  // canvasCtx.restore();
-
-  // grid.updateLandmarks(results.poseWorldLandmarks);
+function showSliderValue() {
+  rangeBullet.innerHTML = rangeSlider.value + '%';
+  const bulletPosition = (rangeSlider.value /rangeSlider.max);
+  rangeBullet.style.left = (bulletPosition * 578) + 'px';
 }
 
-const pose = new Pose({locateFile: (file) => {
-  return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-}});
-pose.setOptions({
-  modelComplexity: 0, // complexity of the model. 0,1,2, the higher the number the more accurate but also more latency.
-  smoothLandmarks: true,
-  enableSegmentation: true,
-  smoothSegmentation: true,
-  minDetectionConfidence: 0.97,
-  minTrackingConfidence: 0.97,
-});
-pose.onResults(onResults);
+const rangeSliderRange = document.getElementById('rs-range-line-range');
+const rangeBulletRange = document.getElementById('rs-bullet-range');
 
-const camera = new Camera(videoElement, {
-  onFrame: async () => {
-    await pose.send({image: videoElement});
-  },
-});
-camera.start();
+rangeSliderRange.addEventListener('input', showSliderValueRange, false);
+
+/**
+ * shows slider value on the screen
+ */
+function showSliderValueRange() {
+  rangeBulletRange.innerHTML = rangeSliderRange.value + '%';
+  const bulletPositionRange = (rangeSliderRange.value /rangeSliderRange.max);
+  rangeBulletRange.style.left = (bulletPositionRange * 578) + 'px';
+}
+
+document.getElementById('cutOutContainer').style.display = 'block';
+document.getElementById('rangeContainer').style.display = 'block';
+
+
+/**
+ * Changes the cut out distance on python side.
+ */
+function pointChange() {
+  newPoint = document.getElementById('rs-range-line-cutOut').value;
+  socket.emit('pointChange', newPoint);
+}
+
+/**
+ * Changes the range of what is not background on python side.
+ */
+function rangeChange() {
+  newRange = document.getElementById('rs-range-line-range').value;
+  socket.emit('rangeChange', newRange);
+}
+
+/**
+ * Opens or closes the video settings for the python side.
+ */
+function openCloseVideoSettings() {
+  const videoSettings = document.getElementById('videoSettings');
+  if (videoSettings.style.display == 'block') {
+    videoSettings.style.display = 'none';
+  } else {
+    videoSettings.style.display = 'block';
+  }
+}

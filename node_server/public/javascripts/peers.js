@@ -5,13 +5,25 @@ let teacherPeer = null;
 let teacherWebcam = undefined;
 const activeconnections = new Map();
 positionalHearing = false;
+let delayNode = undefined;
 
 let lastRotation = 0;
 // eslint-disable-next-line prefer-const
 let rotationNow = 0;
 let socket = null;
 let newUser = true;
-let lastNoti = '';
+let lastNoti = undefined;
+const servRtcStrms = new Map();
+const servRtcStrmsLidars = ['videostream', 'depthstream'];
+const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
+
+
+servRtcStrms.set('videostream', 'lidarVideoStream1');
+servRtcStrms.set('depthstream', 'lidarVideoStream2');
+
+// vars useful for receiving teacher streams
+let teacherIncomingMediaStream = null;
+let teacherTracks = [];
 
 socket = io.connect(window.location.origin);
 
@@ -274,8 +286,22 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
-          // You are the projector and you are adding the teacher to the page.
-          document.getElementById('teacher').srcObject = stream;
+          const video = document.getElementById('lidarVideoStream1');
+
+          video.srcObject = stream;
+          video.onloadedmetadata = function(e) {
+            video.play();
+            video.muted = true;
+          };
+          const audioCtx = new AudioContext();
+          const source = audioCtx.createMediaStreamSource(stream);
+
+          delayNode = audioCtx.createDelay();
+          delayNode.delayTime.value = 0.5;
+
+          source.connect(delayNode);
+          delayNode.connect(audioCtx.destination);
+          document.getElementById('buttonGroup').style.display = 'block';
         }
       } else {
         if (seat == -6) {
@@ -283,9 +309,9 @@ function startConnecting(teacher, name) {
           switch (stream.id) {
             case removedBackgroundStream:
               document.getElementById('projectorInput').srcObject = stream;
-              document.getElementById('selfView').muted = true;
-              document.getElementById('selfView').style.position = 'absolute';
-              document.getElementById('selfView').style.display = 'block';
+              document.getElementById('lidarVideoStream1').muted = true;
+              document.getElementById('lidarVideoStream1').style.position = 'absolute';
+              document.getElementById('lidarVideoStream1').style.display = 'block';
               break;
             default:
               document.getElementById('projectorInput').srcObject = stream;
@@ -354,6 +380,7 @@ function startConnecting(teacher, name) {
         if (localMediaStreamWebcam.getAudioTracks()[0] != undefined) {
           teacherStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
         }
+        console.log(seat);
         newPeer.addStream(teacherStream);
       }
     }
@@ -581,11 +608,20 @@ function startConnecting(teacher, name) {
         }
         // if it's a lidar stream, figure out which one it is and
         // add to the right element
-        const videoToAdd = document.getElementById(servRtcStrms.get(sid));
-        videoToAdd.srcObject = stream;
-        videoToAdd.play();
-        if (table == -2) {
-          start3DRecording();
+
+        // selected position == -6 -> user is the projector
+        if (selectedPosition == -6) {
+          if (stream.id == 'videostream') {
+            document.getElementById('teacher').srcObject = stream;
+          }
+        } else {
+          console.log(servRtcStrms.get(sid));
+          const videoToAdd = document.getElementById(servRtcStrms.get(sid));
+          videoToAdd.srcObject = stream;
+          videoToAdd.play();
+          if (table == -2) {
+            start3DRecording();
+          }
         }
       }
       if (servRtcStrmsScrnsh.includes(sid)) {
@@ -604,6 +640,18 @@ function startConnecting(teacher, name) {
         }
         start3DAudioUser(0, stream);
       }
+      // if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
+      //    undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
+      //   removeBackgroundWithDepth();
+
+      // }
+      // if (sid == 'webcamstream') {
+      //   webcamStream = stream;
+      //   cameraMesh.start();
+      //   document.getElementById('webcamVid').srcObject = stream;
+      //   console.log('set it correctly');
+      //   teacherWebcamOn = true;
+      // }
     });
 
     teacherPeer.on('track', (track, stream) => {
