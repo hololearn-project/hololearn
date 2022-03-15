@@ -863,11 +863,11 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('getUsersTablesNext', () => {
-    const userToSend = [];
+    const usersToSend = [];
     users.forEach((user) => {
-      userToSend.push({table: user.table});
+      usersToSend.push({table: user.table});
     });
-    socket.emit('userTablesNext', userToSend);
+    socket.emit('userTablesNext', usersToSend);
   });
 
   socket.on('getUsersTablesPrevious', () => {

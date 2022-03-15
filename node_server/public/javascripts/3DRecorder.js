@@ -1,12 +1,10 @@
+/* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 let readyToRecord = false;
 let recording3D = false;
 
-// eslint-disable-next-line prefer-const
 let depthStream = undefined;
-// eslint-disable-next-line prefer-const
 let imageStream = undefined;
-// eslint-disable-next-line prefer-const
 let screenShareStream = undefined;
 
 let mediaRecorderDepthStream = undefined;
@@ -27,21 +25,25 @@ let countTemp = 0;
  * Starts the 3D recording if all components are ready and record is clicked.
  */
 function start3DRecording() {
+  // Check if record button is clicked and all streams are defined, otherwise nothing happens.
   if (readyToRecord && depthStream != undefined && imageStream != undefined && screenShareStream != undefined) {
     const options = {mimeType: 'video/webm'};
 
+    // Create a new recorder for the depthStream
     mediaRecorderDepthStream = new MediaRecorder(depthStream, options);
     mediaRecorderDepthStream.ondataavailable = function(e) {
       handleDataAvailable3DRecorder(e, {chunks: recordedChunksDepthStream, name: 'depth'});
     };
     mediaRecorderDepthStream.start();
 
+    // Create a new recorder for the imageStream
     mediaRecorderImageStream = new MediaRecorder(imageStream, options);
     mediaRecorderImageStream.ondataavailable = function(e) {
       handleDataAvailable3DRecorder(e, {chunks: recordedChunksImageStream, name: 'image'});
     };
     mediaRecorderImageStream.start();
 
+    // Create a new recorder for the screenShareStream
     const screenshareScreen = document.getElementById('screenshare');
     mediaRecorderScreenShareStream = new MediaRecorder(screenshareScreen.srcObject, options);
     mediaRecorderScreenShareStream.ondataavailable = function(e) {
@@ -50,44 +52,10 @@ function start3DRecording() {
     mediaRecorderScreenShareStream.start();
   }
 }
-/**
- * Downloads multiple files
- * @param {[string]} urls urls of files to be downloaded.
- */
-function downloadMultipleFiles(urls) {
-  const zip = new JSZip();
-  let count = 0;
-
-  let today = new Date();
-  const dd = String(today.getDate()).padStart(2, '0');
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const yyyy = today.getFullYear();
-
-  today = mm + '/' + dd + '/' + yyyy;
-  const zipFilename = 'HoloLearnLecture' + today + '.zip';
-
-  urls.forEach(function(url) {
-    countTemp = countTemp + 1;
-    const filename = url.name + '.webm';
-    // loading a file and add it in a zip file
-    JSZipUtils.getBinaryContent(url.url, function(err, data) {
-      if (err) {
-        throw err; // or handle the error
-      }
-      zip.file(filename, data, {binary: true});
-      count++;
-      if (count == urls.length) {
-        zip.generateAsync({type: 'blob'}).then(function(content) {
-          saveAs(content, zipFilename);
-        });
-      }
-    });
-  });
-}
 
 /**
- * Pushes, then downloads the data.
- * @param {Event} event - the event that occured
+ * downloads the data.
+ * @param {Event} event - Event that holds the data
  * @param {[]} recordedChunksMethod - empty array to push the recorded chunks in.
  */
 function handleDataAvailable3DRecorder(event, recordedChunksMethod) {
@@ -100,7 +68,8 @@ function handleDataAvailable3DRecorder(event, recordedChunksMethod) {
 }
 
 /**
- * Downloads a zipfile when all streams have url in urls.
+ * Stores the recorded video's and when all video's are stored it will show a div on the screen,
+ * where the user can give the record a name and upload to the server.
  * @param {[MediaStream]} recordedChunksMethod the recording in an array.
  */
 function download3DRecorder(recordedChunksMethod) {
@@ -109,37 +78,34 @@ function download3DRecorder(recordedChunksMethod) {
   });
   const url = URL.createObjectURL(blob);
   if (recordedChunksMethod.name == 'depth') {
-    // const downloadUrl = {url: url, name: 'depthStream'};
-    // urls.push(downloadUrl);
+    // Every blob gets a name so every recording is stored correctly on the server.
     const downloadBlob = {blob: blob, name: 'depthStream'};
     blobs.push(downloadBlob);
   }
 
   if (recordedChunksMethod.name == 'image') {
-    // const downloadUrl2 = {url: url, name: 'imageStream'};
-    // urls.push(downloadUrl2);
+    // Every blob gets a name so every recording is stored correctly on the server.
     const downloadBlob2 = {blob: blob, name: 'imageStream'};
     blobs.push(downloadBlob2);
   }
 
   if (recordedChunksMethod.name == 'screen') {
-    // const downloadUrl3 = {url: url, name: 'screenShareStream'};
-    // urls.push(downloadUrl3);
+    // Every blob gets a name so every recording is stored correctly on the server.
     const downloadBlob3 = {blob: blob, name: 'screenShareStream'};
     blobs.push(downloadBlob3);
   }
 
+  // Only make the user able to upload the data to the server when all 3 blobs are stored.
   if (blobs.length >= 3) {
     document.getElementById('recordingNameInputDiv').style.display = 'block';
   }
 }
 
 /**
- * uploads the lecture to the online database.
+ * uploads the lecture to the database on the server.
  */
 function uploadLecture() {
   let depthBlob = undefined;
-  // downloadMultipleFiles(urls);
   blobs.forEach((blobObject) => {
     if (blobObject.name == 'depthStream') {
       depthBlob = blobObject.blob;
@@ -151,7 +117,10 @@ function uploadLecture() {
       screenShareBlob = blobObject.blob;
     }
   });
+  // Gets the name of the lecture that was inputted by the teacher on the page.
   const lectureName = document.getElementById('recordingNameInput').value;
+  // When receiving all the lectures it will check if the inputted name is an unique name
+  // if not it will throw an alert saying that the name is not unique.
   socket.on('allLectures', (lectures) => {
     let unique = true;
     lectures.forEach((onlineLecture) => {
@@ -160,7 +129,9 @@ function uploadLecture() {
       }
     });
     if (unique) {
+      // The name of the lecture is unique so the lecture is uploaded to the server.
       socket.emit('uploadLecture', lectureName, depthBlob, imageBlob, screenShareBlob);
+      // Removes the div where the lecture can be uploaded from the screen since it has been uploaded now.
       document.getElementById('recordingNameInputDiv').style.display = 'none';
       console.log('lecture uploaded!');
     } else {
@@ -174,7 +145,9 @@ function uploadLecture() {
  * Records if all streams are available or stops recording if it is recording.
  */
 function record3DClicked() {
+  // Checks if it is already recording
   if (readyToRecord) {
+    // if it is it stops the recording.
     recording3D = false;
     if (mediaRecorderDepthStream != undefined) {
       mediaRecorderDepthStream.stop();
@@ -185,10 +158,14 @@ function record3DClicked() {
     if (mediaRecorderScreenShareStream != undefined) {
       mediaRecorderScreenShareStream.stop();
     }
+    // The button on the screen is changed to the correct button icon.
     document.getElementById('3DRecordIcon').style.display = 'block';
     document.getElementById('3DStopRecordIcon').style.display = 'none';
     readyToRecord = false;
   } else {
+    // If it is not recording it will try and start the recording.
+    // If not all streams are present it will still show to the user that the recording mode is on
+    // It will start the recording when the needed streams are present.
     readyToRecord = true;
     document.getElementById('3DRecordIcon').style.display = 'none';
     document.getElementById('3DStopRecordIcon').style.display = 'block';
@@ -198,10 +175,9 @@ function record3DClicked() {
 }
 
 /**
- * Appears the file selecting tag.
+ * Appears the file selecting div.
  */
 function rewatchLecture() {
-  // document.getElementById('inputDiv').style.display = 'block';
   displayLectures();
 }
 
