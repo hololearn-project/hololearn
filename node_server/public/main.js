@@ -37,7 +37,8 @@ let teacherModel = new THREE.BufferGeometry();
 let userClassroomId = 'defaultClassroom';
 
 // Adds the possible positions
-positions.push({a: 0, b: 7, c: 27});
+// positions.push({a: 0, b: 7, c: 27});
+positions.push(undefined);
 positions.push({a: -5, b: 7, c: 5});
 positions.push({a: 0, b: 7, c: 6});
 positions.push({a: 5, b: 7, c: 5});
@@ -82,7 +83,7 @@ async function loadNet() { // this one is more efficient
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
-  document.getElementById('connectButton').style.display = 'none';
+  // document.getElementById('connectButton').style.display = 'none';
 
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
@@ -112,7 +113,11 @@ async function load3DEnvironment() {
 
   initModel();
   renderer.setSize( width, height - 1);
+
+  renderer.xr.enabled = true;
   document.body.appendChild( renderer.domElement );
+
+  document.body.appendChild(VRButton.createButton(renderer));
 
   const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
 
@@ -245,7 +250,8 @@ async function load3DEnvironment() {
   }
 
   function animate() {
-    requestAnimationFrame( animate );
+    // requestAnimationFrame( animate );
+    renderer.setAnimationLoop( animate );
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;
