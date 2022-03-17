@@ -55,6 +55,24 @@ const SOCKET_ADDRESS = 'http://localhost:8080';
 const CLASSROOM_BLACKBOARD_IMAGE = '/assets/fourier.png';
 const WEBCAM_FRAMES_PER_SECOND = 20;
 const DEBUG = true;
+
+camera = new THREE.PerspectiveCamera(35, width / height, 1, 15);
+camera.position.set(0, 0.6, 3); // Set the initial Camera Position.
+
+const cameraGroup = new THREE.Group();
+cameraGroup.position.set(0, -1, 1.5);  // Set the initial VR Headset Position.
+
+// When user turn on the VR mode.
+renderer.xr.addEventListener('sessionstart', function() {
+  scene.add(cameraGroup);
+  cameraGroup.add(camera);
+});
+// When user turn off the VR mode.
+renderer.xr.addEventListener('sessionend', function () {
+  scene.remove(cameraGroup);
+  cameraGroup.remove(camera);
+});
+
 loadNet();
 /**
  * Load neural network from tensorflow. This does the background removal for us.
