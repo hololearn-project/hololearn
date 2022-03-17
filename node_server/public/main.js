@@ -73,6 +73,7 @@ renderer.xr.addEventListener('sessionend', function () {
   cameraGroup.remove(camera);
 });
 
+
 loadNet();
 /**
  * Load neural network from tensorflow. This does the background removal for us.
