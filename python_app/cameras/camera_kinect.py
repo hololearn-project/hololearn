@@ -64,8 +64,8 @@ class kinectcam(camera):
 
     def get_frame_set(self):
         """
-        Retrieves an image from the camera output, and calls the process_frame method
-        to process the image.
+        Retrieves an image from the camera output, and calls the process_frame_set method
+        to process the image without face tracking.
 
         Parameters
         ----------
@@ -83,6 +83,20 @@ class kinectcam(camera):
         return self.process_frame_set(color)
 
     def get_frame_unproc(self):
+        """
+        calls the get_capture method to retrieve the unprocessed image data from the kinect,
+        and returns the transformed_color attribute of the result.
+        transformed_color is used so that the depth data is aligned with the colour data
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the image data, enoded as BRGA
+        """
         capture = self.k4a.get_capture()
         return capture.transformed_color
 

@@ -33,7 +33,7 @@ class camera(ABC):
     cropdimY = 300
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
-    default_format=".jpg"
+    default_format=".png"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
     transpose = True
@@ -179,7 +179,26 @@ class camera(ABC):
             return x_0, x_n, y_0, y_n
 
     def remove_background(self, depth, frame):
+        """
+        sets all colour pixels in places where the depth is too great
+        to black
 
+        Parameters
+        ----------
+        depth: [int, int]
+            the depth data for a given frame, as processed by process_depth
+            assumed to be grayscale, meaning all 3 colour channels have the same value
+        frame: [int, int]
+            the colour data for a given frame, 
+            assumed to have the alpha channel included
+
+        Returns
+        -------
+        [int, int]
+            the colour data with all pixels with a depth value
+            is greater than a threshold are set to black
+
+        """
         frame = np.delete(frame, 3, 2)
 
         if frame.shape != depth.shape:
@@ -187,14 +206,35 @@ class camera(ABC):
             return frame
         
         bg_rm_frame = np.where(depth >= self.mapResRemovalThres, 0, frame)
-  
+
         bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
         return bg_rm_frame
 
 
     def remove_background_set(self, depth, frame):
+        """
+        sets all colour pixels in places where the depth is too great
+        to black. The difference between this and remove_background is that
+        it is assumed that the depth data provided has been processed by
+        process_depth_set, rather than process_depth, the difference between
+        these methods are explained in process_depth_set
 
+        Parameters
+        ----------
+        depth: [int, int]
+            the depth data for a given frame, as processed by process_depth_set
+        frame: [int, int]
+            the colour data for a given frame, 
+            assumed to have the alpha channel included
+
+        Returns
+        -------
+        [int, int]
+            the colour data with all pixels with a depth value
+            is greater than a threshold are set to black
+
+        """
         frame = np.delete(frame, 3, 2)
         # depth = np.where(depth > -1, [depth], [depth])
         # print(depth[400])
@@ -208,8 +248,9 @@ class camera(ABC):
         # cv2.waitKey(0)
         return bg_rm_frame
 
-
+    #TODO: get rid of mt?
     def removeWhere(self, depth, frame, index, arr, rows):
+
         arr[index] = np.where(depth[int(index * rows / 4):int(((index + 1) * rows / 4))] >= self.mapResRemovalThres, 0, frame[int(index * rows / 4):int(((index + 1) * rows / 4))])
         
     def remove_background_mt(self, depth, frame):
@@ -259,8 +300,22 @@ class camera(ABC):
 
 
     def encode_img(self, image, imgFormat=default_format):
-        # print(image)
-        ret, buffer = cv2.imencode('.png', image)
+        """
+        takes an image as an array and returns it encoded in the given format
+
+        Parameters
+        ----------
+        image: [int, int]
+            the image data, works withour or without the alpha channel
+        imgFormat: String
+            string representign the format of the resulting image (eg. .png, .jpg])
+        Returns
+        -------
+        Bytes
+            the bytes class representation of the input image, encoded in the given format
+
+        """
+        ret, buffer = cv2.imencode(imgFormat, image)
 
         return buffer.tobytes()
 
@@ -378,7 +433,8 @@ class camera(ABC):
     
     def process_frame_set(self, color_image):
         """
-        Takes an image, crops it to a certain size
+        Takes an image, crops it to a certain size, the face's position is not updated as
+        facial tracking is not used
 
         Parameters
         ----------
@@ -441,6 +497,9 @@ class camera(ABC):
 
     def process_depth_set(self, depth_image):
         """
+        does minimal processing of the depth data, the most important difference
+        between this and not _set is that the the depth values are not normalised
+        around a mid point, and it is not written to 3 channels.
         Parameters
         ----------
         image: [int, int]
@@ -456,7 +515,7 @@ class camera(ABC):
 
         return depth_image
 
-
+    #TODO remove these?
     def get_frame_mt(self, test, frames):
         ret = self.get_frame()
         frames[0] = np.copy(ret)
@@ -545,12 +604,41 @@ class camera(ABC):
         
         return ret
         
-    def setPoint(self, newPoint):
+    def setPoint(self, newPoint):        
+        """
+        function to set the new midpoint used when removing the background
+        in cases where face tracking isnt being used to update the center point
+        automatically
+
+        Parameters
+        ----------
+        newPoint: int
+            the value to set point to
+
+        Returns
+        -------
+        none
+
+        """
         print('we want to change point')
         self.point = newPoint
         print("point=", self.point)
 
     def setRange(self, newRange):
+        """
+        function to set the range, which is used to calculate the area around
+        the midpoint to treat as "foreground" and as such not remove
+
+        Parameters
+        ----------
+        newRange: int
+            the value to set range to
+
+        Returns
+        -------
+        none
+
+        """
         newRange = 600 + newRange/100 * 1200
         self.range = newRange
 
@@ -609,7 +697,7 @@ class camera_wrapper(camera):
 
     def get_frame_mt(self, out):
         """
-        Calls the get_frame method of the wrapper's camera attribute, and returns the result
+        Calls the get_frame_mt method of the wrapper's camera attribute, and returns the result
 
         Parameters
         ----------
@@ -654,17 +742,22 @@ class camera_wrapper(camera):
         out[1] = self.cam.get_depth()
 
     def get_frame_bgr(self):
+        """
+        Calls the get_frame and get_depth method of the wrapper's camera attribute, 
+        and returns the result of the remove_background method
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the image data, enoded as BRGA
+        """
         print("removing background... in wrapper")
-        # frames = np.empty(2)
-        # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
-        # f_thread.start()
-        # d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
-        # d_thread.start()
         frame = self.cam.get_frame()
         depth = self.cam.get_depth()
-        # f_thread.join()
-        # d_thread.join()
-        # print(frames[0])
         ret = self.remove_background(depth, frame)
         
         return ret
@@ -675,4 +768,16 @@ class camera_wrapper(camera):
 
 
     def get_unproc_frame(self):
+        """
+        Calls the get_frame_unproc method, this is primarily used for testing
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the image data, enoded as BRGA
+        """
         return self.crop(self.cam.get_frame_unproc()[:,:,:3])
