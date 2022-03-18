@@ -1,7 +1,12 @@
+// Javascript that does the editing of the lectures of the 3D environment that are stored on the server.
+
 /* eslint-disable no-unused-vars */
+/* eslint-disable valid-jsdoc */
+
 let lectureToRemove = undefined;
 let loaded = false;
 
+// Adds all lectures to the overview on the page.
 socket.on('allLectures', (lectures) => {
   if (!loaded) {
     lectures.forEach((lecture) => {
@@ -11,18 +16,21 @@ socket.on('allLectures', (lectures) => {
   }
 });
 
+// When the server responds that the database has been edited,
+// reload the webpage to see the new content.
 socket.on('editCompleted', () => {
   location.reload();
 });
 
+// Gets all lecture right when the user loads the webpage.
 socket.emit('getLectures');
 
-// eslint-disable-next-line valid-jsdoc
 /**
  * Adds a lecture to the overview of lectures.
  * @param {lecture object} lecture the lceture to be added.
  */
 function addCell(lecture) {
+  // Copies the example cell and then edits the copy and adds it to the list of all lectures.
   const newCell = document.getElementById('exampleCell').cloneNode(true);
   newCell.innerHTML += lecture.name;
   newCell.style.display = 'block';
@@ -32,6 +40,7 @@ function addCell(lecture) {
   };
   newCell.childNodes[1].onclick = function() {
     lectureToRemove = lecture;
+    // Before a lecture gets removed, an alert is shown to make sure it was not an accident.
     document.getElementById('alertBox').style.display = 'block';
   };
 
@@ -44,9 +53,8 @@ function addCell(lecture) {
   document.getElementById('listEditor').appendChild(newDiv);
 }
 
-// eslint-disable-next-line valid-jsdoc
 /**
- *  Removes lecture from database.
+ *  Removes lecture from the server.
  */
 function removeLectureFromDatabase() {
   socket.emit('removeLecture', lectureToRemove);
@@ -55,11 +63,12 @@ function removeLectureFromDatabase() {
 }
 
 /**
- *  Removes lecture from database.
+ *  Edits a lecture from the server. Only the name can be changed.
  */
 function editLectureFromDatabase() {
   socket.on('allLectures', (lectures) => {
     let unique = true;
+    // Checks if the new lecture name is unique otherwise the user has to pick a different name.
     lectures.forEach((onlineLecture) => {
       if (document.getElementById('nameEditInput').value == onlineLecture.name) {
         unique = false;

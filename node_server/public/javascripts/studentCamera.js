@@ -1,30 +1,33 @@
-// eslint-disable-next-line no-unused-vars
+// Javascript that handles the camera  and incoming video streams off students.
+
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-const */
+
+
+// Arrays that store the video streams and elements needed for removing the background other students.
 const students = new Array(positions.length + 1);
 const sources = new Array(positions.length + 1);
-// eslint-disable-next-line no-unused-vars
 const textures = new Array(positions.length + 1);
 const ctxs = new Array(positions.length + 1);
-// eslint-disable-next-line no-unused-vars
 const rotations = new Array(positions.length + 1);
 const ctxStreams = new Array(positions.length + 1);
-// eslint-disable-next-line no-unused-vars
 const canvasWebcams = new Array(positions.length + 1);
+
 let imageData = '';
+
 const output = document.querySelector('#output');
 const ctxOutput = output.getContext('2d');
+
 const canvasWebcam = document.querySelector('#canvasWebcam');
 const ctxWebcam = canvasWebcam.getContext('2d');
 
-// eslint-disable-next-line no-unused-vars
 let outputStream = output.captureStream(); // used in this file
-// eslint-disable-next-line prefer-const
+
 let localMediaStreamWebcam = null;
 
-// eslint-disable-next-line no-unused-vars
 const video = document.querySelector('#videoElement');
-const canvas = document.querySelector('#canvasElement');
 
-// eslint-disable-next-line no-unused-vars
+const canvas = document.querySelector('#canvasElement');
 const ctx2 = canvas.getContext('2d');
 
 
