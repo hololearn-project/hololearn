@@ -142,3 +142,30 @@ class intelcam(camera):
 
         return self.process_depth(depth_image)
 
+    def get_depth_set(self):
+        """
+        Retrieves a depth image form the camera output, 
+        and calls process_depth method to process the image.
+
+        Parameters
+        ----------
+        none
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the depth data, enoded as BRGA
+        """
+        frames = self.pipeline.wait_for_frames()
+
+        aligned_frames = self.align.process(frames)
+
+        aligned_depth_frame = aligned_frames.get_depth_frame()
+
+        if not aligned_depth_frame:
+            print("Invalid frame", file=sys.stderr)
+
+        depth_image = np.asanyarray(aligned_depth_frame.get_data())
+
+        return self.process_depth_set(depth_image)
+
