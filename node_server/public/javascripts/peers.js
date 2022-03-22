@@ -206,6 +206,7 @@ function startConnecting(teacher, name) {
     let newPeer;
     context1.clearRect(0, 0, 500, 500);
     context1.fillText('Someone New', 0, 60);
+    console.log('should be up now...');
     // One peer needs to be the initiator, herefor the seat is used
     // since two users can't have the same seat if they connect.
     if (seat > selectedPosition || seat == -1) {
