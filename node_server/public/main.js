@@ -5,6 +5,8 @@
 // three.js init variables
 let canvas1 = document.createElement('canvas');
 let context1 = canvas1.getContext('2d');
+let texture1 = new THREE.Texture(canvas1);
+
 let teacherWebcamOn = false;
 let positions = [];
 let width = window.innerWidth;
@@ -156,22 +158,21 @@ async function load3DEnvironment() {
    * Initializes the whole system, including the 3D environment
    */
   async function init() {
-    context1.font = "Bold 50px Arial";
+    context1.font = "Bold 20px Arial";
     context1.fillStyle = "rgba(255,0,0,1)";
     context1.fillText('Hello, world!', 0, 60);
 
     // canvas contents will be used for a texture
-    let texture1 = new THREE.Texture(canvas1);
     texture1.needsUpdate = true;
 
     let material1 = new THREE.MeshBasicMaterial({ map: texture1, side: THREE.DoubleSide });
     material1.transparent = true;
 
     let mesh1 = new THREE.Mesh(
-        new THREE.PlaneGeometry(50, 10),
+        new THREE.PlaneGeometry(20, 10),
         material1,
     );
-    mesh1.position.set(25, 10, -5);
+    mesh1.position.set(0, 10, -15);
     // Note that mesh1 gets added to the shape and not to the scene
 
     scene.add(mesh1);
@@ -283,6 +284,7 @@ async function load3DEnvironment() {
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;
+    texture1.needsUpdate = true;
     for (let i = 0; i < textures.length; i++) {
       if (textures[i] != undefined) {
         textures[i].needsUpdate = true;
