@@ -1,23 +1,29 @@
-// const e = require("cors");
-// eslint-disable-next-line no-unused-vars
+// Javascript that handles communication between users in the environment.
+// To reduce load on the server and improve performance, users make connections between each other.
+// These connections can be used to send video, audio and messages.
+
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-const */
+
 let teacherSocket = '';
 let teacherPeer = null;
 let teacherWebcam = undefined;
+
+// All connections the user has with other users.
 const activeconnections = new Map();
+
 positionalHearing = false;
 let delayNode = undefined;
 
 let lastRotation = 0;
-// eslint-disable-next-line prefer-const
 let rotationNow = 0;
 let socket = null;
-let newUser = true;
 let lastNoti = undefined;
+
+// Used to check if a stream is a LiDar stream or screen share stream and get the correct location to place it.
 const servRtcStrms = new Map();
 const servRtcStrmsLidars = ['videostream', 'depthstream'];
 const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
-
-
 servRtcStrms.set('videostream', 'lidarVideoStream1');
 servRtcStrms.set('depthstream', 'lidarVideoStream2');
 
@@ -25,10 +31,10 @@ servRtcStrms.set('depthstream', 'lidarVideoStream2');
 let teacherIncomingMediaStream = null;
 let teacherTracks = [];
 
+// Connection to the server.
 socket = io.connect(window.location.origin);
 
-socket.emit('getUsers');
-
+// Updates the face mesh of the teacher.
 socket.on('faceMeshTeacher', (array) => {
   if (!isTeacher) {
     facialLandmarksClient = array;
@@ -49,60 +55,13 @@ socket.on('teacherStreamChanged', () => {
   }
 });
 
-socket.on('users', (users) => {
-  const options = document.getElementsByName('room');
-  const roomsFilled = [];
-  for (let i = 0; i < options.length; i++) {
-    roomsFilled.push(0);
-  }
-  users.forEach((user) => {
-    if (user.seat != 0) {
-      roomsFilled[user.table - 1]++;
-    }
-  });
-  options.forEach((option) => {
-    const text = option.value + ':   ' +
-        roomsFilled[option.value - 1] + '/' + (positions.length - 1);
-    option.innerHTML = text;
-  });
-});
-
-socket.on('userSeats', (seats) => {
-  for (let i = 0; i < seats.length; i++) {
-    if (!seats[i].seat <= 0) {
-      const elemId = 'Seat' + seats[i].seat;
-      document.getElementById(elemId).style.border = 'solid rgb(255, 0, 0)';
-      const tag = document.createElement('p');
-      let name = seats[i].name.substring(0, 5);
-      if (seats[i].name.length > 5) {
-        name = name + '...';
-        tag.style.fontSize = '15px';
-      }
-      const text = document.createTextNode(name);
-      tag.appendChild(text);
-      const element = document.getElementById(elemId);
-      element.innerHTML = '';
-      element.appendChild(tag);
-    }
-  }
-});
-
-socket.on('seat taken', () => {
-  alert('seat already taken');
-  location.reload();
-});
-
 /**
  * Start the connection to the server.
  *
- * @param {Object} teacher the teacher to connect to
+ * @param {boolean} teacher if the user is a teacher
  * @param {String} name the name of the user
  */
-// eslint-disable-next-line no-unused-vars, require-jsdoc
 function startConnecting(teacher, name) {
-  // const peerConfig = {iceServers: [
-  //   {urls: ["stun:stun.l.google.com:19302"]}]};
-
   /**
    * adds a student to the environment on the right position.
    * @param {string} id - id of the user that will be added
@@ -128,6 +87,7 @@ function startConnecting(teacher, name) {
       return;
     }
 
+    // Connections to teacher are without sounds unless the speaker function is used.
     if (isTeacher) {
       stream.getAudioTracks()[0].enabled = false;
     }
@@ -136,10 +96,12 @@ function startConnecting(teacher, name) {
       removeVideoElement(seat);
     }
 
+    // a, b and c are the position of the other user.
     a = positions[seat].a;
     b = positions[seat].b;
     c = positions[seat].c;
-    // Add canvas element to display student on.
+
+    // Canvas where snapshots of the students will be used
     const student = document.createElement('CANVAS');
     student.setAttribute('id', 'Student' + seat);
     student.style.display = 'none';
@@ -148,6 +110,7 @@ function startConnecting(teacher, name) {
     const studentsDiv = document.querySelector('#students');
     studentsDiv.appendChild(student);
 
+    // The source video of the student.
     const studentStream = document.createElement('VIDEO');
     studentStream.srcObject = stream;
     studentStream.setAttribute('id', 'StudentStream' + seat);
@@ -157,6 +120,7 @@ function startConnecting(teacher, name) {
     studentStream.muted = true;
     studentsDiv.appendChild(studentStream);
 
+    // Canvas to display the student on without background.
     const studentCtx = document.createElement('CANVAS');
     studentCtx.setAttribute('id', 'StudentCtx' + seat);
     studentCtx.style.display = 'none';
@@ -169,7 +133,7 @@ function startConnecting(teacher, name) {
     ctxStreams[seat] = ctxStudentStream;
     canvasWebcams[seat] = studentCtx;
 
-
+    // Adds the student with removed background to the environment.
     const textureStudent = new THREE.Texture(student);
     const geometry4 = new THREE.PlaneGeometry(5, 5);
     studentCanvas2 = new THREE.Mesh( geometry4, new THREE.MeshPhongMaterial( {
@@ -232,15 +196,16 @@ function startConnecting(teacher, name) {
   }
 
   /**
-   * creates a new connection with a user
+   * Creates a new connection with a user.
    *
    * @param {string} id - id of the new user
    * @param {number} seat - seat of the new user
    * @return {Object} the peer created
    */
   function createNewpeer(id, seat) {
-    // let newPeer = new SimplePeer({ initiator: true, config: peerConfig });
     let newPeer;
+    // One peer needs to be the initiator, herefor the seat is used
+    // since two users can't have the same seat if they connect.
     if (seat > selectedPosition || seat == -1) {
       newPeer = new SimplePeer({initiator: true});
     } else {
@@ -251,9 +216,11 @@ function startConnecting(teacher, name) {
       const string = utf8ArrayToStr(data);
       switch (string) {
         case 'streamId received':
+          // Used when 2D video was used for background removal.
           newPeer.addStream(teacherStreamRemovedBackground);
           break;
         case 'screenShareId Received':
+          // Peer has received the id of the screenshare video. Now we can send it.
           newPeer.addStream(teacherProjectorScreenShare);
           break;
         default:
@@ -261,6 +228,8 @@ function startConnecting(teacher, name) {
             splitted = string.split(' ');
             switch (splitted[0]) {
               case 'mute':
+                // If the coneInnerAngle is 0 the sound is not send into any direction.
+                // This is used for the directional audio.
                 panners[splitted[1]].coneInnerAngle = 0;
                 break;
               case 'unmute':
@@ -277,15 +246,15 @@ function startConnecting(teacher, name) {
       socket.emit('signal', id, data);
     });
     newPeer.on('stream', (stream) => {
-      console.log('new stream: ' + stream);
-      // peer is the teacher
       if (seat == -5) {
-        // selectedPosition -7 -> you are the slides player.
+        // peer is the teacher
         if (selectedPosition == -7) {
+          // selectedPosition -7 -> you are the slides player.
           // adding the screen share to the page.
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
+          // You are the projector.
           const video = document.getElementById('lidarVideoStream1');
 
           video.srcObject = stream;
@@ -293,6 +262,8 @@ function startConnecting(teacher, name) {
             video.play();
             video.muted = true;
           };
+
+          // Add delay into audio.
           const audioCtx = new AudioContext();
           const source = audioCtx.createMediaStreamSource(stream);
 
@@ -323,29 +294,34 @@ function startConnecting(teacher, name) {
               break;
           }
         } else {
+          // Peer is an student in the environment.
           addVideoElement(id, stream, seat);
           start3DAudioUser(seat, stream);
         }
       }
-      // make async broadcast call
     });
+    // Just connected to new peer.
     newPeer.on('connect', () => {
       // seat -7 means the peer is the slide player.
       if (seat == -7) {
         if (teacherProjectorScreenShare != undefined && selectedPosition != -6) {
+          // You are the teacher
           newPeer.addStream(teacherProjectorScreenShare);
         }
       }
       // selected position == -6 means you are the projector
       if (selectedPosition == -6) {
         if (document.getElementById('webcam').srcObject != undefined) {
+          // Send stream of projector side to the teacher.
           newPeer.addStream(document.getElementById('webcam').srcObject);
         }
       }
       console.log('Connected!');
       if (positionalHearing) {
+        // Positional hearing makes only people you are turning towards can hear you.
         activeconnections.forEach((connection) => {
           if (unmutedSeats.includes(connection.seat) && connection.seat != 0 &! isTeacher) {
+            // send message to people that you are turned towards that they need to unmute you.
             connection.peerObject.send(String('unmute ' + selectedPosition));
           }
         });
@@ -353,42 +329,44 @@ function startConnecting(teacher, name) {
         unmutedSeats.forEach((seat) => {
           const index = mutedPositions.indexOf(seat);
           if (index > -1) {
+            // Remove users that are in the unmuted list from the mute list.
             mutedPositions.splice(index, 1);
           }
         });
         activeconnections.forEach((connection) => {
           if (mutedPositions.includes(parseInt(connection.seat)) && connection.seat != 0 &! isTeacher) {
+            // Send message to people that are on the mute list that they need to mute you.
             connection.peerObject.send(String('mute ' + selectedPosition));
           }
         });
         setPositionalHearing(rotationNow);
       }
     });
+
     newPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);
     });
     newPeer.on('close', () => {
       newPeer.destroy();
-      // if(errorCounter < N_RECONNECT_TO_PEER_ATTEMPTS) {
-      //     createNewpeer(id, seat);
-      // }
-      // errorCounter = errorCounter + 1;
     });
+
     // if table is -4 it is the projector or teacher
     if (table == -4 && (typeof teacherStream) !== 'undefined') {
       if (seat != -7) {
+        // If the peer is not the slide shower then send your audio.
         if (localMediaStreamWebcam.getAudioTracks()[0] != undefined) {
           teacherStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
         }
-        console.log(seat);
         newPeer.addStream(teacherStream);
       }
     }
     if ((!isTeacher) && !(seat < 0) && table != -4) {
+      // You are a student
       outputStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
       newPeer.addStream(outputStream);
     }
     if (seat == -1) {
+      // You are using the speaker function.
       const speakerStream = new MediaStream();
       speakerStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
       newPeer.addStream(speakerStream);
@@ -403,7 +381,8 @@ function startConnecting(teacher, name) {
    * @param {*} connlist - List with the active connections
    */
   function updateactiveconnections(connlist) {
-    connlist.forEach((id) => { // create new connections
+    connlist.forEach((id) => {
+      // create new connections
       if (!activeconnections.has(id.id) && id.id != socket.id) {
         console.log('creating new peer: ' + id.id + ', on seat: ' + id.seat);
         p = {connected: false, peerObject: null,
@@ -413,16 +392,14 @@ function startConnecting(teacher, name) {
         activeconnections.get(id.id).peerObject = p2;
       };
     });
-    if (newUser) {
-      newUser = false;
-    }
     Array.from(activeconnections.keys()).forEach((id) => {
       if (!(connlistIncludes(connlist, id)) &&
           activeconnections.get(id).seat >= 0) {
-        console.log('Peer destroyed'); // remove ones who aren't there anymore
+        // remove ones who aren't there anymore
         removeVideoElement(activeconnections.get(id).seat);
         activeconnections.get(id).peerObject.destroy();
         activeconnections.delete(id);
+        console.log('Peer destroyed');
       };
     });
   };
@@ -442,18 +419,6 @@ function startConnecting(teacher, name) {
     }
     return false;
   }
-  // /**
-  //  * Tells the server we are still here
-  //  */
-  // function ping() {
-  //     socket.emit("ping");
-  // };
-
-  socket.on('attendanceList', (list) => {
-    list.forEach((user) => {
-      addStudentToList(user.name, user.table, user.seat);
-    });
-  });
 
   // Sends the rotation if the user has rotated.
   setInterval(function() {
@@ -467,6 +432,7 @@ function startConnecting(teacher, name) {
   }, 1000/10);
 
   socket.on('speaker done', (id) => {
+    // Delete the connection the teacher had with the speaker.
     if (isTeacher) {
       activeconnections.get(id).peerObject.destroy();
       activeconnections.delete(id);
@@ -475,13 +441,16 @@ function startConnecting(teacher, name) {
 
   socket.on('speaker', (id, name) => {
     lastNoti = Date.now();
+    // Show notification that the speaker is speaking
     document.getElementById('notiText').innerHTML = name + ' is speaking!';
     document.getElementById('notification').style.display='block';
+    // If there has been no new notification for 4.5 seconds then the notification div goes away.
     setTimeout(function() {
       if (Date.now() - lastNoti > 4500) {
         document.getElementById('notification').style.display='none';
       }
     }, 5000);
+    // If you are the teacher you will create a connection with the speaker.
     if (isTeacher) {
       p = {connected: false, peerObject: createNewpeer(id, -2),
         idConnectedTo: id, seat: -2};
@@ -489,6 +458,7 @@ function startConnecting(teacher, name) {
     }
   });
 
+  // Connect to the teacher as speaker.
   socket.on('connect to teacher', (id) => {
     teacherSocket = id;
     p = {connected: false, peerObject: createNewpeer(id, -1),
@@ -496,19 +466,23 @@ function startConnecting(teacher, name) {
     activeconnections.set(id, p);
   });
 
+  // Notify that the user has been connected to the teacher.
   socket.on('request accepted', () => {
     document.getElementById('notiText').innerHTML =
       'You are connected.';
     document.getElementById('notification').style.display = 'block';
+    // If there has been no new notification for 4.5 seconds then the notification div goes away.
     setTimeout(function() {
       document.getElementById('notification').style.display = 'none';
     }, 5000);
   });
 
+  // Notify the user that its request to use the speaker function is denied.
   socket.on('request denied', () => {
     document.getElementById('notiText').innerHTML =
       'Request rejected! Teacher is probably not found.';
     document.getElementById('notification').style.display = 'block';
+    // If there has been no new notification for 4.5 seconds then the notification div goes away.
     setTimeout(function() {
       document.getElementById('notification').style.display = 'none';
     }, 5000);
@@ -528,10 +502,10 @@ function startConnecting(teacher, name) {
 
   socket.on('connections-list', (connlist) => {
     updateactiveconnections(connlist);
-    // broadcasttoall();
   });
 
   /**
+   * Used to make a connection.
    * keeps the received signal in a promise in case
    * the local peer hasn't had time to initialize yet
    *
@@ -562,8 +536,10 @@ function startConnecting(teacher, name) {
   socket.on('signal', (id, data) => {
     sendSignal(id, data);
   });
+
+
   socket.on('rotate', (seat, rotation, tableRotate) => {
-    // Perform seat rotation.
+    // A user has rotated. If the user is in your table it will rotate in the environment.
     if (tableRotate == table) {
       rotations[seat] = rotation;
     }
@@ -572,12 +548,6 @@ function startConnecting(teacher, name) {
   socket.on('update-connections', () => {
     // Send back list of connected people.
     socket.emit('query-connections');
-  });
-  socket.on('new message', (msg, name) => {
-    if (nameUser != name) {
-      appendMessage(name, userImage, 'left', msg);
-      messageAlert();
-    }
   });
 
   socket.on('teacher-stream-emitter-signal', (data) => {
@@ -589,7 +559,7 @@ function startConnecting(teacher, name) {
   socket.on('teacher-presence', () => {
     socket.emit('teacher-stream-consumer-connect');
 
-    // Establish new Peer connection with the server.
+    // Establish new Peer connection with the server. This will be used to receive streams from the teacher.
     teacherPeer = new SimplePeer({initiator: true});
 
     teacherPeer.on('signal', (data) => {
@@ -615,11 +585,11 @@ function startConnecting(teacher, name) {
             document.getElementById('teacher').srcObject = stream;
           }
         } else {
-          console.log(servRtcStrms.get(sid));
           const videoToAdd = document.getElementById(servRtcStrms.get(sid));
           videoToAdd.srcObject = stream;
           videoToAdd.play();
           if (table == -2) {
+            // Table == -2 means the user is recording.
             start3DRecording();
           }
         }
@@ -688,6 +658,7 @@ function startConnecting(teacher, name) {
     });
   });
 
+  // Announce yourself to the serve.
   socket.emit('announce', {
     selectedPosition,
     userId: UNIQUE_USER_ID,
@@ -705,24 +676,16 @@ function startConnecting(teacher, name) {
    * @param {boolean} replay if in a replay or not.
    */
 function addScreenShare(stream, replay) {
-  // video.srcObject = stream
-  // sources[0] = video
-  // ctxStreams[0] = ctx2
-  // canvasWebcams[0] = canvas
   const screenshareScreen = document.getElementById('screenshare');
   screenshareScreen.muted = true;
-  if (table != -1) {
-    // screenshareScreen.muted = false;
-  }
   if (replay) {
     screenshareScreen.src = stream;
   } else {
     screenshareScreen.srcObject = stream;
   }
 
-
+  // Adds the screenshare in the Environment.
   mapScreen = new THREE.VideoTexture(screenshareScreen);
-
 
   const geometry2 = new THREE.PlaneGeometry(48, 24);
   const me2 = new THREE.Mesh( geometry2, new THREE.MeshPhongMaterial( {

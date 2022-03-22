@@ -1,12 +1,13 @@
+// Javascript that handles setting the camera and mic for users.
+
+/* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
+
 const select = document.getElementById('select');
 const selectMic = document.getElementById('selectMic');
 let mediaDevices = '';
-// eslint-disable-next-line no-unused-vars
 let lastScreenShare = undefined;
-// eslint-disable-next-line prefer-const
 let recordedChunks = [];
-// eslint-disable-next-line prefer-const
 let teacherSound = undefined;
 let recording = false;
 let streamToRecord = undefined;
@@ -16,17 +17,17 @@ let muted = false;
  * Starts the selecting of mics and cameras.
  * @param {boolean} teacher - if the user is a teacher or not
  */
-async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
+async function checkMedia(teacher) {
   const micText = document.getElementById('micText');
   const camText = document.getElementById('camText');
-  // if (!isTeacher) {
+
+  // Shows text that tells the user to select its mic and cam.
   camText.style.display = 'block';
-  // } else {
-  //   micText.style.marginTop = '100px';
-  // }
   micText.style.display = 'block';
+
   const connectButton = document.getElementById('connectButton');
   connectButton.style.display = 'block';
+
   webcam.muted = false;
   if (teacher) {
     const displayMediaOptions = {
@@ -55,12 +56,11 @@ async function checkMedia(teacher) { // eslint-disable-line no-unused-vars
  * gets the available mics and cameras
  */
 async function getCamerasAndMics() {
+  // First it gets permission before it tries to get the devices.
   await getCameraPermission();
   await getMicPermission();
   navigator.mediaDevices.enumerateDevices().then((devices) => {
-    // if (!isTeacher) {
     gotDevicesCamera(devices);
-    // }
     gotDevicesMic(devices);
   });
 }
@@ -79,6 +79,7 @@ async function getMics() {
 
 /**
  * Sets the options in the select tag for cameras.
+ * If the user in a lecture it will show a box for all possible camera's with a preview.
  * @param {mediaDevice []} mediaDevicesNew the mediadevices available.
  * @param {boolean} inLecture if the user is in the lecture.
  */
@@ -89,13 +90,14 @@ function gotDevicesCamera(mediaDevicesNew, inLecture) {
     selectCamInLecture.style.display = 'block';
     document.getElementById('selectMicInLecture').style.display = 'none';
   } else {
-    console.log('making block');
     document.getElementById('select').style.display = 'block';
   }
   let count = 1;
   mediaDevices.forEach((mediaDevice) => {
     if (mediaDevice.kind === 'videoinput') {
       if (inLecture) {
+        // Makes a box with a preview of the camera
+        // If the box is clicked this camera will be selected.
         const option = document.createElement('VIDEO');
         option.setAttribute('id', mediaDevice.deviceId);
         option.className = 'optionInLecture';
@@ -112,6 +114,8 @@ function gotDevicesCamera(mediaDevicesNew, inLecture) {
             });
         selectCamInLecture.appendChild(option);
       } else {
+        // Shows all possible camera's by their device name.
+        // Once the device is picked, it is shown big on the screen.
         const option = document.createElement('option');
         option.value = mediaDevice.deviceId;
         const label = mediaDevice.label || `Camera ${count++}`;
@@ -139,6 +143,7 @@ function gotDevicesMic(mediaDevicesNew, inLecture) {
   let count = 1;
   mediaDevices.forEach((mediaDevice) => {
     if (mediaDevice.kind === 'audioinput') {
+      // inLecture determines where the mics are shown.
       if (inLecture) {
         const option = document.createElement('DIV');
         option.setAttribute('id', mediaDevice.deviceId);
@@ -189,6 +194,7 @@ function cameraChosen(inLecture, deviceId) {
           webcam.srcObject = stream;
           localMediaStreamWebcam = stream;
         } else {
+          // if there is already a video stream, this stream has to be stopped otherwise it will run for nothing.
           stopMediaTrackVideo(localMediaStreamWebcam);
           webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
           localMediaStreamWebcam.addTrack(stream.getVideoTracks()[0]);
@@ -226,6 +232,7 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
               localMediaStreamWebcam = stream;
             }
           } else {
+            // If there is already an audio stream this has to be stopped.
             stopMediaTrackAudio(webcam.srcObject);
             webcam.srcObject.addTrack(stream.getAudioTracks()[0]);
             if (isTeacher) {
@@ -245,30 +252,35 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
             stopMediaTrackAudio(localMediaStream);
             localMediaStream.addTrack(stream.getAudioTracks()[0]);
             if (muted) {
+              // If we are muted in the lecture we want the new stream also to be muted.
               localMediaStream.getAudioTracks()[0].enabled = false;
               localMediaStream.getAudioTracks()[0].muted = true;
             }
+            // For the stream to the server we first need to remove the last stream and then add the new one.
             teacherPeer.removeTrack(lastTrackAudio, localMediaStream);
             teacherPeer.addTrack(stream.getAudioTracks()[0], localMediaStream);
             lastTrackAudio = stream.getAudioTracks()[0];
             stopMediaTrackAudio(localMediaStream);
-            // localMediaStream.addTrack(stream.getAudioTracks()[0]);
+            // Let the server know we have changed our mic.
             socket.emit('micChange');
           } else {
             stopMediaTrackAudio(localMediaStreamWebcam);
             localMediaStreamWebcam.addTrack(stream.getAudioTracks()[0]);
             if (muted) {
+              // If we are muted in the lecture we want the new stream also to be muted.
               localMediaStreamWebcam.getAudioTracks()[0].enabled = false;
               localMediaStreamWebcam.getAudioTracks()[0].muted = true;
             }
           }
+          // Remove the old stream in the connection with other users.
           activeconnections.forEach((connection) => {
             connection.peerObject.removeStream(outputStream);
           });
-          // eslint-disable-next-line new-cap
+          // Create new stream with the new audio.
           newStream = new MediaStream();
           newStream.addTrack(outputStream.getVideoTracks()[0]);
           newStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
+          // Send the new stream to all connections with other users.
           activeconnections.forEach((connection) => {
             connection.peerObject.addStream(newStream);
           });
@@ -278,8 +290,10 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
           const select = document.getElementById('selectMicInLecture');
           select.style.display = 'none';
           if (positionalHearing) {
+            // If we have positional hearing on we need to update this for every connection.
             activeconnections.forEach((connection) => {
               if (unmutedSeats.includes(connection.seat)) {
+                // Send to all unmuted connections that they can unmute.
                 connection.peerObject.send(String('unmute ' + selectedPosition));
               }
             });
@@ -287,11 +301,13 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
             unmutedSeats.forEach((seat) => {
               const index = mutedPositions.indexOf(seat);
               if (index > -1) {
+                // Removes the connection from the muted list.
                 mutedPositions.splice(index, 1);
               }
             });
             activeconnections.forEach((connection) => {
               if (mutedPositions.includes(connection.seat)) {
+                // Sends to all connections on the muted list that they have to mute.
                 connection.peerObject.send(String('mute ' + selectedPosition));
               }
             });
@@ -303,7 +319,7 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
 
 /**
  * Remove the video in the current stream if there is one. Otherwise do nothing.
- * @param {mediaStream} stream
+ * @param {mediaStream} stream - The stream that contains the tracks that need to be removed.
  */
 function stopMediaTrackVideo(stream) {
   if (stream != null && stream != undefined &&
@@ -314,7 +330,7 @@ function stopMediaTrackVideo(stream) {
 
 /**
  * Remove the audio in the current stream if there is one. Otherwise do nothing.
- * @param {mediaStream} stream
+ * @param {mediaStream} stream - The stream that contains the tracks that need to be removed.
  */
 function stopMediaTrackAudio(stream) {
   if (stream != null && stream != undefined &&
@@ -324,9 +340,9 @@ function stopMediaTrackAudio(stream) {
 }
 
 /**
- * Changes the color of the speak button.
+ * Requests to speak to the teacher or stop the connection to the teacher.
  */
-function speakClicked() { // eslint-disable-line no-unused-vars
+function speakClicked() {
   const soundIcon = document.getElementById('soundIcon');
   const speakIcon = document.getElementById('speakIcon');
   if (speakIcon.style.display != 'none') {
@@ -340,11 +356,10 @@ function speakClicked() { // eslint-disable-line no-unused-vars
     activeconnections.get(teacherSocket).peerObject.destroy();
     activeconnections.delete(teacherSocket);
   }
-  // TODO - do backend for this
 }
 
 /**
- * Changes the color of the mute button & mutes or unmutes the user accordingly.
+ * Changes the mute button & mutes or unmutes the user accordingly.
  */
 function muteClicked() { // eslint-disable-line no-unused-vars
   const mic = document.getElementById('micIcon');
@@ -380,7 +395,7 @@ function muteUnmuteStream(stream) {
 }
 
 /**
- * Start the recording.
+ * Starts the recording.
  */
 async function startRecording() {
   const displayMediaOptions2 = {

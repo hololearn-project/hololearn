@@ -1,4 +1,12 @@
+// Javascript that handles positional hearing. This makes only the people that you are turned towards hear you.
+// The values are hardcoded. It is on by default but can be turned off in the mic settings.
+
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-const */
+
+
 let positionalHearing = true;
+// Hardcoded values that decide with what angles which students are muted or not.
 const allDirections =
 [
   [[0, 0], [1.2211, 2.0729], [1.0982, 1.8671], [-1.4373, -0.434], [0.8838, 1.5069]],
@@ -10,32 +18,44 @@ const allDirections =
 
 let unmutedSeats = [];
 
-// eslint-disable-next-line require-jsdoc
+/**
+ * Toggles on and off the positional hearing.
+ */
 function togglePositionalHearing() {
+  // Check whether positional hearing is on or not.
   if (positionalHearing &! isTeacher) {
     positionalHearing = false;
+    // Send to all connections that they can unmute.
     activeconnections.forEach((connection) => {
       connection.peerObject.send(String('unmute ' + selectedPosition));
     });
     unmutedSeats = [1, 2, 3, 4, 5];
   } else {
     positionalHearing = true;
+    // setPositionalHearing() updates the positional hearing.
     setPositionalHearing(rotationNow);
   }
 }
 
-/* eslint-disable require-jsdoc */
+/**
+ * Updates who can hear a student and who not.
+ * @param {float} rotation
+ */
 function setPositionalHearing(rotation) {
   if (!positionalHearing || isTeacher || selectedPosition < 1) {
+    // Return if not positional hearing is off or if the user is not a student.
     return;
   }
 
+  // Gets directions that determine whether a seat can hear you or not.
+  // Uses selectedPosition -1 since the seats start at 1 but array is 0-indexed.
   const maxDirections = allDirections[selectedPosition - 1];
   const newUnmutedSeats = [];
   for (let i = 0; i != maxDirections.length; i++) {
     // No calculations for the seat the student is sitting on himself.
     if (i != selectedPosition - 1) {
-      // If student is looking towards a seat add them to the
+      // If student is looking towards a seat add them to the unmuted list.
+      // This is a list for users that can hear you.
       if (rotation >= maxDirections[i][0] && rotation <= maxDirections[i][1]) {
         newUnmutedSeats.push(i + 1);
       }
@@ -47,7 +67,6 @@ function setPositionalHearing(rotation) {
       // Unmute seat
       activeconnections.forEach((connection) => {
         if (connection.seat == newUnmutedSeats[i] && connection.seat != 0) {
-          // connection.peerObject.send(['unmute', selectedPosition]);
           connection.peerObject.send(String('unmute ' + selectedPosition));
         }
       });
@@ -59,7 +78,6 @@ function setPositionalHearing(rotation) {
       // Mute seat
       activeconnections.forEach((connection) => {
         if (connection.seat == unmutedSeats[i] && connection.seat != 0 &! isTeacher) {
-          // connection.peerObject.send(['mute', selectedPosition]);
           connection.peerObject.send(String('mute ' + selectedPosition));
         }
       });
@@ -69,13 +87,16 @@ function setPositionalHearing(rotation) {
   unmutedSeats = newUnmutedSeats;
 }
 
-// eslint-disable-next-line no-unused-vars
+/**
+ * Makes an utf8 array to a String. This is used for messages off peer to peer connections.
+ * @param {[]} array - data that needs to go to a String
+ * @return {String} A string that comes from the array
+ */
 function utf8ArrayToStr(array) {
   let out; let i; let len; let c;
   let char2; let char3;
 
   out = '';
-  // eslint-disable-next-line prefer-const
   len = array.length;
   i = 0;
   while (i < len) {
