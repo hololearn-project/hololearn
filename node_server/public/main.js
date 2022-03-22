@@ -158,7 +158,7 @@ async function load3DEnvironment() {
   async function init() {
     context1.font = "Bold 50px Arial";
     context1.fillStyle = "rgba(255,0,0,1)";
-    // context1.fillText('Hello, world!', 0, 60);
+    context1.fillText('Hello, world!', 0, 60);
 
     // canvas contents will be used for a texture
     let texture1 = new THREE.Texture(canvas1);
