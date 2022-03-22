@@ -302,6 +302,8 @@ function startConnecting(teacher, name) {
     });
     // Just connected to new peer.
     newPeer.on('connect', () => {
+      context1.clearRect(0, 0, 500, 500);
+      context1.fillText('Just connected', 0, 60);
       // seat -7 means the peer is the slide player.
       if (seat == -7) {
         if (teacherProjectorScreenShare != undefined && selectedPosition != -6) {
