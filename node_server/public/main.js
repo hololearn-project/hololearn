@@ -3,6 +3,10 @@
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
 // three.js init variables
+let canvas1 = document.createElement('canvas');
+let context1 = canvas1.getContext('2d');
+let texture1 = new THREE.Texture(canvas1);
+
 let teacherWebcamOn = false;
 let positions = [];
 let width = window.innerWidth;
@@ -58,21 +62,6 @@ const DEBUG = true;
 
 camera = new THREE.PerspectiveCamera(35, width / height, 1, 15);
 camera.position.set(0, 0.6, 3); // Set the initial Camera Position.
-
-const cameraGroup = new THREE.Group();
-cameraGroup.position.set(20, 5, 15); // Set the initial VR Headset Position.
-
-// When user turn on the VR mode.
-renderer.xr.addEventListener('sessionstart', function() {
-  scene.add(cameraGroup);
-  cameraGroup.add(camera);
-});
-// When user turn off the VR mode.
-renderer.xr.addEventListener('sessionend', function() {
-  scene.remove(cameraGroup);
-  cameraGroup.remove(camera);
-});
-
 
 loadNet();
 /**
@@ -169,12 +158,33 @@ async function load3DEnvironment() {
    * Initializes the whole system, including the 3D environment
    */
   async function init() {
+    context1.font = "Bold 20px Arial";
+    context1.fillStyle = "rgba(255,0,0,1)";
+    context1.fillText('Hello, world!', 0, 60);
+
+    // canvas contents will be used for a texture
+    texture1.needsUpdate = true;
+
+    let material1 = new THREE.MeshBasicMaterial({ map: texture1, side: THREE.DoubleSide });
+    material1.transparent = true;
+
+    let mesh1 = new THREE.Mesh(
+        new THREE.PlaneGeometry(20, 10),
+        material1,
+    );
+    mesh1.position.set(0, 10, -15);
+    // Note that mesh1 gets added to the shape and not to the scene
+
+    scene.add(mesh1);
+
     scene.add( new THREE.AmbientLight( 0x0f0f0f ) );
 
     let light = new THREE.AmbientLight( 0xffffff);
     light.position.set( 0, 0, 20 );
 
     scene.add(light);
+    // context1.clearRect(0, 0, 500, 500);
+    // context1.fillText('Goodbye mf', 0, 60);
 
     const size = 0.02;
     vertGeometry = new THREE.BoxGeometry(size, size, size);
@@ -274,6 +284,7 @@ async function load3DEnvironment() {
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;
+    texture1.needsUpdate = true;
     for (let i = 0; i < textures.length; i++) {
       if (textures[i] != undefined) {
         textures[i].needsUpdate = true;
