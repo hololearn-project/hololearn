@@ -32,7 +32,7 @@ class VRButton {
         moveSceneToVR();
       }
 
-      function onSessionEnded( /* event*/ ) {
+      async function onSessionEnded( /* event*/ ) {
         currentSession.removeEventListener( 'end', onSessionEnded );
 
         button.textContent = 'ENTER VR';
@@ -75,7 +75,8 @@ class VRButton {
           navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
         } else {
           currentSession.end();
-          moveSceneFromVR();
+          sleep(1000);
+          // moveSceneFromVR();
         }
       };
     }
