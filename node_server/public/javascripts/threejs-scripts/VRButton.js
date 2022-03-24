@@ -20,6 +20,7 @@ class VRButton {
         button.textContent = 'EXIT VR';
 
         currentSession = session;
+        inVR = true;
 
         // set the scale for VR
         scene.scale.set(0.2, 0.2, 0.2);
@@ -34,6 +35,8 @@ class VRButton {
         currentSession.removeEventListener( 'end', onSessionEnded );
 
         button.textContent = 'ENTER VR';
+
+        inVR = false;
 
         currentSession = null;
 

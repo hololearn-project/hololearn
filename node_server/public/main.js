@@ -27,6 +27,7 @@ let c = 0;
 let objects = [];
 let faceMeshFlag = false;
 let bodyTrackFlag = false;
+let inVR = false;
 
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
@@ -40,6 +41,7 @@ let scene = new THREE.Scene();
 let teacherModel = new THREE.BufferGeometry();
 let userClassroomId = 'defaultClassroom';
 
+const vrPos = {a: 0, b: 1.6, c: 0}; // DEFAULT POSITION OF THE CAMERA WHEN RENDERING IN VR
 // Adds the possible positions
 // positions.push({a: 0, b: 7, c: 27});
 positions.push(undefined);
