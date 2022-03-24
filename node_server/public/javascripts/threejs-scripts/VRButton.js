@@ -76,7 +76,7 @@ class VRButton {
         } else {
           currentSession.end();
           sleep(1000);
-          // moveSceneFromVR();
+          moveSceneFromVR();
         }
       };
     }
