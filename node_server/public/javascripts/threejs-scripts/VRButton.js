@@ -26,6 +26,8 @@ class VRButton {
 
         // camera.lookAt(0, 0, 0);
         camera.lookAt(0, 8, 27); // Should be teacher position
+        context1.clearRect(0, 0, 500, 500);
+        context1.fillText('Should be looking at the teacher now', 0, 60);
       }
 
       function onSessionEnded( /* event*/ ) {
