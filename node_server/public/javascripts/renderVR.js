@@ -60,8 +60,8 @@ function moveObjectFromVR(object) {
  * @param {THREE.object} object - the object to move.
 */
 function addVR(object) {
+  scene.add(object);
   if (inVR) {
     moveObjectToVR(object);
   }
-  scene.add(object);
 }
