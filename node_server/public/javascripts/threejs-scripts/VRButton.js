@@ -49,7 +49,7 @@ class VRButton {
 
       button.style.display = '';
 
-      moveSceneFromVR();
+      // moveSceneFromVR();
 
       button.style.cursor = 'pointer';
       button.style.left = 'calc(50% - 50px)';
