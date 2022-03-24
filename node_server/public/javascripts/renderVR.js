@@ -29,6 +29,10 @@ function moveSceneFromVR() {
 function moveObjectToVR(object) {
   object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
 
+  context1.clearRect(0, 0, 500, 500);
+  string = 'was: ' + object.position.y + ', b: ' + b + ' makes: ' + object.position.y + b - 1.6;
+  context1.fillText(string, 0, 60);
+
   object.position.x = object.position.x + a;
   object.position.y = object.position.y + b - 1.6;
   object.position.z = object.position.z + c;
