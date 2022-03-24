@@ -40,11 +40,10 @@ function moveObjectToVR(object) {
  * @param {THREE.object} object - the object to move.
  */
 function moveObjectFromVR(object) {
+  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI);
   object.position.x = object.position.x + a;
   object.position.y = object.position.y + b - 1.6;
   object.position.z = object.position.z + c;
-
-  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI);
 }
 
 /**
