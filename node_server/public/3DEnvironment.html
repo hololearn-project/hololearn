@@ -305,8 +305,14 @@
         <script src="./javascripts/renderVR.js"></script>
 
 
-        <video id='lidarVideoStream1' style="display: none;" autoplay="true" muted></video>
-        <video id='lidarVideoStream2' style="display: none;" autoplay="true" muted></video>
+        <video id='lidarVideoStream1' style="display: none;" autoplay="true" muted>
+            <source src='kinect.webm'>
+            <source src='kinect.mp4'>
+        </video>
+        <video id='lidarVideoStream2' style="display: none;" autoplay="true" muted>
+            <source src='kinect.webm'>
+            <source src='kinect.mp4'>
+        </video>
         <video id='kinectVideo' style="display: none;" autoplay="true" loop muted>
             <source src='kinect.webm'>
             <source src='kinect.mp4'>
