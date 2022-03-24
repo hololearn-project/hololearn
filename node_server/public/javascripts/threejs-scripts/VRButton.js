@@ -26,7 +26,6 @@ class VRButton {
         // scene.scale.set(0.2, 0.2, 0.2);
 
         // camera.lookAt(0, 0, 0);
-        camera.lookAt(0, 8, 27); // Should be teacher position
         moveSceneToVR();
       }
 
@@ -40,7 +39,8 @@ class VRButton {
         currentSession = null;
 
         // set the scale for non-VR
-        scene.scale.set(1, 1, 1);
+        // scene.scale.set(1, 1, 1);
+        moveSceneFromVR();
       }
 
 
@@ -73,8 +73,6 @@ class VRButton {
           navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
         } else {
           currentSession.end();
-          sleep(1000);
-          moveSceneFromVR();
         }
       };
     }
