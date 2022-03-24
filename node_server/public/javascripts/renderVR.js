@@ -22,13 +22,24 @@ function moveSceneFromVR() {
 }
 
 /**
+ * dssdfsdf
+ * @param {float} num 
+ * @returns {boolean} boolean
+ */
+function isBasically(num, comp) {
+  return (num > comp-0.01 && num < comp+0.01);
+}
+
+/**
  * Moves and rotates an object in relation to the seat of the user.
  * For when the users moves into VR.
 * @param {THREE.object} object - the object to move.
  */
 function moveObjectToVR(object) {
+  if (isBasically(object.position.x, 0) && isBasically(object.position.y, 3) && isBasically(object.position.z, 0)) {
+    return;
+  }
   object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-
   context1.clearRect(0, 0, 500, 500);
   string = 'was: ' + object.position.y + ', b: ' + b + ' makes: ' + object.position.y + b - 1.6;
   context1.fillText(string, 0, 60);
@@ -47,6 +58,9 @@ function moveObjectToVR(object) {
  * @param {THREE.object} object - the object to move.
  */
 function moveObjectFromVR(object) {
+  if (isBasically(object.position.x, 0) && isBasically(object.position.y, 3) && isBasically(object.position.z, 0)) {
+    return;
+  }
   object.position.x = object.position.x - a;
   object.position.y = object.position.y + b - 1.6;
   object.position.z = object.position.z - c;

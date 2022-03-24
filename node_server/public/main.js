@@ -280,6 +280,13 @@ async function load3DEnvironment() {
     }
   }
 
+  const geometry = new THREE.SphereGeometry( 4, 32, 16 );
+  const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+  const sphere = new THREE.Mesh( geometry, material );
+  scene.add( sphere );
+  sphere.position.y = 3;
+
+
   function animate() {
     // requestAnimationFrame( animate );
     renderer.setAnimationLoop( animate );

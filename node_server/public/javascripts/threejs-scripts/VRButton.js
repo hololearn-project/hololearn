@@ -23,7 +23,7 @@ class VRButton {
         inVR = true;
 
         // set the scale for VR
-        scene.scale.set(0.2, 0.2, 0.2);
+        // scene.scale.set(0.2, 0.2, 0.2);
 
         // camera.lookAt(0, 0, 0);
         camera.lookAt(0, 8, 27); // Should be teacher position
