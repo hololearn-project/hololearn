@@ -177,14 +177,14 @@ async function load3DEnvironment() {
     mesh1.position.set(0, 10, -15);
     // Note that mesh1 gets added to the shape and not to the scene
 
-    scene.add(mesh1);
+    addVR(mesh1);
 
-    scene.add( new THREE.AmbientLight( 0x0f0f0f ) );
+    addVR( new THREE.AmbientLight( 0x0f0f0f ) );
 
     let light = new THREE.AmbientLight( 0xffffff);
     light.position.set( 0, 0, 20 );
 
-    scene.add(light);
+    addVR(light);
     // context1.clearRect(0, 0, 500, 500);
     // context1.fillText('Goodbye mf', 0, 60);
 
@@ -200,7 +200,7 @@ async function load3DEnvironment() {
         CLASSROOM_SCENE_LOCATION,
         // called when the resource is loaded
         function( gltf ) {
-          scene.add( gltf.scene );
+          addVR( gltf.scene );
           gltf.animations; // Array<THREE.AnimationClip>
           gltf.scene; // THREE.Group
           gltf.scenes; // Array<THREE.Group>

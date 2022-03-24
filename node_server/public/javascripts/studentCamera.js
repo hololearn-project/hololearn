@@ -164,7 +164,7 @@ async function startWebcam(x, y, z, scene2, objects2, teacher, camera) {
     }));
 
     studentCanvas.matrixAutoUpdate = true;
-    // scene.add( studentCanvas );
+    // addVR( studentCanvas );
     // objects.push( studentCanvas );
 
     mapScreenWebcam = new THREE.Texture(output);
