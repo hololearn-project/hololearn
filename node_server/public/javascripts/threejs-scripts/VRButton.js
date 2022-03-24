@@ -45,11 +45,8 @@ class VRButton {
         scene.scale.set(1, 1, 1);
       }
 
-      //
 
       button.style.display = '';
-
-      // moveSceneFromVR();
 
       button.style.cursor = 'pointer';
       button.style.left = 'calc(50% - 50px)';
@@ -78,6 +75,7 @@ class VRButton {
           navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
         } else {
           currentSession.end();
+          moveSceneFromVR();
         }
       };
     }
