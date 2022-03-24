@@ -1,3 +1,5 @@
+// Javascript for the menu on the top of the page.
+
 /* eslint-disable require-jsdoc */
 const theToggle = document.getElementById('toggle');
 

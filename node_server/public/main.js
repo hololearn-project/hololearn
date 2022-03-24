@@ -1,7 +1,10 @@
+// Javascript for the 3D environment.
+
 /* eslint-disable require-jsdoc */
 /* eslint-disable camelcase */
 /* eslint-disable prefer-const */
 /* eslint-disable no-unused-vars */
+
 // three.js init variables
 let teacherWebcamOn = false;
 let positions = [];
@@ -32,13 +35,13 @@ let vertexMarker = 0;
 
 let renderer = new THREE.WebGLRenderer();
 
+// The scene of the environment, all objects are added to display it.
 let scene = new THREE.Scene();
 let teacherModel = new THREE.BufferGeometry();
 let userClassroomId = 'defaultClassroom';
 
 // Adds the possible positions
-// positions.push({a: 0, b: 7, c: 27});
-positions.push(undefined);
+positions.push({a: 0, b: 7, c: 27});
 positions.push({a: -5, b: 7, c: 5});
 positions.push({a: 0, b: 7, c: 6});
 positions.push({a: 5, b: 7, c: 5});
@@ -59,33 +62,12 @@ const DEBUG = true;
 camera = new THREE.PerspectiveCamera(35, width / height, 1, 15);
 camera.position.set(0, 0.6, 3); // Set the initial Camera Position.
 
-const cameraGroup = new THREE.Group();
-cameraGroup.position.set(20, 5, 15); // Set the initial VR Headset Position.
-
-// When user turn on the VR mode.
-renderer.xr.addEventListener('sessionstart', function() {
-  scene.add(cameraGroup);
-  cameraGroup.add(camera);
-});
-// When user turn off the VR mode.
-renderer.xr.addEventListener('sessionend', function() {
-  scene.remove(cameraGroup);
-  cameraGroup.remove(camera);
-});
-
-
 loadNet();
-/**
- * Load neural network from tensorflow. This does the background removal for us.
- */
-// async function loadNet() { // old one
-// net = await bodyPix.load()
-// }
 
 /**
  * Load neural network from tensorflow. This does the background removal for us.
  */
-async function loadNet() { // this one is more efficient
+async function loadNet() {
   net = await bodyPix.load({
     architecture: 'MobileNetV1',
     outputStride: 16,
@@ -95,20 +77,14 @@ async function loadNet() { // this one is more efficient
 }
 
 /**
- * Loads the steve.obj model
- */
-
-/**
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
-  // document.getElementById('connectButton').style.display = 'none';
-
   if (isTeacher) {
+    // Sets the texture to use for screen sharing
     mapScreen = new THREE.VideoTexture(localMediaStream);
-    // console.log(localMediaStreamWebcam);
     if (localMediaStreamWebcam != null) {
-      // cameraMesh.start();
+      // If the teacher has a webcam, turn variable to true for face mesh from webcam.
       teacherWebcamOn = true;
     }
   }
@@ -123,8 +99,7 @@ async function load3DEnvironment() {
   video.style.display = 'none';
   webcam.style.display = 'none';
 
-  // var scene = new THREE.Scene();
-
+  // Sets blue background for the scene.
   scene.background = new THREE.Color( 0xf0f0f0 );
   const objects = [];
 
@@ -207,11 +182,6 @@ async function load3DEnvironment() {
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-    // if (playback) {
-    //   setRecordedPictureSource();
-    //   setRecordedDepthSource();
-    // }
-
     await loadAssets();
 
     // sets the target of the camera
@@ -229,7 +199,12 @@ async function load3DEnvironment() {
     // controls.addEventListener( 'dragend', dragendCallback );
 
     // Starts the webcam or screen sharing
-    await startWebcam(a, b, c, scene, objects, isTeacher, camera);
+    webcam = document.getElementById('webcam');
+    if (isTeacher) {
+      outputStream = localMediaStream;
+    } else {
+      webcam.play();
+    }
   }
 
   /**
@@ -268,6 +243,9 @@ async function load3DEnvironment() {
     }
   }
 
+  /**
+   * Animation loop. Gets called constantly. Everything that needs to keep updating should be in here.
+   */
   function animate() {
     // requestAnimationFrame( animate );
     renderer.setAnimationLoop( animate );

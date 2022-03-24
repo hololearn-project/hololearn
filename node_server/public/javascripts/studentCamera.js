@@ -61,12 +61,13 @@ async function sendSnapshotWebcam(camera, localMediaStreamWebcam,
 }
 
 /**
- * Removes all black pixels in a picture and makes them transparent.
+ * Removes all magenta pixels in a picture and makes them transparent.
  * @param {imageData} imageData - image data to remove background from
  * @return {imageData} the new image data with black pixels removed.
  */
 function removeBlackBackground(imageData) {
   for (let i = 0; i < imageData.data.length; i = i + 4) {
+    // Megenta is used instead of black since less users will be wearing black.
     if (imageData.data[i] > 140 &
         imageData.data[i + 1] < 90 & imageData.data[i + 2] > 140 ) {
       imageData.data[i + 3] = 0;
@@ -77,6 +78,8 @@ function removeBlackBackground(imageData) {
 
 /**
  * Removes the background using of tensorflow.js.
+ * Instead of removing the background we make it magenta.
+ * This video will be sent to others users who then remove the magenta.
  *
  * @param {imageData} imageData - Image data of picture
  * @param {DOMString} canvasWebcam2 - canvas that displays the webcam
@@ -86,6 +89,7 @@ async function removeBackground(imageData, canvasWebcam2) {
   const personSegmentation = await net.segmentPerson(canvasWebcam2);
   for (let i = 0; i < personSegmentation.data.length; i++) {
     if (personSegmentation.data[i] == 0 || cameraOff) {
+      // Every pixel has 4 values: red, blue, green and transparity.
       // imageData.data[i * 4 + 3] = 0;
       imageData.data[i * 4] = 255;
       imageData.data[i * 4 + 1] = 0;
@@ -138,73 +142,24 @@ function dotProduct(vector1, vector2) {
 }
 
 /**
- * Starts the sharing of webcams and screen share.
- * @param {number} x - x coordinate of the user in the 3D environment
- * @param {number} y - y coordinate of the user in the 3D environment
- * @param {number} z - z coordinate of the user in the 3D environment
- * @param {THREE.Scene} scene2 - scene of the 3D environment
- * @param {*} objects2 objects in the 3D environment
- * @param {boolean} teacher - whether the user is a teacher or not
- * @param {THREE.camera} camera - the camera the user watches through
- */
-// eslint-disable-next-line require-jsdoc, no-unused-vars
-async function startWebcam(x, y, z, scene2, objects2, teacher, camera) {
-  const webcam = document.querySelector('#webcam');
-  if (isTeacher) {
-    outputStream = localMediaStream;
-  } else {
-    // add webcam to the environment
-    const geometry3 = new THREE.PlaneGeometry(5, 5);
-    studentCanvas = new THREE.Mesh( geometry3, new THREE.MeshPhongMaterial( {
-      color: 'white',
-      map: mapScreenWebcam,
-      alphaTest: 0.5,
-      transparent: true,
-      side: THREE.DoubleSide,
-    }));
-
-    studentCanvas.matrixAutoUpdate = true;
-    // scene.add( studentCanvas );
-    // objects.push( studentCanvas );
-
-    mapScreenWebcam = new THREE.Texture(output);
-    webcam.play();
-
-    studentCanvas.position.set(x, y, z);
-    if (x < 0) {
-      studentCanvas.rotation.y = getAngle(0, 1, (0 - x), (27 - z));
-    } else {
-      studentCanvas.rotation.y = - getAngle(0, 1, (0 - x), (27 - z));
-    }
-  }
-}
-
-/**
  * Updates the webcams and screen share.
  * @param {boolean} teacher - if the user is a teacher or not
  * @param {THREE.camera} camera - the camera the user is looking through
  */
-// eslint-disable-next-line require-jsdoc, no-unused-vars
 function updateScreenAndWebcams(teacher, camera) {
-  if (isTeacher) {
-    for (let i = 1; i < ctxs.length; i++) {
-      if (ctxStreams[i] != undefined) {
-        ctxStreams[i].drawImage(sources[i], 0, 0, 500, 500);
-        let newData = ctxStreams[i].getImageData(0, 0, 500, 500);
-        newData = removeBlackBackground(newData);
-        ctxs[i].putImageData(newData, 0, 0);
-      }
-    }
-  } else {
+  if (!isTeacher) {
+    // If user is a student, update its webcam.
     sendSnapshotWebcam(camera, localMediaStreamWebcam, ctxWebcam,
         ctxOutput, canvasWebcam, teacher);
-    for (let i = 1; i < ctxs.length; i++) {
-      if (ctxStreams[i] != undefined) {
-        ctxStreams[i].drawImage(sources[i], 0, 0, 500, 500);
-        let newData = ctxStreams[i].getImageData(0, 0, 500, 500);
-        newData = removeBlackBackground(newData);
-        ctxs[i].putImageData(newData, 0, 0);
-      }
+  }
+  // For every other student, update the webcam by taking a screenshot from its webcam video
+  // Then remove the magenta pixels and putting it on the canvas of the student.
+  for (let i = 1; i < ctxs.length; i++) {
+    if (ctxStreams[i] != undefined) {
+      ctxStreams[i].drawImage(sources[i], 0, 0, 500, 500);
+      let newData = ctxStreams[i].getImageData(0, 0, 500, 500);
+      newData = removeBlackBackground(newData);
+      ctxs[i].putImageData(newData, 0, 0);
     }
   }
 }
