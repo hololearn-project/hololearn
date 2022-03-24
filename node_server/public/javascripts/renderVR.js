@@ -39,13 +39,7 @@ function moveObjectToVR(object) {
   if (isBasically(object.position.x, 0) && isBasically(object.position.y, 3) && isBasically(object.position.z, 0)) {
     return;
   }
-  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-  context1.clearRect(0, 0, 500, 500);
-  string = 'was: ' + object.position.y + ', b: ' + b + ' makes: ' + object.position.y + b - 1.6;
-  context1.fillText(string, 0, 60);
-  console.log(object.position.y);
-  console.log(b);
-  console.log(object.position.y - b + 1.6);
+  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI + rotationNow);
 
   object.position.x = object.position.x + a;
   object.position.y = object.position.y - b + 1.6;
