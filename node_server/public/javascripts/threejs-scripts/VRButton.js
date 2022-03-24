@@ -23,7 +23,7 @@ class VRButton {
         inVR = true;
 
         // set the scale for VR
-        // scene.scale.set(0.2, 0.2, 0.2);
+        scene.scale.set(0.2, 0.2, 0.2);
 
         // camera.lookAt(0, 0, 0);
         moveSceneToVR();
@@ -39,7 +39,7 @@ class VRButton {
         currentSession = null;
 
         // set the scale for non-VR
-        // scene.scale.set(1, 1, 1);
+        scene.scale.set(1, 1, 1);
         moveSceneFromVR();
       }
 
