@@ -5,8 +5,9 @@
  */
 function moveSceneToVR() {
   for (let i = 0; i < scene.children.length; i++) {
-    moveObject(scene.children[i]);
+    moveObjectToVR(scene.children[i]);
   }
+  inVR = true;
 }
 
 /**
@@ -17,6 +18,7 @@ function moveSceneFromVR() {
   for (let i = 0; i < scene.children.length; i++) {
     moveObjectFromVR(scene.children[i]);
   }
+  inVR = false;
 }
 
 /**
