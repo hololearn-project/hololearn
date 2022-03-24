@@ -44,7 +44,7 @@ function moveObjectFromVR(object) {
   object.position.y = object.position.y + b - 1.6;
   object.position.z = object.position.z + c;
 
-  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
+  // object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI);
 }
 
 /**
