@@ -41,11 +41,13 @@ function moveObjectToVR(object) {
   }
   context1.clearRect(0, 0, 500, 500);
   context1.fillText(rotationNow, 10, 40);
-  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
 
   object.position.x = object.position.x + a;
   object.position.y = object.position.y - b + 5;
   object.position.z = object.position.z + c;
+
+  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI - rotationNow);
+
 
   // object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -rotationNow);
 }
