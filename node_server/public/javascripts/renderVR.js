@@ -15,9 +15,9 @@ function moveSceneToVR() {
  * perspective of the VR user
  */
 function moveSceneFromVR() {
-  // for (let i = 0; i < scene.children.length; i++) {
-  //   moveObjectFromVR(scene.children[i]);
-  // }
+  for (let i = 0; i < scene.children.length; i++) {
+    moveObjectFromVR(scene.children[i]);
+  }
   inVR = false;
 }
 
@@ -39,14 +39,15 @@ function moveObjectToVR(object) {
   if (isBasically(object.position.x, 0) && isBasically(object.position.y, 3) && isBasically(object.position.z, 0)) {
     return;
   }
-  context1.clearRect(0, 0, 500, 500);
-  context1.fillText(rotationNow, 10, 40);
+
+  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
 
   object.position.x = object.position.x + a;
   object.position.y = object.position.y - b + 5;
   object.position.z = object.position.z + c;
 
-  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI - rotationNow);
+  object.rotation.y += rotationNow;
+
 
 
   // object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -rotationNow);
