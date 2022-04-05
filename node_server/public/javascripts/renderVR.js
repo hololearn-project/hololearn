@@ -15,9 +15,9 @@ function moveSceneToVR() {
  * perspective of the VR user
  */
 function moveSceneFromVR() {
-  for (let i = 0; i < scene.children.length; i++) {
-    moveObjectFromVR(scene.children[i]);
-  }
+  // for (let i = 0; i < scene.children.length; i++) {
+  //   moveObjectFromVR(scene.children[i]);
+  // }
   inVR = false;
 }
 
