@@ -29,8 +29,8 @@ class camera(ABC):
     mapResRemovalThres = mapRes - 10
     dimX = 576
     dimY = 640
-    cropdimX = 548
-    cropdimY = 300
+    cropdimX = 500
+    cropdimY = 500
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".png"

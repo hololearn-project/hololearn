@@ -365,14 +365,17 @@ function updatePoints(dctx) {
   const depthData = dctx.getImageData(0, 0, imgWidth, imgLength).data;
   let x;
   let y;
+  let z;
   let i = 0;
 
   for (y = 0; y < imgLength; y+= subSample) {
     for (x = 0; x < imgWidth; x+= subSample) {
-      const z = 255 - (depthData[getLoc(x, y)] +
+      z = (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2])/3;
-
+      if (blueMan) {
+        z = 255 - z;
+      }
       points[i] = x;
       points[i + 1] = imgLength - y;
       points[i + 2] = z;
@@ -406,13 +409,15 @@ function updatePointsAndColors(dctx, ctx) {
 
   let x;
   let y;
+  let z;
   let i = 0;
 
   for (y = 0; y < imgLength; y += subSample) {
     for (x = 0; x < imgWidth; x += subSample) {
-      const z = 255 - (depthData[getLoc(x, y)] +
+      z = (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2]) / 3;
+      if (blueMan) z = 255 - z;
       points[i] = x;
       points[i + 1] = imgLength - y;
       points[i + 2] = z;
