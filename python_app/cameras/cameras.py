@@ -36,8 +36,8 @@ class camera(ABC):
     default_format=".png"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
-    transpose = True
-    bgr = True
+    transpose = False
+    bgr = False
     totalTime = 0
     steps = 1
     numThreads = 3

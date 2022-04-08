@@ -76,7 +76,7 @@ const staticModels = ['M4', 'M5', 'M6'];
 
 const dynamicModels = ['M1', 'M2'];
 
-
+const blueMan = false;
 /*
 M1 = mesh
 M2 = index
@@ -205,11 +205,14 @@ function filterIndices(vertices) {
     const z2 = vertices[(i2 * 3) + 2];
     const z3 = vertices[(i3 * 3) + 2];
 
-    // if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
-    //   newIndices.push(i1, i2, i3);
-    // }
-    if ((z1 > thresh && z2 > thresh && z3 > thresh)) {
-      newIndices.push(i1, i2, i3);
+    if (blueMan) {
+      if ((z1 > thresh && z2 > thresh && z3 > thresh)) {
+        newIndices.push(i1, i2, i3);
+      }
+    } else {
+      if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
+        newIndices.push(i1, i2, i3);
+      }
     }
   }
 
@@ -471,7 +474,11 @@ function initTriangles(dctx) {
       depthData[getLoc(x + subSample, y + subSample) + 1] +
       depthData[getLoc(x + subSample, y + subSample) + 2])/3;
 
-      if (tl > 255 - thresh || tr > 255 - thresh || br > 255 - thresh) continue;
+      if (blueMan) {
+        if (tl > 255 - thresh || tr > 255 - thresh || br > 255 - thresh) continue;
+      } else {
+        if (tl < thresh || tr < thresh || br < thresh) continue;
+      }
 
       verts.push(x + subSample);
       verts.push(imgLength - y);
@@ -493,8 +500,11 @@ function initTriangles(dctx) {
 
       UVs.push(getUVx(x));
       UVs.push(getUVy(y));
-
-      if (bl > 255 - thresh) continue;
+      if (blueMan) {
+        if (bl > 255 - thresh) continue;
+      } else {
+        if (bl < thresh) continue;
+      }
 
       verts.push(x + subSample);
       verts.push(imgLength - y - subSample);
