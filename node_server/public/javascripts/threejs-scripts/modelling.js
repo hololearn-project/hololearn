@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable require-jsdoc */
 /* eslint-disable no-unused-vars */
 /* eslint-disable valid-jsdoc */
@@ -61,6 +62,9 @@ let modelType = 'M1';
 
 /* X position of the model. */
 let teacherX = -6;
+let teacherY = 2;
+let teacherZ = 28.5;
+
 
 /* Flag for toggling the visibility of the advanced options menu
 on the webpage. */
@@ -204,16 +208,15 @@ function filterIndices(vertices) {
     const z1 = vertices[(i1 * 3) + 2];
     const z2 = vertices[(i2 * 3) + 2];
     const z3 = vertices[(i3 * 3) + 2];
-
-    if (blueMan) {
-      if ((z1 > thresh && z2 > thresh && z3 > thresh)) {
-        newIndices.push(i1, i2, i3);
-      }
-    } else {
-      if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
-        newIndices.push(i1, i2, i3);
-      }
+    if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
+      newIndices.push(i1, i2, i3);
     }
+    // if (blueMan) {
+    // } else {
+    //   if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
+    //     newIndices.push(i1, i2, i3);
+    //   }
+    // }
   }
 
   return new Uint32Array(newIndices);
@@ -233,7 +236,7 @@ function createMeshModel(vertices) {
   teacherModel.setAttribute('uv',
       new THREE.BufferAttribute(vertices[1], 2));
   teacherModel.scale(0.03, 0.03, 0.05);
-  teacherModel.translate(teacherX, 2, 18);
+  teacherModel.translate(teacherX, teacherY, teacherZ);
   const material = new THREE.MeshBasicMaterial({map: texture});
   const mesh = new THREE.Mesh(teacherModel, material);
 
@@ -256,7 +259,7 @@ function createIndexedModel(indices) {
 
   const texture = new THREE.VideoTexture(pictureVideo);
   teacherModel.scale(0.03, 0.03, 0.05);
-  teacherModel.translate(teacherX, 2, 18);
+  teacherModel.translate(teacherX, teacherY, teacherZ);
 
   const material = new THREE.MeshBasicMaterial({map: texture});
   const mesh = new THREE.Mesh(teacherModel, material);
@@ -275,7 +278,7 @@ function createIndexedModel(indices) {
  */
 function createPointCloudModel() {
   teacherModel.scale(0.03, 0.03, 0.06);
-  teacherModel.translate(teacherX, 2, 18);
+  teacherModel.translate(teacherX, teacherY, teacherZ);
   const material = new THREE.PointsMaterial(
       {vertexColors: true, size: pointSize});
   const mesh = new THREE.Points(teacherModel, material);
