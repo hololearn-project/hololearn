@@ -668,7 +668,8 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
   try {
     dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
   } catch {
-    console.log('error with drawing an image');
+    // pass
+    depthVideo = document.getElementById('lidarVideoStream2');
   }
 
   switch (modelType) {
@@ -733,6 +734,7 @@ function getPictureVideo() {
  * @return the element with id=lidarVideoStream2
  */
 function getDepthVideo() {
+  console.log(document.getElementById('lidarVideoStream2'));
   return document.getElementById('lidarVideoStream2');
 }
 
