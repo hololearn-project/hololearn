@@ -75,6 +75,11 @@ console.log = function() {
   // new & array data
   console.logs.push(Array.from(arguments));
 };
+window.onerror = function(error, url, line) {
+  serverConsole(error);
+  serverConsole(url);
+  serverConsole(line);
+};
 
 // these are video settings
 const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
