@@ -666,14 +666,8 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
   ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
   dctx.clearRect(0, 0, depthCanvas.width, depthCanvas.height);
   problems = true;
-  while (problems) {
-    try {
-      dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
-      problems = false;
-    } catch {
-      console.log('we have problemos');
-    }
-  }
+  dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
+
 
   switch (modelType) {
     case 'M1': // index

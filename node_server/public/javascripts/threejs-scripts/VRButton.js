@@ -14,9 +14,11 @@ class VRButton {
       let currentSession = null;
 
       async function onSessionStarted( session ) {
+        console.log('in VR');
         session.addEventListener( 'end', onSessionEnded );
-
+        console.log('setting session');
         await renderer.xr.setSession( session );
+        console.log('session set!');
         button.textContent = 'EXIT VR';
 
         currentSession = session;
@@ -26,7 +28,9 @@ class VRButton {
         scene.scale.set(0.2, 0.2, 0.2);
 
         // camera.lookAt(0, 0, 0);
+        console.log('Moving shit to VR');
         moveSceneToVR();
+        console.log('Done moving');
       }
 
       async function onSessionEnded( /* event*/ ) {
