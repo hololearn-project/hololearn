@@ -74,9 +74,9 @@ class VRButton {
           // ('local' is always available for immersive sessions and doesn't need to
           // be requested separately.)
 
-          console.log('going to start session now')
+          const sessionInit = {optionalFeatures: []};
           console.log('going to start session now');
-          navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
+          navigator.xr.requestSession( 'immersive-vr').then( onSessionStarted );
         } else {
           console.log('something is null');
           currentSession.end();
