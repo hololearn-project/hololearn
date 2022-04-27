@@ -701,3 +701,11 @@ function addScreenShare(stream, replay) {
   addVR( me2 );
   objects.push( me2 );
 }
+
+/**
+ * Sends message to the server who prints it out in its console.
+ * @param {String} message - The message that has to be printed.
+ */
+function serverConsole(message) {
+  socket.emit('console', (message));
+}

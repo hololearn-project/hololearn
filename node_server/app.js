@@ -79,7 +79,7 @@ app.use(function(req, res, next) {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(logger('dev'));
+// app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
@@ -390,6 +390,10 @@ console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
   let screenLectureUploadTeacher = undefined;
   let screenLectureUploadScreenShare = undefined;
+  socket.on('console', (message) => {
+    console.log('------------------------');
+    console.log('USER LOG: ' + message);
+  });
   socket.on('pointChange', (newPoint) => {
     newPoint = newPoint / 100 * 2000 + 1000;
     pythonWhisperer.send('pointChange ' + newPoint);

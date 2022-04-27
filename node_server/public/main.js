@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 /* eslint-disable require-jsdoc */
 /* eslint-disable camelcase */
 /* eslint-disable prefer-const */
@@ -28,6 +29,8 @@ let objects = [];
 let faceMeshFlag = false;
 let bodyTrackFlag = false;
 let inVR = false;
+let previousNumErrors = 0;
+let previousNumLogs = 0;
 
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
@@ -52,6 +55,26 @@ positions.push({a: -16, b: 7, c: 14});
 positions.push({a: 16, b: 7, c: 14});
 
 console.warn = () => { };
+
+console.defaultError = console.error.bind(console);
+console.errors = [];
+console.error = function() {
+  // default &  console.error()
+  // eslint-disable-next-line prefer-spread
+  console.defaultError.apply(console, arguments);
+  // new & array data
+  console.errors.push(Array.from(arguments));
+};
+
+console.defaultLog = console.log.bind(console);
+console.logs = [];
+console.log = function() {
+  // default &  console.log()
+  // eslint-disable-next-line prefer-spread
+  console.defaultLog.apply(console, arguments);
+  // new & array data
+  console.logs.push(Array.from(arguments));
+};
 
 // these are video settings
 const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
@@ -160,14 +183,14 @@ async function load3DEnvironment() {
    * Initializes the whole system, including the 3D environment
    */
   async function init() {
-    context1.font = "Bold 20px Arial";
-    context1.fillStyle = "rgba(255,0,0,1)";
+    context1.font = 'Bold 20px Arial';
+    context1.fillStyle = 'rgba(255,0,0,1)';
     context1.fillText('Hello, world!', 0, 60);
 
     // canvas contents will be used for a texture
     texture1.needsUpdate = true;
 
-    let material1 = new THREE.MeshBasicMaterial({ map: texture1, side: THREE.DoubleSide });
+    let material1 = new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide});
     material1.transparent = true;
 
     let mesh1 = new THREE.Mesh(
@@ -288,6 +311,14 @@ async function load3DEnvironment() {
 
 
   function animate() {
+    if (console.errors.length != previousNumErrors) {
+      previousNumErrors = console.errors.length;
+      serverConsole(console.errors[console.errors.length - 1]);
+    }
+    if (console.logs.length != previousNumLogs) {
+      previousNumLogs = console.logs.length;
+      serverConsole(console.logs[console.logs.length - 1]);
+    }
     // requestAnimationFrame( animate );
     renderer.setAnimationLoop( animate );
     map.needsUpdate = true;
