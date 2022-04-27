@@ -671,7 +671,7 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
       dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
       problems = false;
     } catch {
-
+      console.log('we have problemos');
     }
   }
 
