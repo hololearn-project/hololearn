@@ -665,12 +665,12 @@ function model2DWithDepth(ctx, dctx) {
 function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
   ctx.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
   dctx.clearRect(0, 0, depthCanvas.width, depthCanvas.height);
-  try {
-    dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
-  } catch {
-    // pass
-    depthVideo = document.getElementById('lidarVideoStream2');
-  }
+  // try {
+  //   dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
+  // } catch {
+  //   // pass
+  //   depthVideo = document.getElementById('lidarVideoStream2');
+  // }
 
   switch (modelType) {
     case 'M1': // index
@@ -734,7 +734,6 @@ function getPictureVideo() {
  * @return the element with id=lidarVideoStream2
  */
 function getDepthVideo() {
-  console.log(document.getElementById('lidarVideoStream2'));
   return document.getElementById('lidarVideoStream2');
 }
 
