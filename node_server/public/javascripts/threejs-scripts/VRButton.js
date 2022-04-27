@@ -65,6 +65,7 @@ class VRButton {
       };
 
       button.onclick = function() {
+        console.log('button clicked');
         if ( currentSession === null ) {
           // WebXR's requestReferenceSpace only works if the corresponding feature
           // was requested at session creation time. For simplicity, just ask for
@@ -74,8 +75,10 @@ class VRButton {
           // be requested separately.)
 
           const sessionInit = {optionalFeatures: ['local-floor', 'bounded-floor', 'hand-tracking', 'layers']};
+          console.log('going to start session now')
           navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
         } else {
+          console.log('something is null');
           currentSession.end();
         }
       };
