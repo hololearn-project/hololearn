@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // const e = require("cors");
 // eslint-disable-next-line no-unused-vars
 let teacherSocket = '';
@@ -613,6 +614,7 @@ function startConnecting(teacher, name) {
         if (selectedPosition == -6) {
           if (stream.id == 'videostream') {
             document.getElementById('teacher').srcObject = stream;
+            document.getElementById('teacher').style.display = 'block';
           }
         } else {
           console.log(servRtcStrms.get(sid));
@@ -735,4 +737,12 @@ function addScreenShare(stream, replay) {
   me2.rotation.y = Math.PI;
   scene.add( me2 );
   objects.push( me2 );
+}
+
+/**
+ * Sends a message to the server and the server will print it in its console.
+ * @param {String} message The message that needs to be printed.
+ */
+function serverConsole(message) {
+  socket.emit('console', (message));
 }

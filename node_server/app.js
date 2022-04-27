@@ -388,6 +388,9 @@ function getUsers() {
 // socket.io connection here...
 console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
+  socket.on('console', (message) => {
+    console.log(message);
+  });
   let screenLectureUploadTeacher = undefined;
   let screenLectureUploadScreenShare = undefined;
   socket.on('pointChange', (newPoint) => {

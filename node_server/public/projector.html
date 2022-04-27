@@ -49,7 +49,7 @@
 
 
         <video autoplay="true" id="webcam" style="display: none"></video>
-        <video width="300" height="550" autoplay="true" id="teacher" class="rotateUp"></video>
+        <video width="300" height="550" autoplay="true" id="teacher" class="rotateUp" style="display: none;"></video>
         <video autoplay="true" id="fileCam" style="display: none" loop></video>
 
         <br><br><br><br>
@@ -72,9 +72,9 @@
           
         </div>
       </div>
-      <div id="buttonGroup" class="buttonGroup" style="position: absolute; bottom: 50px; display: none;">
+      <div id="buttonGroup" class="buttonGroup" style="position: absolute; bottom: 50px; background: rgba(255, 255, 255, 0.2); display:  none;">
         <div class="buttonInGroup" id="settingsButton" onclick="openCloseVideoSettings()">
-          <i id="settingsButton" style="font-size:24px; color: white;" class='fa fa-gear'></i>
+          <i id="settingsButton" style="font-size:24px; color: white; display: block;" class='fas fa-tools'></i>
         </div>
       </div>
         <!-- <canvas id='lidarVideoStream1Canvas' width="500" height="540" style="display: none"></canvas>

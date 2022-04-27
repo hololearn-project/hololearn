@@ -9,7 +9,7 @@ from aiortc import RTCPeerConnection, RTCSessionDescription
 from data_streams.StreamingTrack import StreamingTrack
 
 # Socket.io details
-NODEJS_URL = '145.94.148.186'
+NODEJS_URL = 'localhost'
 NODEJS_PORT = '4000'
 ROOT = os.path.dirname(__file__)
 CLASSROOM_ID = "defaultClassroom"
