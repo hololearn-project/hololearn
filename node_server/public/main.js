@@ -375,6 +375,7 @@ function animate() {
 
 
 function render() {
+  console.log(inVR);
   if (inVR) {
     console.log('VR in render');
   }
