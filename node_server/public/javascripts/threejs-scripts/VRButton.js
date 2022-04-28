@@ -81,7 +81,11 @@ class VRButton {
           // be requested separately.)
 
           const sessionInit = {optionalFeatures: []};
-          console.log(navigator.xr.isSessionSupported( 'immersive-vr' ));
+          if (navigator.xr.isSessionSupported( 'immersive-vr' )) {
+            console.log('session IS supported');
+          } else {
+            console.log('session is NOT supported');
+          }
           navigator.xr.requestSession( 'immersive-vr').then( onSessionStarted ).catch(onSessionRejected);
         } else {
           console.log('something is null');
