@@ -382,7 +382,6 @@ function render() {
     console.log('VR in render');
   }
   // requestAnimationFrame( animate );
-  // renderer.setAnimationLoop( animate );
   map.needsUpdate = true;
   mapScreen.needsUpdate = true;
   mapScreenWebcam.needsUpdate = true;
@@ -420,4 +419,5 @@ function render() {
   // if (!isTeacher)
   animateTeacher(dctx, ctx, depth_canvas, canvas2d);
   renderer.render(scene, camera);
+  renderer.setAnimationLoop( animate );
 };
