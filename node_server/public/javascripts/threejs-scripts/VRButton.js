@@ -33,6 +33,10 @@ class VRButton {
         console.log('Done moving');
       }
 
+      async function onSessionRejected() {
+        console.log('FUUUCCKKK WE ARE REJECTED');
+      }
+
       async function onSessionEnded( /* event*/ ) {
         currentSession.removeEventListener( 'end', onSessionEnded );
 
@@ -75,9 +79,8 @@ class VRButton {
           // be requested separately.)
 
           const sessionInit = {optionalFeatures: []};
-          console.log('going to start session now');
           console.log(navigator.xr.isSessionSupported( 'immersive-vr' ));
-          navigator.xr.requestSession( 'immersive-vr').then( onSessionStarted );
+          navigator.xr.requestSession( 'immersive-vr').then( onSessionStarted ).catch(onSessionRejected);
         } else {
           console.log('something is null');
           currentSession.end();
