@@ -74,7 +74,7 @@ let advOpts = false;
 const playback = true;
 
 /* Flag to indicate wether or not the next frame should be rendered */
-let render = true;
+let goAndRender = true;
 
 const staticModels = ['M4', 'M5', 'M6'];
 
@@ -348,7 +348,7 @@ function createLightWeightPointCloudModel() {
   modelPresent = true;
   addVR(pointsModel);
 
-  render = false;
+  goAndRender = false;
 
   depthVideo.play();
 }
@@ -679,7 +679,7 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
       break;
   }
 
-  render = true;
+  goAndRender = true;
 }
 /**
  * Will add jdoc later
@@ -702,7 +702,7 @@ function createStaticModel() {
  */
 function hideModel() {
   removeModel();
-  render = false;
+  goAndRender = false;
 }
 
 /**
@@ -805,7 +805,7 @@ function okToModel() {
  * which the picture image will be drawn.
  */
 function animateTeacher(dctx, ctx, depthCanvas, imageCanvas) {
-  if (render) { // Add okToModel() == 2 back when you're done
+  if (goAndRender) { // Add okToModel() == 2 back when you're done
     removeModel();
     if (dynamicModels.includes(modelType)) {
       createDynamicModel(dctx, ctx, depthCanvas, imageCanvas);
@@ -852,7 +852,7 @@ function updateType() {
       bodyGroup.visible = false;
       teacherModel = new THREE.BufferGeometry();
       initModel();
-      render = true;
+      goAndRender = true;
   }
 
   modelType = newType;
