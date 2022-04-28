@@ -315,18 +315,14 @@ async function load3DEnvironment() {
   scene.add( sphere );
   sphere.position.y = 3;
 
-
   function animate() {
-    if (console.errors.length != previousNumErrors) {
-      previousNumErrors = console.errors.length;
-      serverConsole(console.errors[console.errors.length - 1]);
-    }
-    if (console.logs.length != previousNumLogs) {
-      previousNumLogs = console.logs.length;
-      serverConsole(console.logs[console.logs.length - 1]);
-    }
+    renderer.setAnimationLoop(render);
+  }
+
+
+  function render() {
     // requestAnimationFrame( animate );
-    renderer.setAnimationLoop( animate );
+    // renderer.setAnimationLoop( animate );
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;
