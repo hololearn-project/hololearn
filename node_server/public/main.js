@@ -315,53 +315,6 @@ async function load3DEnvironment() {
   scene.add( sphere );
   sphere.position.y = 3;
 
-  function animate() {
-    renderer.setAnimationLoop(render);
-  }
-
-
-  function render() {
-    // requestAnimationFrame( animate );
-    // renderer.setAnimationLoop( animate );
-    map.needsUpdate = true;
-    mapScreen.needsUpdate = true;
-    mapScreenWebcam.needsUpdate = true;
-    texture1.needsUpdate = true;
-    for (let i = 0; i < textures.length; i++) {
-      if (textures[i] != undefined) {
-        textures[i].needsUpdate = true;
-      }
-    }
-    let lookAtVector = new THREE.Vector3();
-    camera.getWorldDirection(lookAtVector);
-    rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
-    if (!isTeacher) {
-      if (student_canvas != null) {
-        student_canvas.rotation.y = rotation;
-      }
-      rotationNow = rotation;
-    }
-    // Rotates every student accordingly
-    for (let i = 0; i < rotations.length; i++) {
-      if (students[i] != undefined && rotations[i] != undefined) {
-        students[i].rotation.y = rotations[i];
-      }
-    }
-
-    if (faceMeshFlag) {
-      updateFaceMesh();
-    } else if (bodyTrackFlag) {
-      updateSkeleton();
-    }
-
-
-    updateScreenAndWebcams(isTeacher, camera);
-
-    // if (!isTeacher)
-    animateTeacher(dctx, ctx, depth_canvas, canvas2d);
-    renderer.render(scene, camera);
-  };
-
   await init();
   // simpleTextureMap();
   if (table != -3) {
@@ -411,3 +364,50 @@ async function load3DEnvironment() {
   animate();
   // simpleVerticies()
 }
+
+function animate() {
+  renderer.setAnimationLoop(render);
+}
+
+
+function render() {
+  // requestAnimationFrame( animate );
+  // renderer.setAnimationLoop( animate );
+  map.needsUpdate = true;
+  mapScreen.needsUpdate = true;
+  mapScreenWebcam.needsUpdate = true;
+  texture1.needsUpdate = true;
+  for (let i = 0; i < textures.length; i++) {
+    if (textures[i] != undefined) {
+      textures[i].needsUpdate = true;
+    }
+  }
+  let lookAtVector = new THREE.Vector3();
+  camera.getWorldDirection(lookAtVector);
+  rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
+  if (!isTeacher) {
+    if (student_canvas != null) {
+      student_canvas.rotation.y = rotation;
+    }
+    rotationNow = rotation;
+  }
+  // Rotates every student accordingly
+  for (let i = 0; i < rotations.length; i++) {
+    if (students[i] != undefined && rotations[i] != undefined) {
+      students[i].rotation.y = rotations[i];
+    }
+  }
+
+  if (faceMeshFlag) {
+    updateFaceMesh();
+  } else if (bodyTrackFlag) {
+    updateSkeleton();
+  }
+
+
+  updateScreenAndWebcams(isTeacher, camera);
+
+  // if (!isTeacher)
+  animateTeacher(dctx, ctx, depth_canvas, canvas2d);
+  renderer.render(scene, camera);
+};
