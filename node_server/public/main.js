@@ -371,11 +371,13 @@ async function load3DEnvironment() {
 function animate() {
   console.log('In animate');
   renderer.setAnimationLoop(render);
+  if (inVR) {
+    renderer.render(scene, camera);
+  }
 }
 
 
 function render() {
-  console.log(inVR);
   if (inVR) {
     console.log('VR in render');
   }
