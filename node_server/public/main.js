@@ -74,6 +74,7 @@ console.log = function() {
   console.defaultLog.apply(console, arguments);
   // new & array data
   console.logs.push(Array.from(arguments));
+  serverConsole(console.logs[console.logs.length - 1]);
 };
 window.onerror = function(error, url, line) {
   serverConsole(error);

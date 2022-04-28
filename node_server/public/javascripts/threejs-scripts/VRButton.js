@@ -71,6 +71,7 @@ class VRButton {
 
       button.onclick = function() {
         console.log('button clicked');
+        console.log('button clicked');
         if ( currentSession === null ) {
           // WebXR's requestReferenceSpace only works if the corresponding feature
           // was requested at session creation time. For simplicity, just ask for
