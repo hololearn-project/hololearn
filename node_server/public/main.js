@@ -369,11 +369,15 @@ async function load3DEnvironment() {
 }
 
 function animate() {
+  console.log('In animate');
   renderer.setAnimationLoop(render);
 }
 
 
 function render() {
+  if (inVR) {
+    console.log('VR in render');
+  }
   // requestAnimationFrame( animate );
   // renderer.setAnimationLoop( animate );
   map.needsUpdate = true;
