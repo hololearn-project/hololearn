@@ -44,6 +44,24 @@ let scene = new THREE.Scene();
 let teacherModel = new THREE.BufferGeometry();
 let userClassroomId = 'defaultClassroom';
 
+let camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+
+camera.position.x = a;
+camera.position.y = b;
+camera.position.z = c;
+
+let startColor;
+const canvas2d = document.getElementById('2d');
+const ctx = canvas2d.getContext('2d');
+
+const depth_canvas = document.getElementById('dm');
+const dctx = depth_canvas.getContext('2d');
+
+const map = new THREE.Texture(canvas2d);
+
+const loader = new THREE.GLTFLoader();
+
+
 const vrPos = {a: 0, b: 1.6, c: 0}; // DEFAULT POSITION OF THE CAMERA WHEN RENDERING IN VR
 // Adds the possible positions
 // positions.push({a: 0, b: 7, c: 27});
@@ -90,9 +108,6 @@ const SOCKET_ADDRESS = 'http://localhost:8080';
 const CLASSROOM_BLACKBOARD_IMAGE = '/assets/fourier.png';
 const WEBCAM_FRAMES_PER_SECOND = 20;
 const DEBUG = true;
-
-camera = new THREE.PerspectiveCamera(35, width / height, 1, 15);
-camera.position.set(0, 0.6, 3); // Set the initial Camera Position.
 
 loadNet();
 /**
@@ -143,38 +158,26 @@ async function load3DEnvironment() {
   video.style.display = 'none';
   webcam.style.display = 'none';
 
-  // var scene = new THREE.Scene();
-
-  scene.background = new THREE.Color( 0xf0f0f0 );
   const objects = [];
 
-  updateSubSample();
+  scene.background = new THREE.Color( 0xf0f0f0 );
 
-  initModel();
   renderer.setSize( width, height - 1);
 
   renderer.xr.enabled = true;
   document.body.appendChild( renderer.domElement );
 
   document.body.appendChild(VRButton.createButton(renderer));
-
-  const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
-
-  camera.position.x = a;
-  camera.position.y = b;
-  camera.position.z = c;
-
-  let startColor;
-  const canvas2d = document.getElementById('2d');
-  const ctx = canvas2d.getContext('2d');
-
-  const depth_canvas = document.getElementById('dm');
-  const dctx = depth_canvas.getContext('2d');
-
-  const map = new THREE.Texture(canvas2d);
+  initModel();
+  updateSubSample();
   scene.background = new THREE.Color( 0x87ceeb );
 
-  const loader = new THREE.GLTFLoader();
+  // camera = new THREE.PerspectiveCamera(35, width / height, 1, 15);
+  // camera.position.set(0, 0.6, 3); // Set the initial Camera Position.
+
+
+
+  // var scene = new THREE.Scene();
 
   /**
    * Window resizer
