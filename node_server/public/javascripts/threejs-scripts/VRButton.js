@@ -12,6 +12,7 @@ class VRButton {
 
     function showEnterVR( /* device*/ ) {
       let currentSession = null;
+      console.log('Showing the button');
 
       async function onSessionStarted( session ) {
         console.log('in VR');
@@ -130,6 +131,7 @@ class VRButton {
 
       navigator.xr.isSessionSupported( 'immersive-vr' ).then( function( supported ) {
         supported ? showEnterVR() : showWebXRNotFound();
+        console.log('we now if it is supported or not');
       } );
 
       return button;
