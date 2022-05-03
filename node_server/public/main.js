@@ -369,55 +369,45 @@ async function load3DEnvironment() {
 }
 
 function animate() {
-  console.log('In animate');
-  renderer.setAnimationLoop(render);
-  if (inVR) {
+  renderer.setAnimationLoop(function() {
+    if (inVR) {
+      console.log('VR in render');
+    }
+    map.needsUpdate = true;
+    mapScreen.needsUpdate = true;
+    mapScreenWebcam.needsUpdate = true;
+    texture1.needsUpdate = true;
+    for (let i = 0; i < textures.length; i++) {
+      if (textures[i] != undefined) {
+        textures[i].needsUpdate = true;
+      }
+    }
+    let lookAtVector = new THREE.Vector3();
+    camera.getWorldDirection(lookAtVector);
+    rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
+    if (!isTeacher) {
+      if (student_canvas != null) {
+        student_canvas.rotation.y = rotation;
+      }
+      rotationNow = rotation;
+    }
+    // Rotates every student accordingly
+    for (let i = 0; i < rotations.length; i++) {
+      if (students[i] != undefined && rotations[i] != undefined) {
+        students[i].rotation.y = rotations[i];
+      }
+    }
+
+    if (faceMeshFlag) {
+      updateFaceMesh();
+    } else if (bodyTrackFlag) {
+      updateSkeleton();
+    }
+
+
+    updateScreenAndWebcams(isTeacher, camera);
+
+    animateTeacher(dctx, ctx, depth_canvas, canvas2d);
     renderer.render(scene, camera);
-  }
+  });
 }
-
-
-function render() {
-  if (inVR) {
-    console.log('VR in render');
-  }
-  // requestAnimationFrame( animate );
-  map.needsUpdate = true;
-  mapScreen.needsUpdate = true;
-  mapScreenWebcam.needsUpdate = true;
-  texture1.needsUpdate = true;
-  for (let i = 0; i < textures.length; i++) {
-    if (textures[i] != undefined) {
-      textures[i].needsUpdate = true;
-    }
-  }
-  let lookAtVector = new THREE.Vector3();
-  camera.getWorldDirection(lookAtVector);
-  rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
-  if (!isTeacher) {
-    if (student_canvas != null) {
-      student_canvas.rotation.y = rotation;
-    }
-    rotationNow = rotation;
-  }
-  // Rotates every student accordingly
-  for (let i = 0; i < rotations.length; i++) {
-    if (students[i] != undefined && rotations[i] != undefined) {
-      students[i].rotation.y = rotations[i];
-    }
-  }
-
-  if (faceMeshFlag) {
-    updateFaceMesh();
-  } else if (bodyTrackFlag) {
-    updateSkeleton();
-  }
-
-
-  updateScreenAndWebcams(isTeacher, camera);
-
-  // if (!isTeacher)
-  animateTeacher(dctx, ctx, depth_canvas, canvas2d);
-  renderer.render(scene, camera);
-  renderer.setAnimationLoop( animate );
-};

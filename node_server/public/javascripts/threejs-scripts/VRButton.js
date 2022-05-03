@@ -47,6 +47,7 @@ class VRButton {
         inVR = false;
 
         currentSession = null;
+        console.log('session has ended');
 
         // set the scale for non-VR
         scene.scale.set(1, 1, 1);
@@ -87,7 +88,9 @@ class VRButton {
           } else {
             console.log('session is NOT supported');
           }
+          console.log('requesting session');
           navigator.xr.requestSession( 'immersive-vr').then( onSessionStarted ).catch(onSessionRejected);
+          console.log('session is requested');
         } else {
           console.log('something is null');
           currentSession.end();
