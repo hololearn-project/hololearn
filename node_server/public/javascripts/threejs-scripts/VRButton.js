@@ -32,7 +32,8 @@ class VRButton {
         console.log('Moving shit to VR');
         moveSceneToVR();
         console.log('Done moving');
-        animate();
+        renderer.render(scene, camera);
+        console.log('renderer.render called');
       }
 
       async function onSessionRejected() {
