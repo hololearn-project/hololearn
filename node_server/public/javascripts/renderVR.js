@@ -41,6 +41,7 @@ function moveObjectToVR(object) {
     return;
   }
   if (object.name == 'model') {
+    console.log(object.name);
     console.log(object.position.x);
     console.log(object.position.y);
     console.log(object.position.z);
