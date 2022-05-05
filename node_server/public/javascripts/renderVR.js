@@ -5,6 +5,7 @@ let inVR = false;
  * perspective of the VR user
  */
 function moveSceneToVR() {
+  console.log('moving scene into vr');
   for (let i = 0; i < scene.children.length; i++) {
     moveObjectToVR(scene.children[i]);
   }
@@ -40,7 +41,7 @@ function moveObjectToVR(object) {
   if (isBasically(object.position.x, 0) && isBasically(object.position.y, 3) && isBasically(object.position.z, 0)) {
     return;
   }
-  if (object.name == 'model') {
+  if (object.name == 'humanModel') {
     console.log(object.name);
     console.log(object.position.x);
     console.log(object.position.y);
