@@ -218,6 +218,7 @@ async function load3DEnvironment() {
         MODEL_LOCATION,
         // called when the resource is loaded
         function( gltf ) {
+          gltf.name = 'model';
           addVR( gltf.scene );
           gltf.scene.scale.set(0.2, 0.2, 0.2);
           gltf.scene.position.x = -18.8;
