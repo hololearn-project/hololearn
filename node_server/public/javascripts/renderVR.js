@@ -53,6 +53,13 @@ function moveObjectToVR(object) {
   object.position.y = object.position.y - b + 8;
   object.position.z = object.position.z + c - 2;
 
+  if (object.name == 'humanModel') {
+    console.log(object.name);
+    console.log(object.position.x);
+    console.log(object.position.y);
+    console.log(object.position.z);
+  }
+
   object.rotation.y += rotationNow;
 
   // object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -rotationNow);
