@@ -41,17 +41,18 @@ function moveObjectToVR(object) {
   if (isBasically(object.position.x, 0) && isBasically(object.position.y, 3) && isBasically(object.position.z, 0)) {
     return;
   }
+
   if (object.name == 'humanModel') {
     object.position.x = -object.position.x;
     // object.position.y = object.position.y - b + 8;
     object.position.z = -object.position.z;
   } else {
-    object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
-
     object.position.x = object.position.x + a;
     object.position.y = object.position.y - b + 8;
     object.position.z = object.position.z + c - 2;
   }
+
+  object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
 
   // object.rotation.y += rotationNow;
 
