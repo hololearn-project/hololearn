@@ -221,9 +221,10 @@ async function load3DEnvironment() {
           gltf.name = 'model';
           addVR( gltf.scene );
           gltf.scene.scale.set(0.2, 0.2, 0.2);
-          gltf.scene.position.x = -18.8;
-          gltf.scene.position.y = 0.8;
-          gltf.scene.position.z = 13.7;
+          // gltf.scene.position.x = -18.8;
+          // gltf.scene.position.y = 0.8;
+          // gltf.scene.position.z = 13.7;
+          gltf.scene.position.set(-18.8, 0.8, 13.7);
           gltf.scene.rotation.y = 0.7;
 
 
