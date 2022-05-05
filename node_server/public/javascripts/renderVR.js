@@ -45,7 +45,7 @@ function moveObjectToVR(object) {
   if (object.name == 'humanModel') {
     object.position.x = -object.position.x + a;
     object.position.y = object.position.y - b + 8;
-    object.position.z = -object.position.z;
+    object.position.z = -object.position.z + c + 4;
   } else {
     object.position.x = object.position.x + a;
     object.position.y = object.position.y - b + 8;
