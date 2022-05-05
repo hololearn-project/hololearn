@@ -63,7 +63,7 @@ let modelType = 'M1';
 /* X position of the model. */
 let teacherX = -6;
 let teacherY = 2;
-let teacherZ = 28.5;
+let teacherZ = 23;
 
 
 /* Flag for toggling the visibility of the advanced options menu
