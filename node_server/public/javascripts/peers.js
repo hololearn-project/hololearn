@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // const e = require("cors");
 // eslint-disable-next-line no-unused-vars
 let teacherSocket = '';
@@ -735,4 +736,13 @@ function addScreenShare(stream, replay) {
   me2.rotation.y = Math.PI;
   addVR( me2 );
   objects.push( me2 );
+}
+
+
+/**
+ * Sends message to the server who prints it out in its console.
+ * @param {String} message - The message that has to be printed.
+ */
+function serverConsole(message) {
+  socket.emit('console', (message));
 }
