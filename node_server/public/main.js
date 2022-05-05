@@ -218,7 +218,7 @@ async function load3DEnvironment() {
         MODEL_LOCATION,
         // called when the resource is loaded
         function( gltf ) {
-          gltf.name = 'humanModel';
+          gltf.scene.name = 'humanModel';
           console.log('model loaded');
           addVR( gltf.scene );
           gltf.scene.scale.set(0.2, 0.2, 0.2);
