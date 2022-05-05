@@ -15,13 +15,12 @@ class VRButton {
 
       async function onSessionStarted( session ) {
         session.addEventListener( 'end', onSessionEnded );
+        moveSceneToVR();
 
         await renderer.xr.setSession( session );
         button.textContent = 'EXIT VR';
 
         currentSession = session;
-
-        moveSceneToVR();
 
         // set the scale for VR
         scene.scale.set(0.2, 0.2, 0.2);
