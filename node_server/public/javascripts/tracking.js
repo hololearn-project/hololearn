@@ -97,7 +97,7 @@ function loadCanonicalFaceModel() {
 
         // mesh.material.map = canonTexture;
 
-        scene.add(face);
+        scene.addVR(face);
 
         face.visible = false;
 
@@ -134,7 +134,7 @@ function loadCanonicalFaceModelWithTexture() {
 
         face = gltf.scene
 
-        scene.add(face);
+        scene.addVR(face);
 
         // face.rotation.y += Math.PI
 
@@ -142,7 +142,7 @@ function loadCanonicalFaceModelWithTexture() {
         
         vertMarker = new THREE.Mesh(vertGeometry, vertMaterial);
         vertMarker.scale.set(10, 10, 10);
-        scene.add(vertMarker)
+        scene.addVR(vertMarker)
        
         mesh = face.children[2];
         mesh.material.wireframe = true;
@@ -196,7 +196,7 @@ function loadMaleModel() {
 
         bodyGroup.visible = false;
 
-        scene.add(bodyGroup);
+        scene.addVR(bodyGroup);
 
         // initGui();
 
@@ -234,7 +234,7 @@ function drawSphere() {
 
   const sphere = new THREE.Mesh( circle, canonMaterial );
 
-  scene.add( sphere );
+  scene.addVR( sphere );
 }
 
 function genUVs() {
@@ -273,7 +273,7 @@ function createLooseBody() {
     meshes.push(tracker);
   }
 
-  scene.add(bodyGroup);
+  scene.addVR(bodyGroup);
 
 }
 

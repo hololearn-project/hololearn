@@ -1,9 +1,10 @@
+let inVR = false;
 /* eslint-disable no-unused-vars */
 /**
  * Iterates through every object in the scene and transforms it to accomodate the
  * perspective of the VR user
  */
- function moveSceneToVR() {
+function moveSceneToVR() {
   for (let i = 0; i < scene.children.length; i++) {
     moveObjectToVR(scene.children[i]);
   }
@@ -73,7 +74,7 @@ function moveObjectFromVR(object) {
  * @param {THREE.object} object - the object to move.
 */
 function addVR(object) {
-  scene.add(object);
+  scene.addVR(object);
   if (inVR) {
     moveObjectToVR(object);
   }
