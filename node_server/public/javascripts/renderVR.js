@@ -47,18 +47,12 @@ function moveObjectToVR(object) {
     console.log(object.position.y);
     console.log(object.position.z);
   }
-
-  object.position.x = object.position.x + a;
-  object.position.y = object.position.y - b + 8;
-  object.position.z = object.position.z + c - 2;
-
   object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
 
-  if (object.name == 'humanModel') {
-    console.log(object.name);
-    console.log(object.position.x);
-    console.log(object.position.y);
-    console.log(object.position.z);
+  if (object.name != 'humanModel') {
+    object.position.x = object.position.x + a;
+    object.position.y = object.position.y - b + 8;
+    object.position.z = object.position.z + c - 2;
   }
 
   // object.rotation.y += rotationNow;
