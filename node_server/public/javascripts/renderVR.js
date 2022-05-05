@@ -60,7 +60,7 @@ function moveObjectToVR(object) {
     console.log(object.position.z);
   }
 
-  object.rotation.y += rotationNow;
+  // object.rotation.y += rotationNow;
 
   // object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -rotationNow);
 }
