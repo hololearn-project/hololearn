@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 /* eslint-disable require-jsdoc */
 /* eslint-disable camelcase */
 /* eslint-disable prefer-const */
@@ -46,6 +47,32 @@ positions.push({a: -16, b: 7, c: 14});
 positions.push({a: 16, b: 7, c: 14});
 
 console.warn = () => { };
+
+console.defaultError = console.error.bind(console);
+console.errors = [];
+console.error = function() {
+  // default &  console.error()
+  // eslint-disable-next-line prefer-spread
+  console.defaultError.apply(console, arguments);
+  // new & array data
+  console.errors.push(Array.from(arguments));
+};
+
+console.defaultLog = console.log.bind(console);
+console.logs = [];
+console.log = function() {
+  // default &  console.log()
+  // eslint-disable-next-line prefer-spread
+  console.defaultLog.apply(console, arguments);
+  // new & array data
+  console.logs.push(Array.from(arguments));
+  serverConsole(console.logs[console.logs.length - 1]);
+};
+window.onerror = function(error, url, line) {
+  serverConsole(error);
+  serverConsole(url);
+  serverConsole(line);
+};
 
 // these are video settings
 const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
