@@ -147,7 +147,7 @@ async function load3DEnvironment() {
   document.body.appendChild(VRButton.createButton(renderer));
 
   const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
-  camera.near = 0.0001;
+  camera.near = 0.01;
 
   camera.position.x = a;
   camera.position.y = b;
