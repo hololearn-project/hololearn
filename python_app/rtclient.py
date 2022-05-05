@@ -9,7 +9,7 @@ from aiortc import RTCPeerConnection, RTCSessionDescription
 from data_streams.StreamingTrack import StreamingTrack
 
 # Socket.io details
-NODEJS_URL = '145.94.148.186'
+NODEJS_URL = 'hololearn.tech'
 NODEJS_PORT = '4000'
 ROOT = os.path.dirname(__file__)
 CLASSROOM_ID = "defaultClassroom"
@@ -220,10 +220,10 @@ if __name__ == "__main__":
     mediatracks = []
     # mediatracks.append(webcam)
     # mediatracks.append(flagstream)
-    # mediatracks.append(streamingTrack.depthTrack)
-    # mediatracks.append(streamingTrack.videoTrack)
-    mediatracks.append(streamingTrack.flag)
-    mediatracks.append(streamingTrack.BGRTrack)
+    mediatracks.append(streamingTrack.depthTrack)
+    mediatracks.append(streamingTrack.videoTrack)
+    # mediatracks.append(streamingTrack.flag)
+    # mediatracks.append(streamingTrack.BGRTrack)
 
     # Keep the asyncio loop running until connection closed or
     # keyboard interrupt found.

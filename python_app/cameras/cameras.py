@@ -29,8 +29,8 @@ class camera(ABC):
     mapResRemovalThres = mapRes - 10
     dimX = 576
     dimY = 640
-    cropdimX = 548
-    cropdimY = 300
+    cropdimX = 500
+    cropdimY = 500
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".jpg"
@@ -81,7 +81,7 @@ class camera(ABC):
         ret = image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
         return ret
         
-    def set_focal_window(self, image, range=400):
+    def set_focal_window(self, image, range=700):
         """
         takes the depth map and normalises the values in the given range around
         the object's point attribute
