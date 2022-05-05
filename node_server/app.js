@@ -390,6 +390,10 @@ console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
   let screenLectureUploadTeacher = undefined;
   let screenLectureUploadScreenShare = undefined;
+  socket.on('console', (message) => {
+    console.log('------------------------');
+    console.log('USER LOG: ' + message);
+  });
   socket.on('pointChange', (newPoint) => {
     newPoint = newPoint / 100 * 2000 + 1000;
     pythonWhisperer.send('pointChange ' + newPoint);
