@@ -43,9 +43,9 @@ function moveObjectToVR(object) {
 
   object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
 
-  object.position.x = object.position.x + a - 2;
+  object.position.x = object.position.x + a;
   object.position.y = object.position.y - b + 8;
-  object.position.z = object.position.z + c;
+  object.position.z = object.position.z + c - 2;
 
   object.rotation.y += rotationNow;
 
@@ -61,9 +61,9 @@ function moveObjectFromVR(object) {
   if (isBasically(object.position.x, 0) && isBasically(object.position.y, 3) && isBasically(object.position.z, 0)) {
     return;
   }
-  object.position.x = object.position.x - a + 2;
+  object.position.x = object.position.x - a;
   object.position.y = object.position.y + b - 8;
-  object.position.z = object.position.z - c;
+  object.position.z = object.position.z - c + 2;
 
   object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -Math.PI);
 }
