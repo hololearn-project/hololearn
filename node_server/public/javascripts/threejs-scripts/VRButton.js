@@ -21,6 +21,8 @@ class VRButton {
 
         currentSession = session;
 
+        moveSceneToVR();
+
         // set the scale for VR
         scene.scale.set(0.2, 0.2, 0.2);
 
