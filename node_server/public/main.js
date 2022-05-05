@@ -150,12 +150,12 @@ async function load3DEnvironment() {
    * Initializes the whole system, including the 3D environment
    */
   async function init() {
-    scene.addVR( new THREE.AmbientLight( 0x0f0f0f ) );
+    addVR( new THREE.AmbientLight( 0x0f0f0f ) );
 
     let light = new THREE.AmbientLight( 0xffffff);
     light.position.set( 0, 0, 20 );
 
-    scene.addVR(light);
+    addVR(light);
 
     const size = 0.02;
     vertGeometry = new THREE.BoxGeometry(size, size, size);
@@ -169,7 +169,7 @@ async function load3DEnvironment() {
         CLASSROOM_SCENE_LOCATION,
         // called when the resource is loaded
         function( gltf ) {
-          scene.addVR( gltf.scene );
+          addVR( gltf.scene );
           gltf.animations; // Array<THREE.AnimationClip>
           gltf.scene; // THREE.Group
           gltf.scenes; // Array<THREE.Group>

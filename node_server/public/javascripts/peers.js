@@ -182,7 +182,7 @@ function startConnecting(teacher, name) {
     studentCanvas2.position.set( a, b, c);
     studentCanvas2.matrixAutoUpdate = true;
     studentCanvas2.name = 'Student' + seat;
-    scene.addVR( studentCanvas2 );
+    addVR( studentCanvas2 );
     objects.push( studentCanvas2 );
 
     students[seat] = studentCanvas2;
@@ -733,6 +733,6 @@ function addScreenShare(stream, replay) {
     side: THREE.DoubleSide,
   }));
   me2.rotation.y = Math.PI;
-  scene.addVR( me2 );
+  addVR( me2 );
   objects.push( me2 );
 }

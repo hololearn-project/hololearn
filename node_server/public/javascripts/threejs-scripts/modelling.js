@@ -237,7 +237,7 @@ function createMeshModel(vertices) {
   modelPresent = true;
   mesh.name = 'model';
 
-  scene.addVR(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -260,7 +260,7 @@ function createIndexedModel(indices) {
 
   modelPresent = true;
   mesh.name = 'model';
-  scene.addVR(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -279,7 +279,7 @@ function createPointCloudModel() {
 
   modelPresent = true;
   mesh.name = 'model';
-  scene.addVR(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -340,7 +340,7 @@ function createLightWeightPointCloudModel() {
 
   pointsModel.name = 'model';
   modelPresent = true;
-  scene.addVR(pointsModel);
+  addVR(pointsModel);
 
   render = false;
 
@@ -586,7 +586,7 @@ function model2DNoDepth(ctx) {
   mesh.name = 'model';
   modelPresent = true;
 
-  scene.addVR(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -629,7 +629,7 @@ function model2DWithDepth(ctx, dctx) {
   mesh.name = 'model';
   modelPresent = true;
 
-  scene.addVR(mesh);
+  addVR(mesh);
 }
 
 /**
