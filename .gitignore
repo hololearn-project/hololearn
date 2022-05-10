@@ -29,3 +29,4 @@ node_server/user1.db
 *.db
 node_server/user1.db
 *.db
+video_server/ffmpeg.exe
