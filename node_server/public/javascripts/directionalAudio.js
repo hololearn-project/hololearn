@@ -1,7 +1,7 @@
 /* eslint-disable require-jsdoc */
 // const audioContext = window.AudioContext = window.AudioContext || window.webkitAudioContext;
 panners = new Array(positions.length + 1);
-let threeDAudio = true;
+let threeDAudio = false;
 
 async function start3DAudioUser(seat, stream) {
   const aContext = new AudioContext();
