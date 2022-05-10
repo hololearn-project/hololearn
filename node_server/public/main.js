@@ -38,8 +38,8 @@ let teacherModel = new THREE.BufferGeometry();
 let userClassroomId = 'defaultClassroom';
 
 // Adds the possible positions
-// positions.push({a: 0, b: 7, c: 27});
-positions.push(undefined);
+positions.push({a: 0, b: 7, c: 27});
+// positions.push(undefined);
 positions.push({a: -5, b: 7, c: 5});
 positions.push({a: 0, b: 7, c: 6});
 positions.push({a: 5, b: 7, c: 5});
