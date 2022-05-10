@@ -80,7 +80,7 @@ const staticModels = ['M4', 'M5', 'M6'];
 
 const dynamicModels = ['M1', 'M2'];
 
-const blueMan = false;
+const blueMan = true;
 /*
 M1 = mesh
 M2 = index
@@ -211,12 +211,12 @@ function filterIndices(vertices) {
     if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
       newIndices.push(i1, i2, i3);
     }
-    // if (blueMan) {
-    // } else {
-    //   if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
-    //     newIndices.push(i1, i2, i3);
-    //   }
-    // }
+    if (blueMan) {
+    } else {
+      if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
+        newIndices.push(i1, i2, i3);
+      }
+    }
   }
 
   return new Uint32Array(newIndices);
