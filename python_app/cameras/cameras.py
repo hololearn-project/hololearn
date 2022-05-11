@@ -20,11 +20,14 @@ if(not os.path.isfile(filepath + filename)):
 
 class camera(ABC):
     debug = False
+    frame_cnt = 0
     edge_tracking = False
+    multi_face_sampling = False
     near_plane = 500
     far_plane = 100000
     point = 1500
     face = (0, 0)
+    face_samples = []
     mapRes = 255
     mapResRemovalThres = mapRes - 10
     dimX = 576
@@ -102,7 +105,15 @@ class camera(ABC):
             a 2d array, containing a depth map centered around the point attribute
 
         """
-        new_point = image[self.face] #1300
+        if not self.multi_face_sampling:
+        
+            new_point = image[self.face] #1300
+        else:
+            new_depths = [image[int(i[0]), int(i[1])] for i in self.face_samples]
+
+            new_point = np.mean(new_depths)
+
+        print(new_point)
 
         if(self.near_plane < new_point < self.far_plane):
             self.point = new_point
@@ -366,14 +377,54 @@ class camera(ABC):
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
 
-        self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
+        self.frame_cnt += 1
 
-        for (x,y,w,h) in self.faces:
-            if(w*h > 400):
-                cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
-                self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
-                break
+        if self.frame_cnt % 5 == 0:
+
+            self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
+
+            for (x,y,w,h) in self.faces:
+                if(w*h > 400):
+                    cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
+
+                    self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
+
+                    self.face_samples = []
+
+                    self.face_samples.append(self.face + (0,10))
+                    self.face_samples.append(self.face + (0,-10))
+                    self.face_samples.append(self.face + (10,0))
+                    self.face_samples.append(self.face + (-10,0))
+
+                    #self.face_grid(x, w, y, h, (color_image.shape[0]-1, color_image.shape[1]-1))
+                    
+                    break
+        
         return color_image
+
+    def face_grid(self, x, w, y, h, dim):
+
+        GRID_SAMPLE_GAP_PCT = 0.2
+
+        # Starts at 25% into the box area and stops at 75%, thus 50% coverage
+
+        x_grid = x + 0.25*w
+        y_grid = y + 0.25*h
+
+        x_inc = GRID_SAMPLE_GAP_PCT*(0.5*w)
+        y_inc = GRID_SAMPLE_GAP_PCT*(0.5*h)
+
+        self.face_samples = []
+
+        for k in range(int(1/GRID_SAMPLE_GAP_PCT)):
+
+            x_k = min(dim[1]-1, x + (k*x_inc))
+
+            for j in range(int(1/GRID_SAMPLE_GAP_PCT)):
+
+                y_j = min(dim[0]-1, y +(j*y_inc))
+
+                self.face_samples.append((y_j, x_k))
     
     def process_frame_set(self, color_image):
         """
@@ -416,7 +467,7 @@ class camera(ABC):
 
         # if(self.transpose): depth_image = cv2.transpose(depth_image)
 
-        #depth_image = self.set_focal_window(depth_image)
+        # depth_image = self.set_focal_window(depth_image)
 
         # depth_image = self.sharpen_edges(depth_image)
 
