@@ -25,6 +25,7 @@ class camera(ABC):
     far_plane = 100000
     point = 1500
     face = (0, 0)
+    facegrid = None
     mapRes = 255
     mapResRemovalThres = mapRes - 10
     dimX = 576
@@ -102,7 +103,11 @@ class camera(ABC):
             a 2d array, containing a depth map centered around the point attribute
 
         """
-        new_point = image[self.face] #1300
+        # new_point = image[self.face] #1300
+
+        new_depths = [image[i] for i in self.face_grid]
+
+        new_point = np.mean(new_depths)
 
         if(self.near_plane < new_point < self.far_plane):
             self.point = new_point
@@ -361,6 +366,9 @@ class camera(ABC):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
+
+        FACE_BOX_MIN_AREA = 400
+
         color_image = self.crop(color_image)
 
         if (self.transpose): color_image = cv2.transpose(color_image)
@@ -370,11 +378,43 @@ class camera(ABC):
         self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
 
         for (x,y,w,h) in self.faces:
-            if(w*h > 400):
+            if(w*h > FACE_BOX_MIN_AREA):
                 cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
-                self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
+
+                # self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
+                self.face_grid(x, w, y, h, (color_image.shape[1], color_image.shape[0]))
                 break
+
         return color_image
+
+    def face_grid(self, x, w, y, h, dim):
+
+        GRID_SAMPLE_GAP_PCT = 0.2
+
+        # Starts at 25% into the box area and stops at 75%, thus 50% coverage
+
+        x_grid = x + 0.25*w
+        y_grid = y + 0.25*h
+
+        x_inc = GRID_SAMPLE_GAP_PCT*(0.5*w)
+        y_inc = GRID_SAMPLE_GAP_PCT*(0.5*h)
+
+        self.face_grid = []
+
+        for k in range(np.floor(1/GRID_SAMPLE_GAP_PCT)):
+
+            x_k = min(dim[0]-1,  + (k*x_inc))
+
+            for j in range(self.GRID_SAMPLE_GAP):
+
+                y_j = min(dim[1]-1, y +(j*y_inc))
+
+                self.face_grid.append((x_k, y_j))
+
+
+
+
+
     
     def process_frame_set(self, color_image):
         """
@@ -431,11 +471,6 @@ class camera(ABC):
             depth_image = self.encode_bgr_channels_color(depth_image)
             
         # depth_image = self.remove_background_noise(depth_image)
-
-        # cv2.imshow("after processing", depth_image)
-        # cv2.waitKey(0)
-
-
 
         return depth_image
 
