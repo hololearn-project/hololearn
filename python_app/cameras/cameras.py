@@ -362,7 +362,6 @@ class camera(ABC):
             a 3d array containing the image data, enoded as BRGA
         """
         color_image = self.crop(color_image)
-
         if (self.transpose): color_image = cv2.transpose(color_image)
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
@@ -415,27 +414,28 @@ class camera(ABC):
         # cv2.imshow("depth before processing", depth_image)
         # cv2.waitKey(0)
 
-        if(self.transpose): depth_image = cv2.transpose(depth_image)
+        # if(self.transpose): depth_image = cv2.transpose(depth_image)
 
-        depth_image = self.set_focal_window(depth_image)
+        #depth_image = self.set_focal_window(depth_image)
 
         # depth_image = self.sharpen_edges(depth_image)
 
-        # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
+        # # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
 
-        # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
-        # cv2.waitKey(0)
-        if(self.bgr):
-            depth_image = self.encode_bgr_channels(depth_image)
-        else:
-            depth_image = self.encode_bgr_channels_color(depth_image)
+        # # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
+        # # cv2.waitKey(0)
+        # if(self.bgr):
+        #     depth_image = self.encode_bgr_channels(depth_image)
+        # else:
+        #     depth_image = self.encode_bgr_channels_color(depth_image)
             
-        # depth_image = self.remove_background_noise(depth_image)
+        #depth_image = self.remove_background_noise(depth_image)
+        # alpha = ((2 * range)/self.mapRes)
+        # beta = (self.point - range) / alpha
+        #depth_image = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=alpha, beta=beta), cv2.COLORMAP_JET)
 
-        # cv2.imshow("after processing", depth_image)
-        # cv2.waitKey(0)
-
-
+        # # cv2.imshow("after processing", depth_image)
+        # # cv2.waitKey(0)
 
         return depth_image
 

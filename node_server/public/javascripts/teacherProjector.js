@@ -82,47 +82,6 @@ function rotateSelfView() {
   }
 }
 
-/**
- * Sets the chosen camera.
- * @param {boolean} inLecture if the user is in a lecture or not.
- * @param {string} deviceId id of the chosen device.
- */
-function cameraChosenRotated(inLecture, deviceId) {
-  if (!inLecture) {
-    webcam.style.display = 'block';
-  }
-  const videoConstraints = {
-    width: {ideal: 1080},
-    height: {ideal: 720},
-  };
-  stopMediaTrackVideo(webcam.srcObject);
-  if (inLecture) {
-    videoConstraints.deviceId = {exact: deviceId.id,
-    };
-  } else {
-    videoConstraints.deviceId = {exact: select.value,
-    };
-  }
-  navigator.mediaDevices.getUserMedia({audio: false, video: videoConstraints})
-      .then((stream) => {
-        if (webcam.srcObject == null || webcam.srcObject == undefined) {
-          webcam.srcObject = stream;
-          localMediaStreamWebcam = stream;
-        } else {
-          stopMediaTrackVideo(localMediaStreamWebcam);
-          webcam.srcObject.addTrack(stream.getVideoTracks()[0]);
-          localMediaStreamWebcam.addTrack(stream.getVideoTracks()[0]);
-        }
-        document.getElementById('webcam').addEventListener('playing', () => {
-          // eslint-disable-next-line max-len
-          document.getElementById('seperationDiv').style.height = document.getElementById('webcam').videoWidth - document.getElementById('webcam').videoHeight;
-        });
-      });
-  if (inLecture) {
-    document.getElementById('selectCamInLecture').style.display = 'none';
-  }
-}
-
 // eslint-disable-next-line require-jsdoc
 async function startScreenShare() {
   const displayMediaOptions = {
