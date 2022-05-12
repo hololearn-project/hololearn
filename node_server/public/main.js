@@ -393,5 +393,28 @@ async function load3DEnvironment() {
   }
 
   animate();
+
+  const screenshareScreen = document.getElementById('screenshare');
+  screenshareScreen.muted = false;
+
+  screenshareScreen.src = 'screenShareStream.webm';
+
+
+  mapScreen = new THREE.VideoTexture(screenshareScreen);
+
+
+  const geometry2 = new THREE.PlaneGeometry(48, 24);
+  const me2 = new THREE.Mesh( geometry2, new THREE.MeshPhongMaterial( {
+    color: 'white',
+    map: mapScreen,
+    alphaTest: 0.5,
+    transparent: true,
+    side: THREE.DoubleSide,
+  }));
+  me2.rotation.y = Math.PI;
+  me2.position.set(0, 15, 32);
+  console.log('Position should be set');
+  addVR( me2 );
+  objects.push( me2 );
   // simpleVerticies()
 }
