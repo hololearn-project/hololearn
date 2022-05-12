@@ -397,7 +397,7 @@ async function load3DEnvironment() {
   const screenshareScreen = document.getElementById('screenshare');
   screenshareScreen.muted = false;
 
-  screenshareScreen.src = 'screenShareStream.webm';
+  // screenshareScreen.src = 'screenShareStream.webm';
 
 
   mapScreen = new THREE.VideoTexture(screenshareScreen);
