@@ -44,7 +44,7 @@ class VideoRecorder():
 		self.color_filename = "color_video."+self.format
 		self.open = True
 		self.device_index = 0
-		self.fps = 10          	        # fps should be the minimum constant rate at which the camera can
+		self.fps = 15          	        # fps should be the minimum constant rate at which the camera can
 		self.fourcc = None
 		if self.format == "mp4":
 			self.fourcc = "mp4v"
