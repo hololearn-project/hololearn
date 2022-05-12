@@ -393,5 +393,7 @@ async function load3DEnvironment() {
   }
 
   animate();
+  document.getElementById('lidarVideoStream1').play();
+  document.getElementById('lidarVideoStream2').play();
   // simpleVerticies()
 }
