@@ -30,3 +30,5 @@ node_server/user1.db
 node_server/user1.db
 *.db
 python_app/ffmpeg.exe
+python_app/venv1
+virtualenv/

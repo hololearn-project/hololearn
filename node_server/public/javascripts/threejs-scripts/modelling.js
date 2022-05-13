@@ -80,7 +80,7 @@ const staticModels = ['M4', 'M5', 'M6'];
 
 const dynamicModels = ['M1', 'M2'];
 
-const blueMan = true;
+const blueMan = false;
 /*
 M1 = mesh
 M2 = index
