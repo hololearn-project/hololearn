@@ -120,22 +120,22 @@ function download3DRecorder(recordedChunksMethod) {
   });
   const url = URL.createObjectURL(blob);
   if (recordedChunksMethod.name == 'depth') {
-    // const downloadUrl = {url: url, name: 'depthStream'};
-    // urls.push(downloadUrl);
+    const downloadUrl = {url: url, name: 'depthStream'};
+    urls.push(downloadUrl);
     const downloadBlob = {blob: blob, name: 'depthStream'};
     blobs.push(downloadBlob);
   }
 
   if (recordedChunksMethod.name == 'image') {
-    // const downloadUrl2 = {url: url, name: 'imageStream'};
-    // urls.push(downloadUrl2);
+    const downloadUrl2 = {url: url, name: 'imageStream'};
+    urls.push(downloadUrl2);
     const downloadBlob2 = {blob: blob, name: 'imageStream'};
     blobs.push(downloadBlob2);
   }
 
   if (recordedChunksMethod.name == 'screen') {
-    // const downloadUrl3 = {url: url, name: 'screenShareStream'};
-    // urls.push(downloadUrl3);
+    const downloadUrl3 = {url: url, name: 'screenShareStream'};
+    urls.push(downloadUrl3);
     const downloadBlob3 = {blob: blob, name: 'screenShareStream'};
     blobs.push(downloadBlob3);
   }
@@ -151,7 +151,7 @@ function download3DRecorder(recordedChunksMethod) {
  */
 function uploadLecture() {
   let depthBlob = undefined;
-  // downloadMultipleFiles(urls);
+  downloadMultipleFiles(urls);
   blobs.forEach((blobObject) => {
     if (blobObject.name == 'depthStream') {
       depthBlob = blobObject.blob;

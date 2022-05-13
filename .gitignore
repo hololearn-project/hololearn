@@ -36,3 +36,6 @@ node_server/public/color_video.mp4
 node_server/public/color_video.mp4
 *.webm
 node_server/public/color_video.webm
+hololearn/
+python_app/venv1
+virtualenv

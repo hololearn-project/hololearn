@@ -76,6 +76,17 @@ async function getMics() {
   });
 }
 
+/**
+ * gets the available mics
+ */
+async function getMics() {
+  await getCameraPermission();
+  await getMicPermission();
+  navigator.mediaDevices.enumerateDevices().then((devices) => {
+    gotDevicesMic(devices);
+  });
+}
+
 
 /**
  * Sets the options in the select tag for cameras.

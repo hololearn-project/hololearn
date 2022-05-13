@@ -734,6 +734,8 @@ function addScreenShare(stream, replay) {
     side: THREE.DoubleSide,
   }));
   me2.rotation.y = Math.PI;
+  me2.position.set(0, 15, 32);
+  console.log('Position should be set');
   addVR( me2 );
   objects.push( me2 );
 }
