@@ -2,7 +2,6 @@ let lecturesLoaded = false;
 
 /* eslint-disable new-cap */
 socket.on('onlyTeacherLecture', () => {
-  console.log('only teacher');
   teacherBase64 = '';
   socket.emit('getNextChunkTeacher', 0);
   socket.on('nextTeacherChunk', (chunk, nextStart) => {

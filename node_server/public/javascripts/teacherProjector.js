@@ -7,11 +7,14 @@ removedBackgroundStream = '';
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 userClassroomId = 'defaultClassroom';
 let rotate = 'right';
-getCamerasAndMics();
+getMics();
 document.getElementById('micText').style.display = 'block';
 document.getElementById('selectMic').style.display = 'block';
 document.getElementById('buttonGroup').style.width = '60px';
 document.getElementById('buttonGroup').style.marginLeft = 'calc((100% - 60px) / 2)';
+document.getElementById('buttonGroup').style.position = 'relative';
+document.getElementById('buttonGroup').style.marginTop = '50px';
+
 
 let teacherProjectorScreenShare = undefined;
 
@@ -19,24 +22,28 @@ let teacherProjectorScreenShare = undefined;
  * starts sending the vid.
  */
 function startProjecting() {
+  if (typeof localMediaStreamWebcam === 'undefined') {
+    alert('Please select a microphone.');
+    return;
+  }
+  document.getElementById('input_video').srcObject = localMediaStreamWebcam;
   webcam.muted = true;
   document.getElementById('selectMic').style.display = 'none';
   document.getElementById('micText').style.display = 'none';
-  document.getElementById('buttonGroup').style.display = 'block';
+  document.getElementById('webcam').style.display = 'none';
+  // document.getElementById('buttonGroup').style.display = 'block';
 
   document.getElementById('logInButton').style.display = 'none';
-  // TODO add stream of removed background to teacherstream.
-  // teacherStream.addTrack(webcam.srcObject.getAudioTracks()[0]);
-  // document.getElementById('selfView').srcObject = teacherStream;
+  teacherStream = webcam.srcObject;
 
   // eslint-disable-next-line max-len
-  if (document.getElementById('selfView').classList[0] == 'rotateLeft' || document.getElementById('selfView').classList[0] == 'rotateRight') {
+  if (document.getElementById('lidarVideoStream1').classList[0] == 'rotateLeft' || document.getElementById('lidarVideoStream1').classList[0] == 'rotateRight') {
     const ratio = 1280 / 720;
-    document.getElementById('selfView').style.right = 10 - (ratio * 300 - 300) / 2;
-    document.getElementById('selfView').style.bottom = 10 + (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.right = 10 - (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.bottom = 10 + (ratio * 300 - 300) / 2;
   } else {
-    document.getElementById('selfView').style.right = 10;
-    document.getElementById('selfView').style.bottom = 10;
+    document.getElementById('lidarVideoStream1').style.right = 10;
+    document.getElementById('lidarVideoStream1').style.bottom = 10;
   }
 
   startConnecting(false, 'teacherProjector');
@@ -46,7 +53,7 @@ function startProjecting() {
  * Rotates the video of the teacher.
  */
 function rotateSelfView() {
-  const selfView = document.getElementById('selfView');
+  const selfView = document.getElementById('lidarVideoStream1');
   const currentClass = selfView.classList[0];
   selfView.classList.remove(currentClass);
   switch (currentClass) {
@@ -65,13 +72,13 @@ function rotateSelfView() {
   }
 
   // eslint-disable-next-line max-len
-  if (document.getElementById('selfView').classList[0] == 'rotateLeft' || document.getElementById('selfView').classList[0] == 'rotateRight') {
+  if (document.getElementById('lidarVideoStream1').classList[0] == 'rotateLeft' || document.getElementById('lidarVideoStream1').classList[0] == 'rotateRight') {
     const ratio = 1280 / 720;
-    document.getElementById('selfView').style.right = 10 - (ratio * 300 - 300) / 2;
-    document.getElementById('selfView').style.bottom = 10 + (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.right = 10 - (ratio * 300 - 300) / 2;
+    document.getElementById('lidarVideoStream1').style.bottom = 10 + (ratio * 300 - 300) / 2;
   } else {
-    document.getElementById('selfView').style.right = 10;
-    document.getElementById('selfView').style.bottom = 10;
+    document.getElementById('lidarVideoStream1').style.right = 10;
+    document.getElementById('lidarVideoStream1').style.bottom = 10;
   }
 }
 
@@ -137,4 +144,64 @@ function utf8ArrayToStr(array) {
   }
 
   return out;
+}
+
+const rangeSlider = document.getElementById('rs-range-line-cutOut');
+const rangeBullet = document.getElementById('rs-bullet');
+
+rangeSlider.addEventListener('input', showSliderValue, false);
+
+/**
+ * shows slider value on the screen
+ */
+function showSliderValue() {
+  rangeBullet.innerHTML = rangeSlider.value + '%';
+  const bulletPosition = (rangeSlider.value /rangeSlider.max);
+  rangeBullet.style.left = (bulletPosition * 578) + 'px';
+}
+
+const rangeSliderRange = document.getElementById('rs-range-line-range');
+const rangeBulletRange = document.getElementById('rs-bullet-range');
+
+rangeSliderRange.addEventListener('input', showSliderValueRange, false);
+
+/**
+ * shows slider value on the screen
+ */
+function showSliderValueRange() {
+  rangeBulletRange.innerHTML = rangeSliderRange.value + '%';
+  const bulletPositionRange = (rangeSliderRange.value /rangeSliderRange.max);
+  rangeBulletRange.style.left = (bulletPositionRange * 578) + 'px';
+}
+
+document.getElementById('cutOutContainer').style.display = 'block';
+document.getElementById('rangeContainer').style.display = 'block';
+
+
+/**
+ * Changes the cut out distance on python side.
+ */
+function pointChange() {
+  newPoint = document.getElementById('rs-range-line-cutOut').value;
+  socket.emit('pointChange', newPoint);
+}
+
+/**
+ * Changes the range of what is not background on python side.
+ */
+function rangeChange() {
+  newRange = document.getElementById('rs-range-line-range').value;
+  socket.emit('rangeChange', newRange);
+}
+
+/**
+ * Opens or closes the video settings for the python side.
+ */
+function openCloseVideoSettings() {
+  const videoSettings = document.getElementById('videoSettings');
+  if (videoSettings.style.display == 'block') {
+    videoSettings.style.display = 'none';
+  } else {
+    videoSettings.style.display = 'block';
+  }
 }

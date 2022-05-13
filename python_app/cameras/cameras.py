@@ -1,15 +1,17 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import math
+import time
 # Import OpenCV for easy image rendering
 import cv2 
 import sys
-import threading
+from threading import Thread
 import requests
 import os
 url = 'https://gist.githubusercontent.com/Learko/8f51e58ac0813cb695f3733926c77f52/raw/07eed8d5486b1abff88d7e34891f1326a9b6a6f5/haarcascade_frontalface_default.xml'
 filename = url.split('/')[-1] # this will take only -1 splitted part of the url
 filepath = ""
+
 
 if(not os.path.isfile(filepath + filename)):
     r = requests.get(url)
@@ -18,24 +20,34 @@ if(not os.path.isfile(filepath + filename)):
 
 class camera(ABC):
     debug = False
+    frame_cnt = 0
     edge_tracking = False
+    multi_face_sampling = False
     near_plane = 500
     far_plane = 100000
     point = 1500
     face = (0, 0)
-    mapRes = 767
-    dimX = 960
-    dimY = 540
-    cropdimX = 400
-    cropdimY = 540
+    face_samples = []
+    mapRes = 255
+    mapResRemovalThres = mapRes - 10
+    dimX = 576
+    dimY = 640
+    cropdimX = 500
+    cropdimY = 500
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".jpg"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
     transpose = False
-    bgr = False
+    bgr = True
+    totalTime = 0
+    steps = 1
+    numThreads = 3
+    start_time = time.time()
+    range = 1200
 
+    
     @abstractmethod
     def get_frame(self) -> bytes:
         pass
@@ -63,14 +75,16 @@ class camera(ABC):
             a slice of the given image, centered in the middle
         """
 
-        # print(image.shape)
+        width = self.cropdimX
+        height = self.cropdimY
 
         midY = int(image.shape[0]/2)
         midX = int(image.shape[1]/2)
 
-        return image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
+        ret = image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
+        return ret
         
-    def set_focal_window(self, image, range=1400):
+    def set_focal_window(self, image, range=1200):
         """
         takes the depth map and normalises the values in the given range around
         the object's point attribute
@@ -91,7 +105,15 @@ class camera(ABC):
             a 2d array, containing a depth map centered around the point attribute
 
         """
-        new_point = image[self.face] #1300
+        if not self.multi_face_sampling:
+        
+            new_point = image[self.face] #1300
+        else:
+            new_depths = [image[int(i[0]), int(i[1])] for i in self.face_samples]
+
+            new_point = np.mean(new_depths)
+
+        print(new_point)
 
         if(self.near_plane < new_point < self.far_plane):
             self.point = new_point
@@ -172,13 +194,80 @@ class camera(ABC):
         frame = np.delete(frame, 3, 2)
 
         if frame.shape != depth.shape:
+            print('frame and depth are not the same shape!')
             return frame
         
-        bg_rm_frame = np.where(depth >= self.mapRes - 10, 0, frame)
+        bg_rm_frame = np.where(depth >= self.mapResRemovalThres, 0, frame)
   
         bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
 
         return bg_rm_frame
+
+
+    def remove_background_set(self, depth, frame):
+
+        frame = np.delete(frame, 3, 2)
+        # depth = np.where(depth > -1, [depth], [depth])
+        # print(depth[400])
+        depth = np.reshape(depth, (self.cropdimX, self.cropdimY, 1))
+        # bg_rm_frame = np.where(depth >= self.point, [0,0,0], frame)
+        bg_rm_frame = np.where(abs(depth - self.point) > self.range, [0,0,0], frame)
+
+        # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
+
+        # cv2.imshow("bgrimg", bg_rm_frame)
+        # cv2.waitKey(0)
+        return bg_rm_frame
+
+
+    def removeWhere(self, depth, frame, index, arr, rows):
+        arr[index] = np.where(depth[int(index * rows / 4):int(((index + 1) * rows / 4))] >= self.mapResRemovalThres, 0, frame[int(index * rows / 4):int(((index + 1) * rows / 4))])
+        
+    def remove_background_mt(self, depth, frame):
+        frame = np.delete(frame, 3, 2)
+
+        if frame.shape != depth.shape:
+            print('frame and depth are not the same shape!')
+            return frame
+
+        bg_rm_frame = [None] * 4
+        # threads = [None] * self.numThreads
+
+        rows = depth.shape[0]
+
+        # for i in range(self.numThreads):
+        #     threads[i] = Thread(target = self.removeWhere, args = (depth, frame, i, bg_rm_frame, rows))
+        #     threads[i].start()
+
+
+        thread1 = Thread(target = self.removeWhere, args = (depth, frame, 0, bg_rm_frame, rows))
+        thread1.start()
+
+        thread2 = Thread(target = self.removeWhere, args = (depth, frame, 1, bg_rm_frame, rows))
+        thread2.start()
+
+        thread3 = Thread(target = self.removeWhere, args = (depth, frame, 2, bg_rm_frame, rows))
+        thread3.start()
+        
+        thread4 = Thread(target = self.removeWhere, args = (depth, frame, 3, bg_rm_frame, rows))
+        thread4.start()
+
+        # for i in range(self.numThreads):
+        #     threads[i].join()
+
+        thread1.join()
+        thread2.join()
+        thread3.join()
+        thread4.join()
+
+        bg_rm_frame = np.concatenate(bg_rm_frame, axis=0)
+
+        # bg_rm_frame = np.concatenate((bg_rm_frame[0], bg_rm_frame[1], bg_rm_frame[2], bg_rm_frame[3]), axis=0)
+  
+        # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
+
+        return bg_rm_frame
+
 
     def encode_img(self, image, imgFormat=default_format):
         # print(image)
@@ -284,21 +373,79 @@ class camera(ABC):
             a 3d array containing the image data, enoded as BRGA
         """
         color_image = self.crop(color_image)
-        # print(color_image.shape)
         if (self.transpose): color_image = cv2.transpose(color_image)
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
 
-        self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
+        self.frame_cnt += 1
 
-        for (x,y,w,h) in self.faces:
-            if(w*h > 400):
-                cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
-                self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
-                break
-            
+        if self.frame_cnt % 5 == 0:
+
+            self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
+
+            for (x,y,w,h) in self.faces:
+                if(w*h > 400):
+                    cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
+
+                    self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
+
+                    self.face_samples = []
+
+                    self.face_samples.append(self.face + (0,10))
+                    self.face_samples.append(self.face + (0,-10))
+                    self.face_samples.append(self.face + (10,0))
+                    self.face_samples.append(self.face + (-10,0))
+
+                    #self.face_grid(x, w, y, h, (color_image.shape[0]-1, color_image.shape[1]-1))
+                    
+                    break
+        
+        return color_image
+
+    def face_grid(self, x, w, y, h, dim):
+
+        GRID_SAMPLE_GAP_PCT = 0.2
+
+        # Starts at 25% into the box area and stops at 75%, thus 50% coverage
+
+        x_grid = x + 0.25*w
+        y_grid = y + 0.25*h
+
+        x_inc = GRID_SAMPLE_GAP_PCT*(0.5*w)
+        y_inc = GRID_SAMPLE_GAP_PCT*(0.5*h)
+
+        self.face_samples = []
+
+        for k in range(int(1/GRID_SAMPLE_GAP_PCT)):
+
+            x_k = min(dim[1]-1, x + (k*x_inc))
+
+            for j in range(int(1/GRID_SAMPLE_GAP_PCT)):
+
+                y_j = min(dim[0]-1, y +(j*y_inc))
+
+                self.face_samples.append((y_j, x_k))
+    
+    def process_frame_set(self, color_image):
+        """
+        Takes an image, crops it to a certain size
+
+        Parameters
+        ----------
+        image: [int, int]
+        
+        Returns
+        -------
+        [int, int, int]
+            a 3d array containing the image data, enoded as BRGA
+        """
+        color_image = self.crop(color_image)
+
+        if (self.transpose): color_image = cv2.transpose(color_image)
+
         return color_image
     
+
     def process_depth(self, depth_image):
         """
         Removes background noise, normalises the data around a central point, 
@@ -314,13 +461,13 @@ class camera(ABC):
             a 3d array containing the depth data, enoded as BRGA
         """
         depth_image = self.crop(depth_image)
-        # # print(depth_image.shape)
-        # # cv2.imshow("depth before processing", depth_image)
-        # # cv2.waitKey(0)
+
+        # cv2.imshow("depth before processing", depth_image)
+        # cv2.waitKey(0)
 
         # if(self.transpose): depth_image = cv2.transpose(depth_image)
 
-        #depth_image = self.set_focal_window(depth_image)
+        # depth_image = self.set_focal_window(depth_image)
 
         # depth_image = self.sharpen_edges(depth_image)
 
@@ -343,6 +490,121 @@ class camera(ABC):
 
         return depth_image
 
+    def process_depth_set(self, depth_image):
+        """
+        Parameters
+        ----------
+        image: [int, int]
+        
+        Returns
+        -------
+        [int, int]
+            a 3d array containing the depth data, enoded as BRGA
+        """
+        depth_image = self.crop(depth_image)
+
+        if(self.transpose): depth_image = cv2.transpose(depth_image)
+
+        return depth_image
+
+
+    def get_frame_mt(self, test, frames):
+        ret = self.get_frame()
+        frames[0] = np.copy(ret)
+
+    def get_depth_mt(self, test, frames):
+        ret = self.get_depth()
+        frames[1] = np.copy(ret)
+
+
+    def get_frame_mt_set(self, test, frames):
+        ret = self.get_frame_set()
+        frames[0] = np.copy(ret)
+
+    def get_depth_mt_set(self, test, frames):
+        ret = self.get_depth_set()
+        frames[1] = np.copy(ret)
+
+
+    def get_frame_bgr_mt(self):
+        frames1 = [None] * 2
+        f_thread = Thread(target = self.get_frame_mt, args = (self, frames1))
+        f_thread.start()
+        d_thread = Thread(target=self.get_depth_mt, args=(self, frames1))
+        d_thread.start()
+        f_thread.join()
+        d_thread.join()
+        ret = self.remove_background(frames1[1], frames1[0])
+
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+        # print(ret.shape)
+        # print(self.cropdimX)
+        # print(self.dimX)
+        # print(self.cropdimY)
+        # print(self.dimY)
+
+        if self.steps % 100 == 0:
+            print(1 / ((time.time() - self.start_time) / self.steps))
+            self.start_time = time.time()
+            self.steps = 0
+        self.steps += 1
+        # print(ret.shape)
+
+        return ret
+
+
+    def get_frame_bgr_mt_set(self):
+        frames1 = [None] * 2
+        f_thread = Thread(target = self.get_frame_mt_set, args = (self, frames1))
+        f_thread.start()
+        d_thread = Thread(target=self.get_depth_mt_set, args=(self, frames1))
+        d_thread.start()
+        f_thread.join()
+        d_thread.join()
+        ret = self.remove_background_set(frames1[1], frames1[0])
+
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+        # print(ret.shape)
+        # print(self.cropdimX)
+        # print(self.dimX)
+        # print(self.cropdimY)
+        # print(self.dimY)
+
+        if self.steps % 100 == 0:
+            print(1 / ((time.time() - self.start_time) / self.steps))
+            self.start_time = time.time()
+            self.steps = 0
+        self.steps += 1
+        # print(ret.shape)
+
+        return ret
+
+
+    def get_frame_bgr(self):
+
+        frame = self.get_frame()
+        depth = self.get_depth()
+
+        # print(frames[0])
+        ret = self.remove_background(depth, frame)
+
+        # cv2.imshow("bgrimg", ret)
+        # cv2.waitKey(0)
+        # print(ret.shape)
+        
+        return ret
+        
+    def setPoint(self, newPoint):
+        print('we want to change point')
+        self.point = newPoint
+        print("point=", self.point)
+
+    def setRange(self, newRange):
+        newRange = 600 + newRange/100 * 1200
+        self.range = newRange
+
 class camera_wrapper(camera):
 
     def __init__(self):
@@ -363,6 +625,7 @@ class camera_wrapper(camera):
             from cameras.camera_intel import intelcam
             self.cam = intelcam()
             self.cam.get_frame()
+            print("intel cam connected")
         except Exception as e:
             print(e)
             try:
@@ -442,6 +705,7 @@ class camera_wrapper(camera):
         out[1] = self.cam.get_depth()
 
     def get_frame_bgr(self):
+        print("removing background... in wrapper")
         # frames = np.empty(2)
         # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
         # f_thread.start()
@@ -453,13 +717,13 @@ class camera_wrapper(camera):
         # d_thread.join()
         # print(frames[0])
         ret = self.remove_background(depth, frame)
-        print(ret.shape)
         
         return ret
 
     def get_frame_bgr_encoded(self):
+        print("removing background... encoded")
         return self.encode_img(self.cam.get_frame_bgr())
 
 
     def get_unproc_frame(self):
-        return self.crop(self.cam.get_frame_unproc()[:,:,:3], width=self.cropdimX)
+        return self.crop(self.cam.get_frame_unproc()[:,:,:3])

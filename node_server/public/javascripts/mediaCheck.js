@@ -65,6 +65,17 @@ async function getCamerasAndMics() {
   });
 }
 
+/**
+ * gets the available mics
+ */
+async function getMics() {
+  await getCameraPermission();
+  await getMicPermission();
+  navigator.mediaDevices.enumerateDevices().then((devices) => {
+    gotDevicesMic(devices);
+  });
+}
+
 
 /**
  * Sets the options in the select tag for cameras.
@@ -78,7 +89,8 @@ function gotDevicesCamera(mediaDevicesNew, inLecture) {
     selectCamInLecture.style.display = 'block';
     document.getElementById('selectMicInLecture').style.display = 'none';
   } else {
-    select.style.display = 'block';
+    console.log('making block');
+    document.getElementById('select').style.display = 'block';
   }
   let count = 1;
   mediaDevices.forEach((mediaDevice) => {
@@ -193,9 +205,9 @@ function cameraChosen(inLecture, deviceId) {
  * @param {string} id id of the chosen device.
  */
 function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
-  if (!isTeacher && !inLecture) {
-    webcam.style.display = 'block';
-  }
+  // if (!isTeacher && !inLecture) {
+  //   webcam.style.display = 'block';
+  // }
   const audioConstraints = {};
   if (inLecture) {
     audioConstraints.deviceId = {exact: id.id};
@@ -251,13 +263,18 @@ function micChosen(inLecture, id) { // eslint-disable-line no-unused-vars
             }
           }
           activeconnections.forEach((connection) => {
-            connection.peerObject.removeTrack(lastTrackAudio, outputStream);
+            connection.peerObject.removeStream(outputStream);
           });
+          // eslint-disable-next-line new-cap
+          newStream = new MediaStream();
+          newStream.addTrack(outputStream.getVideoTracks()[0]);
+          newStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
           activeconnections.forEach((connection) => {
-            connection.peerObject.addTrack(localMediaStreamWebcam.
-                getAudioTracks()[0], outputStream);
-            lastTrackAudio = localMediaStreamWebcam.getAudioTracks()[0];
+            connection.peerObject.addStream(newStream);
           });
+          outputStream = newStream;
+
+          lastTrackAudio = localMediaStreamWebcam.getAudioTracks()[0];
           const select = document.getElementById('selectMicInLecture');
           select.style.display = 'none';
           if (positionalHearing) {

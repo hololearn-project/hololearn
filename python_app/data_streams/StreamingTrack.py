@@ -11,4 +11,5 @@ class StreamingTrack:
         self.BGRTrack = LidarBGRTrack(self.cam)
         self.videoTrack = LidarVideoTrack(self.cam)
         self.webcamTrack = WebcamVideoTrack()
+        # self.dummyTrack = 
         self.flag = FlagVideoStreamTrack()

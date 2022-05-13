@@ -1,3 +1,4 @@
+/* eslint-disable prefer-rest-params */
 /* eslint-disable require-jsdoc */
 /* eslint-disable camelcase */
 /* eslint-disable prefer-const */
@@ -38,6 +39,7 @@ let userClassroomId = 'defaultClassroom';
 
 // Adds the possible positions
 positions.push({a: 0, b: 7, c: 27});
+// positions.push(undefined);
 positions.push({a: -5, b: 7, c: 5});
 positions.push({a: 0, b: 7, c: 6});
 positions.push({a: 5, b: 7, c: 5});
@@ -46,10 +48,37 @@ positions.push({a: 16, b: 7, c: 14});
 
 console.warn = () => { };
 
+console.defaultError = console.error.bind(console);
+console.errors = [];
+console.error = function() {
+  // default &  console.error()
+  // eslint-disable-next-line prefer-spread
+  console.defaultError.apply(console, arguments);
+  // new & array data
+  console.errors.push(Array.from(arguments));
+};
+
+console.defaultLog = console.log.bind(console);
+console.logs = [];
+console.log = function() {
+  // default &  console.log()
+  // eslint-disable-next-line prefer-spread
+  console.defaultLog.apply(console, arguments);
+  // new & array data
+  console.logs.push(Array.from(arguments));
+  serverConsole(console.logs[console.logs.length - 1]);
+};
+window.onerror = function(error, url, line) {
+  serverConsole(error);
+  serverConsole(url);
+  serverConsole(line);
+};
+
 // these are video settings
 const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
 const URL_DEPTHFEED_PYTHON = 'http://localhost:5000/depth_feed';
 const CLASSROOM_SCENE_LOCATION = '/assets/scene.gltf';
+const MODEL_LOCATION = '/assets/scaledModel.gltf';
 const SOCKET_ADDRESS = 'http://localhost:8080';
 const CLASSROOM_BLACKBOARD_IMAGE = '/assets/fourier.png';
 const WEBCAM_FRAMES_PER_SECOND = 20;
@@ -82,7 +111,7 @@ async function loadNet() { // this one is more efficient
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
-  document.getElementById('connectButton').style.display = 'none';
+  // document.getElementById('connectButton').style.display = 'none';
 
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
@@ -112,9 +141,14 @@ async function load3DEnvironment() {
 
   initModel();
   renderer.setSize( width, height - 1);
+
+  renderer.xr.enabled = true;
   document.body.appendChild( renderer.domElement );
 
+  document.body.appendChild(VRButton.createButton(renderer));
+
   const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+  camera.near = 0.01;
 
   camera.position.x = a;
   camera.position.y = b;
@@ -145,12 +179,12 @@ async function load3DEnvironment() {
    * Initializes the whole system, including the 3D environment
    */
   async function init() {
-    scene.add( new THREE.AmbientLight( 0x0f0f0f ) );
+    addVR( new THREE.AmbientLight( 0x0f0f0f ) );
 
     let light = new THREE.AmbientLight( 0xffffff);
     light.position.set( 0, 0, 20 );
 
-    scene.add(light);
+    addVR(light);
 
     const size = 0.02;
     vertGeometry = new THREE.BoxGeometry(size, size, size);
@@ -164,7 +198,7 @@ async function load3DEnvironment() {
         CLASSROOM_SCENE_LOCATION,
         // called when the resource is loaded
         function( gltf ) {
-          scene.add( gltf.scene );
+          addVR( gltf.scene );
           gltf.animations; // Array<THREE.AnimationClip>
           gltf.scene; // THREE.Group
           gltf.scenes; // Array<THREE.Group>
@@ -179,6 +213,33 @@ async function load3DEnvironment() {
           console.log( 'An error happened' );
         },
     );
+    // loader.load(
+    //     // resource URL
+    //     MODEL_LOCATION,
+    //     // called when the resource is loaded
+    //     function( gltf ) {
+    //       gltf.scene.name = 'humanModel';
+    //       console.log('model loaded');
+    //       addVR( gltf.scene );
+    //       gltf.scene.scale.set(0.2, 0.2, 0.2);
+    //       // gltf.scene.position.x = -18.8;
+    //       // gltf.scene.position.y = 0.8;
+    //       // gltf.scene.position.z = 13.7;
+    //       gltf.scene.position.set(-18.8, 0.8, 13.7);
+    //       gltf.scene.rotation.y = 0.7;
+
+
+    //       gltf.animations; // Array<THREE.AnimationClip>
+    //       gltf.scene; // THREE.Group
+    //       gltf.scenes; // Array<THREE.Group>
+    //       gltf.cameras; // Array<THREE.Camera>
+    //       gltf.asset; // Object
+    //     },
+    //     // called while loading is progressing
+    //     function( xhr ) {
+    //     },
+    //     // called when loading has errors
+    // );
 
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -245,7 +306,8 @@ async function load3DEnvironment() {
   }
 
   function animate() {
-    requestAnimationFrame( animate );
+    // requestAnimationFrame( animate );
+    renderer.setAnimationLoop( animate );
     map.needsUpdate = true;
     mapScreen.needsUpdate = true;
     mapScreenWebcam.needsUpdate = true;
@@ -331,5 +393,7 @@ async function load3DEnvironment() {
   }
 
   animate();
+  document.getElementById('lidarVideoStream1').play();
+  document.getElementById('lidarVideoStream2').play();
   // simpleVerticies()
 }

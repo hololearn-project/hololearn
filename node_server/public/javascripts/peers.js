@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // const e = require("cors");
 // eslint-disable-next-line no-unused-vars
 let teacherSocket = '';
@@ -5,14 +6,14 @@ let teacherPeer = null;
 let teacherWebcam = undefined;
 const activeconnections = new Map();
 positionalHearing = false;
+let delayNode = undefined;
 
 let lastRotation = 0;
 // eslint-disable-next-line prefer-const
 let rotationNow = 0;
 let socket = null;
 let newUser = true;
-let lastNoti = '';
-
+let lastNoti = undefined;
 const servRtcStrms = new Map();
 const servRtcStrmsLidars = ['videostream', 'depthstream'];
 const servRtcStrmsScrnsh = ['screensharestream', 'webcamstream'];
@@ -132,6 +133,10 @@ function startConnecting(teacher, name) {
       stream.getAudioTracks()[0].enabled = false;
     }
 
+    if (document.getElementById('Student' + seat) != undefined) {
+      removeVideoElement(seat);
+    }
+
     a = positions[seat].a;
     b = positions[seat].b;
     c = positions[seat].c;
@@ -178,7 +183,7 @@ function startConnecting(teacher, name) {
     studentCanvas2.position.set( a, b, c);
     studentCanvas2.matrixAutoUpdate = true;
     studentCanvas2.name = 'Student' + seat;
-    scene.add( studentCanvas2 );
+    addVR( studentCanvas2 );
     objects.push( studentCanvas2 );
 
     students[seat] = studentCanvas2;
@@ -238,10 +243,8 @@ function startConnecting(teacher, name) {
     // let newPeer = new SimplePeer({ initiator: true, config: peerConfig });
     let newPeer;
     if (seat > selectedPosition || seat == -1) {
-      console.log('inintiator');
       newPeer = new SimplePeer({initiator: true});
     } else {
-      console.log('not initiator');
       newPeer = new SimplePeer();
     }
     newPeer.on('data', (data) => {
@@ -275,6 +278,7 @@ function startConnecting(teacher, name) {
       socket.emit('signal', id, data);
     });
     newPeer.on('stream', (stream) => {
+      console.log('new stream: ' + stream);
       // peer is the teacher
       if (seat == -5) {
         // selectedPosition -7 -> you are the slides player.
@@ -283,8 +287,22 @@ function startConnecting(teacher, name) {
           document.getElementById('screenSharePlayer').srcObject = stream;
           document.getElementById('screenSharePlayer').play();
         } else {
-          // You are the projector and you are adding the teacher to the page.
-          document.getElementById('teacher').srcObject = stream;
+          const video = document.getElementById('lidarVideoStream1');
+
+          video.srcObject = stream;
+          video.onloadedmetadata = function(e) {
+            video.play();
+            video.muted = true;
+          };
+          const audioCtx = new AudioContext();
+          const source = audioCtx.createMediaStreamSource(stream);
+
+          delayNode = audioCtx.createDelay();
+          delayNode.delayTime.value = 0.5;
+
+          source.connect(delayNode);
+          delayNode.connect(audioCtx.destination);
+          document.getElementById('buttonGroup').style.display = 'block';
         }
       } else {
         if (seat == -6) {
@@ -292,9 +310,9 @@ function startConnecting(teacher, name) {
           switch (stream.id) {
             case removedBackgroundStream:
               document.getElementById('projectorInput').srcObject = stream;
-              document.getElementById('selfView').muted = true;
-              document.getElementById('selfView').style.position = 'absolute';
-              document.getElementById('selfView').style.display = 'block';
+              document.getElementById('lidarVideoStream1').muted = true;
+              document.getElementById('lidarVideoStream1').style.position = 'absolute';
+              document.getElementById('lidarVideoStream1').style.display = 'block';
               break;
             default:
               document.getElementById('projectorInput').srcObject = stream;
@@ -308,7 +326,6 @@ function startConnecting(teacher, name) {
         } else {
           addVideoElement(id, stream, seat);
           start3DAudioUser(seat, stream);
-          addVideoElement(id, stream, seat);
         }
       }
       // make async broadcast call
@@ -364,6 +381,7 @@ function startConnecting(teacher, name) {
         if (localMediaStreamWebcam.getAudioTracks()[0] != undefined) {
           teacherStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
         }
+        console.log(seat);
         newPeer.addStream(teacherStream);
       }
     }
@@ -583,7 +601,6 @@ function startConnecting(teacher, name) {
       teacherIncomingMediaStream = stream;
       // Set video element to be the stream depending on its ID
       const sid = stream.id;
-      console.log(stream.getTracks());
       if (servRtcStrmsLidars.includes(sid)) {
         if (stream.id == 'depthstream') {
           depthStream = stream;
@@ -592,11 +609,20 @@ function startConnecting(teacher, name) {
         }
         // if it's a lidar stream, figure out which one it is and
         // add to the right element
-        const videoToAdd = document.getElementById(servRtcStrms.get(sid));
-        videoToAdd.srcObject = stream;
-        videoToAdd.play();
-        if (table == -2) {
-          start3DRecording();
+
+        // selected position == -6 -> user is the projector
+        if (selectedPosition == -6) {
+          if (stream.id == 'videostream') {
+            document.getElementById('teacher').srcObject = stream;
+          }
+        } else {
+          console.log(servRtcStrms.get(sid));
+          const videoToAdd = document.getElementById(servRtcStrms.get(sid));
+          videoToAdd.srcObject = stream;
+          videoToAdd.play();
+          if (table == -2) {
+            start3DRecording();
+          }
         }
       }
       if (servRtcStrmsScrnsh.includes(sid)) {
@@ -615,10 +641,11 @@ function startConnecting(teacher, name) {
         }
         start3DAudioUser(0, stream);
       }
-      if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
-         undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
-        removeBackgroundWithDepth();
-      }
+      // if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
+      //    undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
+      //   removeBackgroundWithDepth();
+
+      // }
       // if (sid == 'webcamstream') {
       //   webcamStream = stream;
       //   cameraMesh.start();
@@ -707,6 +734,15 @@ function addScreenShare(stream, replay) {
     side: THREE.DoubleSide,
   }));
   me2.rotation.y = Math.PI;
-  scene.add( me2 );
+  addVR( me2 );
   objects.push( me2 );
+}
+
+
+/**
+ * Sends message to the server who prints it out in its console.
+ * @param {String} message - The message that has to be printed.
+ */
+function serverConsole(message) {
+  socket.emit('console', (message));
 }

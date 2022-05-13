@@ -39,7 +39,7 @@ class BasicCharacterController {
         });
   
         this._target = fbx;
-        this._params.scene.add(this._target);
+        this._params.addVR(this._target);
   
         this._mixer = new THREE.AnimationMixer(this._target);
   
