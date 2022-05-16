@@ -26,8 +26,8 @@ const thresh = 40;
 
 /* Specifies the dimensions of the canvases that are used to store the
 incoming video data. */
-const imgWidth = 400;
-const imgLength = 400;
+let imgWidth = 90;
+let imgLength = 210;
 
 /* Specifies the number of sampling points per row and column
 respectively. These variables depend on the value of subSample as it
@@ -101,10 +101,13 @@ M7 = flat (background removed with depth)
 
 function initFlatModel() {
   console.log('initsflatmodel');
+  // imgWidth = document.getElementById('teacherRecording').src.width;
+  // console.log(document.getElementById('teacherRecording').src.width);
+  // imgLength = document.getElementById('teacherRecording').src.getVideoTracks()[0].getSettings().height;
   const flatCanvas = document.getElementById('flatCanvas');
   teacherTexture = new THREE.VideoTexture(flatCanvas);
   teacherTexture.format = THREE.RGBAFormat;
-  const plane= new THREE.PlaneGeometry(24/400*540, 24);
+  const plane= new THREE.PlaneGeometry(20, 10);
   const mesh = new THREE.Mesh( plane, new THREE.MeshPhongMaterial( {
     color: 'white',
     map: teacherTexture,
@@ -113,7 +116,7 @@ function initFlatModel() {
     side: THREE.FrontSide,
   }));
   mesh.rotation.y = Math.PI;
-  mesh.position.set(0, 9, 27);
+  mesh.position.set(-5, 8.5, 27);
   modelPresent = true;
   mesh.name = 'model';
 

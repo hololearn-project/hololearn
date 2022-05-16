@@ -398,7 +398,7 @@ async function load3DEnvironment() {
   animate();
 
   const screenshareScreen = document.getElementById('screenshare');
-  screenshareScreen.muted = false;
+  // screenshareScreen.muted = false;
 
   screenshareScreen.src = 'screenShareStream.webm';
 
@@ -419,6 +419,8 @@ async function load3DEnvironment() {
   console.log('Position should be set');
   addVR( me2 );
   objects.push( me2 );
+
+  document.getElementById('teacherRecording').play();
 
   // const teacherRecording = document.getElementById('teacherRecording');
   // teacherRecording.muted = false;
@@ -442,8 +444,4 @@ async function load3DEnvironment() {
   // addVR( mesh );
   // objects.push( mesh );
   // simpleVerticies()
-  document.getElementById('teacherRecording').onended = function() {
-    document.getElementById('teacherRecording').load();
-    document.getElementById('teacherRecording').play();
-  };
 }

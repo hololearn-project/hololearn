@@ -227,11 +227,12 @@
         <button href="#" onclick="recordClicked()" id="recordButton" style="font-size:42px; display: none;"><span id="record"></div><i id="recordIcon" style="font-size:42px" class="fa">&#xf8d9;</i></span> Record</button>
         <span href="#" id="rotateClassroom" ondblclick="doubleClickClassroom()" onclick="rotateClassroomClicked()"><i id="rotateClassroomIcon" style="font-size:42px" class='fas fa-arrow-right'></i></span>
 
-        <canvas id="2d" width="400" height="540" style="display: none"></canvas>
+        <canvas id="2d" style="display: none"></canvas>
+        <!-- <canvas id="2d"></canvas> -->
         <canvas id="2dRem" width="400" height="540" style="display: none" y="100"></canvas>
         <canvas id="dm" width="400" height="540" style="display: none"></canvas>
         <video autoplay="true" id="webcam" style="display: none"></video>
-        <video autoplay="true" id="screenshare" style="position: absolute;" width="0" height="0"></video>
+        <video autoplay="true" id="screenshare" style="position: absolute;" width="0" height="0" muted></video>
         <canvas id="canvasWebcam" width="250" height="250" style="display: none"></canvas>
 
         <video autoplay="true" id="test" style="display: none"></video>
@@ -312,7 +313,7 @@
             <!-- <source src='kinect.webm'>
             <source src='kinect.mp4'> -->
         <!-- </video> -->
-        <video id="teacherRecording" src="teacherRecording.webm" autoplay="false" style="display: none;" loop></video>
+        <video id="teacherRecording" width="100" height="200" src="teacherRecording.webm" style="display: none;" loop></video>
         <script src="./javascripts/peers.js"></script>
         <script src="./javascripts/attendanceList.js"></script>
         <script src="./javascripts/mediaChange.js"></script>
