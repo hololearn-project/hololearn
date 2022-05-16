@@ -27,7 +27,7 @@ const thresh = 40;
 /* Specifies the dimensions of the canvases that are used to store the
 incoming video data. */
 const imgWidth = 400;
-const imgLength = 540;
+const imgLength = 400;
 
 /* Specifies the number of sampling points per row and column
 respectively. These variables depend on the value of subSample as it
@@ -58,7 +58,10 @@ let modelPresent = false;
 
 /* Specificies which method to use when constructing the 3D model
 [mesh, index, point cloud, point cloud with shaders, hidden] */
-let modelType = 'M1';
+let modelType = 'M7';
+
+let teacherTexture = undefined;
+let ctxFlatCanvas = document.getElementById('flatCanvas').getContext('2d');
 
 /* X position of the model. */
 let teacherX = -6;
@@ -95,6 +98,29 @@ M7 = flat (background removed with depth)
  * calls several other initialization methods,
  * necessary for the creating of the teacher model
  */
+
+function initFlatModel() {
+  console.log('initsflatmodel');
+  const flatCanvas = document.getElementById('flatCanvas');
+  teacherTexture = new THREE.VideoTexture(flatCanvas);
+  teacherTexture.format = THREE.RGBAFormat;
+  const plane= new THREE.PlaneGeometry(24/400*540, 24);
+  const mesh = new THREE.Mesh( plane, new THREE.MeshPhongMaterial( {
+    color: 'white',
+    map: teacherTexture,
+    alphaTest: 0.5,
+    transparent: true,
+    side: THREE.FrontSide,
+  }));
+  mesh.rotation.y = Math.PI;
+  mesh.position.set(0, 9, 27);
+  modelPresent = true;
+  mesh.name = 'model';
+
+  addVR(mesh);
+  objects.push( mesh );
+}
+
 function initModel() {
   initUV();
   initIndex();
@@ -586,26 +612,18 @@ function modelFromIndexes(dctx) {
  * performs backgorund removal with sensor flow.
  * @param {HTMLCanvasElement} ctx The canvas containing the picture image
  */
-function model2DNoDepth(ctx) {
-  const flatCanvas = document.getElementById('flatCanvas');
+function model2DNoDepth() {
+  const twod = document.getElementById('2d');
+  ctx.drawImage(document.getElementById('teacherRecording'), 0, 0, imgWidth, imgLength);
 
-  flatCanvas.imageData = removeBlackBackgroundTeacherRecording(getPictureData(ctx));
+  ctxFlatCanvas.putImageData(removeBlackBackgroundTeacherRecording(ctx.getImageData(0, 0, imgWidth, imgLength)), 0, 0);
   // const colorData = ctx.getImageData(0, 0, imgWidth, imgLength).data;
 
-  const texture = new THREE.Texture(flatCanvas);
-  const plane = new THREE.PlaneGeometry(5, 5);
-  const mesh = new THREE.Mesh(plane, new THREE.MeshPhongMaterial( {
-    color: 'white',
-    map: texture,
-    alphaTest: 0.5,
-    transparent: true,
-    side: THREE.FrontSide,
-  }));
-
-  mesh.name = 'model';
-  modelPresent = true;
-
-  addVR(mesh);
+  const mesh = scene.getObjectByName('model');
+  if (teacherTexture != undefined) {
+    teacherTexture.needsUpdate = true;
+  }
+  mesh.map = teacherTexture;
 }
 
 /**
@@ -668,6 +686,7 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
   dctx.clearRect(0, 0, depthCanvas.width, depthCanvas.height);
 
   dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
+  console.log(modelType);
 
 
   switch (modelType) {
@@ -679,7 +698,6 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
       modelFromPoints(dctx, ctx);
       break;
     case 'M7': // flat
-      ctx.drawImage(document.getElementById('teacherRecording'), 0, 0, imgWidth, imgLength);
       model2DNoDepth();
       break;
   }
@@ -697,7 +715,6 @@ function createStaticModel() {
     case 'M6': // hidden
       hideModel();
       break;
-
   }
 }
 
@@ -812,11 +829,15 @@ function okToModel() {
  */
 function animateTeacher(dctx, ctx, depthCanvas, imageCanvas) {
   if (goAndRender) { // Add okToModel() == 2 back when you're done
-    removeModel();
-    if (dynamicModels.includes(modelType)) {
-      createDynamicModel(dctx, ctx, depthCanvas, imageCanvas);
-    } else if (staticModels.includes(modelType)) {
-      createStaticModel();
+    if (modelType == 'M7') {
+      model2DNoDepth();
+    } else {
+      removeModel();
+      if (dynamicModels.includes(modelType)) {
+        createDynamicModel(dctx, ctx, depthCanvas, imageCanvas);
+      } else if (staticModels.includes(modelType)) {
+        createStaticModel();
+      }
     }
   }
 }
@@ -851,11 +872,14 @@ function updateType() {
       bodyTrackFlag = false;
       break;
     case 'M7':
-      console.log('Changed to flat');
+      console.log('Changed to 3d modelling');
       faceMeshFlag = false;
-      face.visible = false;
-      bodyGroup.visible = false;
+      // face.visible = false;
       bodyTrackFlag = false;
+      // bodyGroup.visible = false;
+      teacherModel = new THREE.BufferGeometry();
+      initFlatModel();
+      goAndRender = true;
       break;
     default:
       console.log('Changed to 3d modelling');

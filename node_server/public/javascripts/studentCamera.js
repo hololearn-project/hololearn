@@ -79,8 +79,8 @@ function removeBlackBackground(imageData) {
  */
 function removeBlackBackgroundTeacherRecording(imageData) {
   for (let i = 0; i < imageData.data.length; i = i + 4) {
-    if (imageData.data[i] > 200 &
-        imageData.data[i + 1] > 200 & imageData.data[i + 2] > 200 ) {
+    if (imageData.data[i] < 20 &
+        imageData.data[i + 1] < 20 & imageData.data[i + 2] < 20 ) {
       imageData.data[i + 3] = 0;
     }
   }

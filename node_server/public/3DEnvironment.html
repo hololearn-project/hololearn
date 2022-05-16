@@ -128,11 +128,11 @@
             <div id="modelTypeDiv">
                 <p style="text-align:left;font-size:16px;color:gray">Model Type:</p>
                 <select id="modelType" onchange="updateType()">
+                    <option name="flat" value="M7">flat</option>
                     <option name="mesh" value="M1">Mesh</option>
                     <option name="point cloud" value="M2">Point Cloud</option>
                     <option name="face tracking" value="M3">Face Tracking WIP</option>
                     <option name="body tracking" value="M4">Body Tracking WIP</option>
-                    <option name="flat" value="M7">flat</option>
                     <option name="hidden" value="M5">Hidden</option>
                 </select>
             </div>
@@ -312,7 +312,7 @@
             <!-- <source src='kinect.webm'>
             <source src='kinect.mp4'> -->
         <!-- </video> -->
-        <video id="teacherRecording" autoplay="true" style="display: none;"></video>
+        <video id="teacherRecording" src="teacherRecording.webm" autoplay="false" style="display: none;" loop></video>
         <script src="./javascripts/peers.js"></script>
         <script src="./javascripts/attendanceList.js"></script>
         <script src="./javascripts/mediaChange.js"></script>

@@ -25,6 +25,12 @@ let objects = [];
 let faceMeshFlag = false;
 let bodyTrackFlag = false;
 
+const canvas2d = document.getElementById('2d');
+const ctx = canvas2d.getContext('2d');
+
+const depth_canvas = document.getElementById('dm');
+const dctx = depth_canvas.getContext('2d');
+
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
 const FACE_MESH_LANDMARK_COUNT = 468;
@@ -139,7 +145,8 @@ async function load3DEnvironment() {
 
   updateSubSample();
 
-  initModel();
+  initFlatModel();
+
   renderer.setSize( width, height - 1);
 
   renderer.xr.enabled = true;
@@ -155,11 +162,6 @@ async function load3DEnvironment() {
   camera.position.z = c;
 
   let startColor;
-  const canvas2d = document.getElementById('2d');
-  const ctx = canvas2d.getContext('2d');
-
-  const depth_canvas = document.getElementById('dm');
-  const dctx = depth_canvas.getContext('2d');
 
   const map = new THREE.Texture(canvas2d);
   scene.background = new THREE.Color( 0x87ceeb );
@@ -440,4 +442,8 @@ async function load3DEnvironment() {
   // addVR( mesh );
   // objects.push( mesh );
   // simpleVerticies()
+  document.getElementById('teacherRecording').onended = function() {
+    document.getElementById('teacherRecording').load();
+    document.getElementById('teacherRecording').play();
+  };
 }
