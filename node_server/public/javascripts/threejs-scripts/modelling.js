@@ -76,7 +76,7 @@ const playback = true;
 /* Flag to indicate wether or not the next frame should be rendered */
 let goAndRender = true;
 
-const staticModels = ['M4', 'M5', 'M6'];
+const staticModels = ['M4', 'M5', 'M6', 'M7'];
 
 const dynamicModels = ['M1', 'M2'];
 
@@ -589,7 +589,8 @@ function modelFromIndexes(dctx) {
 function model2DNoDepth(ctx) {
   const flatCanvas = document.getElementById('flatCanvas');
 
-  flatCanvas.imageData = removeBackground(getPictureData(ctx), ctx);
+  flatCanvas.imageData = removeBlackBackgroundTeacherRecording(getPictureData(ctx));
+  // const colorData = ctx.getImageData(0, 0, imgWidth, imgLength).data;
 
   const texture = new THREE.Texture(flatCanvas);
   const plane = new THREE.PlaneGeometry(5, 5);
@@ -677,6 +678,10 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
       ctx.drawImage(pictureVideo, 0, 0, imgWidth, imgLength);
       modelFromPoints(dctx, ctx);
       break;
+    case 'M7': // flat
+      ctx.drawImage(document.getElementById('teacherRecording'), 0, 0, imgWidth, imgLength);
+      model2DNoDepth();
+      break;
   }
 
   goAndRender = true;
@@ -692,6 +697,7 @@ function createStaticModel() {
     case 'M6': // hidden
       hideModel();
       break;
+
   }
 }
 
@@ -839,6 +845,13 @@ function updateType() {
       break;
     case 'M5':
       console.log('Changed to hidden');
+      faceMeshFlag = false;
+      face.visible = false;
+      bodyGroup.visible = false;
+      bodyTrackFlag = false;
+      break;
+    case 'M7':
+      console.log('Changed to flat');
       faceMeshFlag = false;
       face.visible = false;
       bodyGroup.visible = false;

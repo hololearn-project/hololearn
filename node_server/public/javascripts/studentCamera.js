@@ -73,6 +73,21 @@ function removeBlackBackground(imageData) {
 }
 
 /**
+ * Removes all black pixels in a picture and makes them transparent.
+ * @param {imageData} imageData - image data to remove background from
+ * @return {imageData} the new image data with black pixels removed.
+ */
+function removeBlackBackgroundTeacherRecording(imageData) {
+  for (let i = 0; i < imageData.data.length; i = i + 4) {
+    if (imageData.data[i] > 200 &
+        imageData.data[i + 1] > 200 & imageData.data[i + 2] > 200 ) {
+      imageData.data[i + 3] = 0;
+    }
+  }
+  return imageData;
+}
+
+/**
  * Removes the background using of tensorflow.js.
  *
  * @param {imageData} imageData - Image data of picture

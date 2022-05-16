@@ -132,6 +132,7 @@
                     <option name="point cloud" value="M2">Point Cloud</option>
                     <option name="face tracking" value="M3">Face Tracking WIP</option>
                     <option name="body tracking" value="M4">Body Tracking WIP</option>
+                    <option name="flat" value="M7">flat</option>
                     <option name="hidden" value="M5">Hidden</option>
                 </select>
             </div>
@@ -305,12 +306,13 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.9.3/simplepeer.min.js"></script>
         <video id='lidarVideoStream1' style="display: none;" autoplay="true" src="color_video.webm" loop></video>
         <video id='lidarVideoStream2' style="display: none;" autoplay="true" src="depth_video.webm" loop muted></video>
-        <video id='depthDemo' style="display: none;" autoplay="true" src='DepthDemo.webm' loop muted></video>
+        <!-- <video id='depthDemo' style="display: none;" autoplay="true" src='DepthDemo.webm' loop muted></video>
         <video id='pictureDemo' style="display: none;" autoplay="true" src='PictureDemo.webm' loop muted></video>
-        <video id='kinectVideo' style="display: none;" autoplay="true" loop muted>
-            <source src='kinect.webm'>
-            <source src='kinect.mp4'>
-        </video>
+        <video id='kinectVideo' style="display: none;" autoplay="true" loop muted> -->
+            <!-- <source src='kinect.webm'>
+            <source src='kinect.mp4'> -->
+        <!-- </video> -->
+        <video id="teacherRecording" autoplay="true" style="display: none;"></video>
         <script src="./javascripts/peers.js"></script>
         <script src="./javascripts/attendanceList.js"></script>
         <script src="./javascripts/mediaChange.js"></script>

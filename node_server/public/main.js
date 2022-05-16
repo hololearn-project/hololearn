@@ -249,7 +249,7 @@ async function load3DEnvironment() {
     //   setRecordedDepthSource();
     // }
 
-    await loadAssets();
+    // await loadAssets();
 
     // sets the target of the camera
     if (isTeacher) {
@@ -332,17 +332,18 @@ async function load3DEnvironment() {
       }
     }
 
-    if (faceMeshFlag) {
-      updateFaceMesh();
-    } else if (bodyTrackFlag) {
-      updateSkeleton();
-    }
+    // if (faceMeshFlag) {
+    //   updateFaceMesh();
+    // } else if (bodyTrackFlag) {
+    //   updateSkeleton();
+    // }
 
 
     updateScreenAndWebcams(isTeacher, camera);
 
-    // if (!isTeacher)
+    // if (!isTeacher) {
     animateTeacher(dctx, ctx, depth_canvas, canvas2d);
+    // }
     renderer.render(scene, camera);
   };
 
@@ -416,5 +417,27 @@ async function load3DEnvironment() {
   console.log('Position should be set');
   addVR( me2 );
   objects.push( me2 );
+
+  // const teacherRecording = document.getElementById('teacherRecording');
+  // teacherRecording.muted = false;
+
+  // teacherRecording.src = 'teacherRecording.webm';
+
+
+  // teacherTexture = new THREE.VideoTexture(teacherRecording);
+
+
+  // const plane= new THREE.PlaneGeometry(24, 24);
+  // const mesh = new THREE.Mesh( plane, new THREE.MeshPhongMaterial( {
+  //   color: 'white',
+  //   map: teacherTexture,
+  //   alphaTest: 0.5,
+  //   transparent: true,
+  //   side: THREE.DoubleSide,
+  // }));
+  // mesh.rotation.y = Math.PI;
+  // mesh.position.set(0, 9, 27);
+  // addVR( mesh );
+  // objects.push( mesh );
   // simpleVerticies()
 }
