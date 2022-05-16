@@ -127,3 +127,6 @@ class kinectcam(camera):
         # print("depth: "+str(depth.shape))
 
         return self.process_depth_set(depth)
+
+    def get_frame_without_background(self):
+        pass

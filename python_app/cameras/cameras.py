@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from turtle import back
 import numpy as np
 import math
 import time
@@ -46,6 +47,7 @@ class camera(ABC):
     numThreads = 3
     start_time = time.time()
     range = 1200
+    BLACK_PIXEL = [0,0,0]
 
     
     @abstractmethod
@@ -106,28 +108,27 @@ class camera(ABC):
 
         """
         if not self.multi_face_sampling:
-        
             new_point = image[self.face] #1300
         else:
             new_depths = [image[int(i[0]), int(i[1])] for i in self.face_samples]
 
             new_point = np.mean(new_depths)
 
-        print(new_point)
+        # print(new_point)
 
-        if(self.near_plane < new_point < self.far_plane):
-            self.point = new_point
+        # if(self.near_plane < new_point < self.far_plane):
+        #     self.point = new_point
 
-        image = (image - (self.point - range)) / ((2 * range)/self.mapRes)
+        # image = (image - (self.point - range)) / ((2 * range)/self.mapRes)
 
-        # image[np.where(image < 10)] = 10000
+        # # image[np.where(image < 10)] = 10000
 
-        image = np.clip(image, 0, self.mapRes)
+        # image = np.clip(image, 0, self.mapRes)
 
-        # cv2.imshow("inside set focal", image)
-        # cv2.waitKey(0)
+        # # cv2.imshow("inside set focal", image)
+        # # cv2.waitKey(0)
         
-        return image
+        # return image
 
     def remove_background_noise(self, image):
         """
@@ -189,20 +190,23 @@ class camera(ABC):
 
             return x_0, x_n, y_0, y_n
 
+
+    def get_background_removed_frame(self, depth, color):
+
+        # print('color'+str(frame.shape))
+        # print('depth'+str(depth.shape))
+
+        # cv2.imshow('color', frame)
+        # cv2.waitKey(0)
+
+        color = np.delete(color, 3, 2)
+
+        _, thresh = cv2.threshold(depth,0,255, cv2.THRESH_BINARY)
+
+        return np.where(thresh==255, color, 0)
+
     def remove_background(self, depth, frame):
-
-        frame = np.delete(frame, 3, 2)
-
-        if frame.shape != depth.shape:
-            print('frame and depth are not the same shape!')
-            return frame
-        
-        bg_rm_frame = np.where(depth >= self.mapResRemovalThres, 0, frame)
-  
-        bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
-
-        return bg_rm_frame
-
+        pass
 
     def remove_background_set(self, depth, frame):
 
@@ -223,51 +227,6 @@ class camera(ABC):
     def removeWhere(self, depth, frame, index, arr, rows):
         arr[index] = np.where(depth[int(index * rows / 4):int(((index + 1) * rows / 4))] >= self.mapResRemovalThres, 0, frame[int(index * rows / 4):int(((index + 1) * rows / 4))])
         
-    def remove_background_mt(self, depth, frame):
-        frame = np.delete(frame, 3, 2)
-
-        if frame.shape != depth.shape:
-            print('frame and depth are not the same shape!')
-            return frame
-
-        bg_rm_frame = [None] * 4
-        # threads = [None] * self.numThreads
-
-        rows = depth.shape[0]
-
-        # for i in range(self.numThreads):
-        #     threads[i] = Thread(target = self.removeWhere, args = (depth, frame, i, bg_rm_frame, rows))
-        #     threads[i].start()
-
-
-        thread1 = Thread(target = self.removeWhere, args = (depth, frame, 0, bg_rm_frame, rows))
-        thread1.start()
-
-        thread2 = Thread(target = self.removeWhere, args = (depth, frame, 1, bg_rm_frame, rows))
-        thread2.start()
-
-        thread3 = Thread(target = self.removeWhere, args = (depth, frame, 2, bg_rm_frame, rows))
-        thread3.start()
-        
-        thread4 = Thread(target = self.removeWhere, args = (depth, frame, 3, bg_rm_frame, rows))
-        thread4.start()
-
-        # for i in range(self.numThreads):
-        #     threads[i].join()
-
-        thread1.join()
-        thread2.join()
-        thread3.join()
-        thread4.join()
-
-        bg_rm_frame = np.concatenate(bg_rm_frame, axis=0)
-
-        # bg_rm_frame = np.concatenate((bg_rm_frame[0], bg_rm_frame[1], bg_rm_frame[2], bg_rm_frame[3]), axis=0)
-  
-        # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
-
-        return bg_rm_frame
-
 
     def encode_img(self, image, imgFormat=default_format):
         # print(image)
@@ -507,81 +466,6 @@ class camera(ABC):
 
         return depth_image
 
-
-    def get_frame_mt(self, test, frames):
-        ret = self.get_frame()
-        frames[0] = np.copy(ret)
-
-    def get_depth_mt(self, test, frames):
-        ret = self.get_depth()
-        frames[1] = np.copy(ret)
-
-
-    def get_frame_mt_set(self, test, frames):
-        ret = self.get_frame_set()
-        frames[0] = np.copy(ret)
-
-    def get_depth_mt_set(self, test, frames):
-        ret = self.get_depth_set()
-        frames[1] = np.copy(ret)
-
-
-    def get_frame_bgr_mt(self):
-        frames1 = [None] * 2
-        f_thread = Thread(target = self.get_frame_mt, args = (self, frames1))
-        f_thread.start()
-        d_thread = Thread(target=self.get_depth_mt, args=(self, frames1))
-        d_thread.start()
-        f_thread.join()
-        d_thread.join()
-        ret = self.remove_background(frames1[1], frames1[0])
-
-        # cv2.imshow("bgrimg", ret)
-        # cv2.waitKey(0)
-        # print(ret.shape)
-        # print(self.cropdimX)
-        # print(self.dimX)
-        # print(self.cropdimY)
-        # print(self.dimY)
-
-        if self.steps % 100 == 0:
-            print(1 / ((time.time() - self.start_time) / self.steps))
-            self.start_time = time.time()
-            self.steps = 0
-        self.steps += 1
-        # print(ret.shape)
-
-        return ret
-
-
-    def get_frame_bgr_mt_set(self):
-        frames1 = [None] * 2
-        f_thread = Thread(target = self.get_frame_mt_set, args = (self, frames1))
-        f_thread.start()
-        d_thread = Thread(target=self.get_depth_mt_set, args=(self, frames1))
-        d_thread.start()
-        f_thread.join()
-        d_thread.join()
-        ret = self.remove_background_set(frames1[1], frames1[0])
-
-        # cv2.imshow("bgrimg", ret)
-        # cv2.waitKey(0)
-        # print(ret.shape)
-        # print(self.cropdimX)
-        # print(self.dimX)
-        # print(self.cropdimY)
-        # print(self.dimY)
-
-        if self.steps % 100 == 0:
-            print(1 / ((time.time() - self.start_time) / self.steps))
-            self.start_time = time.time()
-            self.steps = 0
-        self.steps += 1
-        # print(ret.shape)
-
-        return ret
-
-
     def get_frame_bgr(self):
 
         frame = self.get_frame()
@@ -654,26 +538,8 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        ret = self.cam.get_frame()
-        print(ret.shape)
-        return self.encode_img(ret)
+        return self.cam.get_frame()
 
-    def get_frame_mt(self, out):
-        """
-        Calls the get_frame method of the wrapper's camera attribute, and returns the result
-
-        Parameters
-        ----------
-        none
-        
-        Returns
-        -------
-        [int, int, int]
-            a 3d array containing the image data, enoded as BRGA
-        """
-        print("working...")
-        out[0] = self.cam.get_frame()
-        print(out[0].shape)
     def get_depth(self):
         """
         Calls the get_depth method of the wrapper's camera attribute, and returns the result
@@ -687,42 +553,19 @@ class camera_wrapper(camera):
         [int, int, int]
             a 3d array containing the depth data, enoded as BRGA
         """
-        return self.encode_img(self.cam.get_depth())
-
-    def get_depth_mt(self, out):
-        """
-        Calls the get_depth method of the wrapper's camera attribute, and returns the result
-
-        Parameters
-        ----------
-        none
-        
-        Returns
-        -------
-        [int, int, int]
-            a 3d array containing the depth data, enoded as BRGA
-        """
-        out[1] = self.cam.get_depth()
+        return self.cam.get_depth()
 
     def get_frame_bgr(self):
-        print("removing background... in wrapper")
-        # frames = np.empty(2)
-        # f_thread = threading.Thread(target=self.get_frame_mt, args=(frames))
-        # f_thread.start()
-        # d_thread = threading.Thread(target=self.get_depth_mt, args=(frames))
-        # d_thread.start()
+
         frame = self.cam.get_frame()
         depth = self.cam.get_depth()
-        # f_thread.join()
-        # d_thread.join()
-        # print(frames[0])
+
         ret = self.remove_background(depth, frame)
         
         return ret
 
     def get_frame_bgr_encoded(self):
-        print("removing background... encoded")
-        return self.encode_img(self.cam.get_frame_bgr())
+        return self.cam.get_frame_bgr()
 
 
     def get_unproc_frame(self):
