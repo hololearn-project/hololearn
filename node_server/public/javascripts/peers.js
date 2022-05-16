@@ -621,6 +621,9 @@ function startConnecting(teacher, name) {
           const videoToAdd = document.getElementById(servRtcStrms.get(sid));
           videoToAdd.srcObject = stream;
           videoToAdd.play();
+          if (servRtcStrms.get(sid) == 'lidarVideoStream1') {
+            teacherStream.addTrack(stream.getVideoTracks()[0]);
+          }
           if (table == -2) {
             start3DRecording();
           }

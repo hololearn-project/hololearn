@@ -394,7 +394,7 @@ io.sockets.on('connection', (socket) => {
   let screenLectureUploadTeacher = undefined;
   let screenLectureUploadScreenShare = undefined;
   socket.on('pointChange', (newPoint) => {
-    newPoint = newPoint / 100 * 2000 + 1000;
+    newPoint = newPoint / 100 * 2000 + 200;
     pythonWhisperer.send('pointChange ' + newPoint);
   });
   socket.on('rangeChange', (newRange) => {

@@ -224,7 +224,7 @@ document.getElementById('rangeContainer').style.display = 'block';
  */
 function pointChange() {
   newPoint = document.getElementById('rs-range-line-cutOut').value;
-  socket.emit('pointChange', newPoint);
+  socket.emit('pointChange', newPoint / 5);
 }
 
 /**

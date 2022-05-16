@@ -75,13 +75,13 @@ function download3DRecorder(recordedChunksMethod) {
     blobs.push(downloadBlob);
 
     // Downloads the teacher video.
-    // const link = document.createElement('a');
-    // link.download = 'testDownload';
-    // link.href = url;
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
-    // delete link;
+    const link = document.createElement('a');
+    link.download = 'testDownload';
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    delete link;
   }
 
   if (recordedChunksMethod.name == 'screen') {
