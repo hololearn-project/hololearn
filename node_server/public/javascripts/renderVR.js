@@ -47,9 +47,12 @@ function moveObjectToVR(object) {
     object.position.y = object.position.y - b + 8;
     object.position.z = -object.position.z + c - 2;
   } else {
-    object.position.x = object.position.x + a;
+    // object.position.x = object.position.x + a;
+    // object.position.y = object.position.y - b + 8;
+    // object.position.z = object.position.z + c - 2;
+    object.position.x = -object.position.x + a;
     object.position.y = object.position.y - b + 8;
-    object.position.z = object.position.z + c - 2;
+    object.position.z = -object.position.z + c - 2;
   }
 
   object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), Math.PI);
