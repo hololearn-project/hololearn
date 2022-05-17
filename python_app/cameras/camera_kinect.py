@@ -21,7 +21,7 @@ class kinectcam(camera):
         """
         k4a = PyK4A(
             Config(
-                color_resolution=pyk4a.ColorResolution.RES_1440P,
+                color_resolution=pyk4a.ColorResolution.RES_1080P,
                 depth_mode=pyk4a.DepthMode.NFOV_UNBINNED,
                 synchronized_images_only=True,
             )
@@ -38,8 +38,8 @@ class kinectcam(camera):
         self.k4a = k4a
         self.dimY = 400
         self.dimX = 800
-        self.cropdimX = 1400
-        self.cropdimY = 500
+        self.cropdimX = 1200
+        self.cropdimY = 400
 
     def get_frame(self):
         """
