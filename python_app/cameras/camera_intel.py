@@ -110,19 +110,6 @@ class intelcam(camera):
         [int, int, int]
             a 3d array containing the image data, enoded as BRGA
         """
-        # frames = self.pipeline.wait_for_frames()
-
-        # aligned_frames = self.align.process(frames)
-
-        # color_frame = aligned_frames.get_color_frame()
-        
-
-        # if not color_frame:
-        #     print("Invalid frame", file=sys.stderr)
-
-        # color_image = np.asanyarray(color_frame.get_data())
-
-        # return self.process_frame(color_image)
 
         frames = self.pipeline.wait_for_frames()
         aligned_frames = self.align.process(frames)
@@ -132,11 +119,14 @@ class intelcam(camera):
 
         depth_frame = self.thresholder.process(depth_frame)
         depth_frame = self.colorizer.colorize(depth_frame)
+        depth_frame = self.filler.process(depth_frame)
 
         color_frame = np.asanyarray(color_frame.get_data())
         depth_frame = np.asanyarray(depth_frame.get_data())
 
-        return self.get_background_removed_frame(depth_frame, color_frame)
+        # tropic = cv2.imread("./paradise.jpg")
+
+        return self.get_background_removed_frame(depth_frame, color_frame, alt_img=None)
 
     def get_depth(self):
         """
@@ -165,15 +155,10 @@ class intelcam(camera):
         # depth_image = self.filler.process(depth_image)
 
         depth_image = self.colorizer.colorize(depth_image)
-
-        # if not aligned_depth_frame:
-        #     print("Invalid frame", file=sys.stderr)
-
         depth_image = np.asanyarray(depth_image.get_data())
 
-        # return depth_image
+        return depth_image
 
-        return self.process_depth(depth_image)
 
 
 

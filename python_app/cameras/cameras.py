@@ -58,6 +58,19 @@ class camera(ABC):
     def get_depth(self) -> bytes:
         pass
 
+    def get_background_removed_frame(self, depth, color, alt_img=None):
+
+        color = np.delete(color, 3, 2)
+
+        _, thresh = cv2.threshold(depth,0,255, cv2.THRESH_BINARY)
+
+        thresh = self.remove_background_noise(thresh)
+
+        if alt_img is not None:
+            return np.where(thresh==255, color, alt_img)
+        else:
+            return np.where(thresh==255, color, 0)
+
     def crop(self, image, width=cropdimX, height=cropdimY):
         """
         Takes an image and returns a centered slice, of the given dimensions
@@ -111,24 +124,16 @@ class camera(ABC):
             new_point = image[self.face] #1300
         else:
             new_depths = [image[int(i[0]), int(i[1])] for i in self.face_samples]
-
             new_point = np.mean(new_depths)
 
-        # print(new_point)
+        if(self.near_plane < new_point < self.far_plane):
+            self.point = new_point
 
-        # if(self.near_plane < new_point < self.far_plane):
-        #     self.point = new_point
+        image = (image - (self.point - range)) / ((2 * range)/self.mapRes)
 
-        # image = (image - (self.point - range)) / ((2 * range)/self.mapRes)
-
-        # # image[np.where(image < 10)] = 10000
-
-        # image = np.clip(image, 0, self.mapRes)
-
-        # # cv2.imshow("inside set focal", image)
-        # # cv2.waitKey(0)
+        image = np.clip(image, 0, self.mapRes)
         
-        # return image
+        return image
 
     def remove_background_noise(self, image):
         """
@@ -190,77 +195,13 @@ class camera(ABC):
 
             return x_0, x_n, y_0, y_n
 
-
-    def get_background_removed_frame(self, depth, color):
-
-        # print('color'+str(frame.shape))
-        # print('depth'+str(depth.shape))
-
-        # cv2.imshow('color', frame)
-        # cv2.waitKey(0)
-
-        color = np.delete(color, 3, 2)
-
-        _, thresh = cv2.threshold(depth,0,255, cv2.THRESH_BINARY)
-
-        return np.where(thresh==255, color, 0)
-
     def remove_background(self, depth, frame):
         pass
 
-    def remove_background_set(self, depth, frame):
-
-        frame = np.delete(frame, 3, 2)
-        # depth = np.where(depth > -1, [depth], [depth])
-        # print(depth[400])
-        depth = np.reshape(depth, (self.cropdimX, self.cropdimY, 1))
-        # bg_rm_frame = np.where(depth >= self.point, [0,0,0], frame)
-        bg_rm_frame = np.where(abs(depth - self.point) > self.range, [0,0,0], frame)
-
-        # bg_rm_frame = cv2.erode(bg_rm_frame, self.erosion_kernel) 
-
-        # cv2.imshow("bgrimg", bg_rm_frame)
-        # cv2.waitKey(0)
-        return bg_rm_frame
-
-
-    def removeWhere(self, depth, frame, index, arr, rows):
-        arr[index] = np.where(depth[int(index * rows / 4):int(((index + 1) * rows / 4))] >= self.mapResRemovalThres, 0, frame[int(index * rows / 4):int(((index + 1) * rows / 4))])
-        
-
     def encode_img(self, image, imgFormat=default_format):
-        # print(image)
         ret, buffer = cv2.imencode('.png', image)
 
         return buffer.tobytes()
-
-    def encode_bgr_channels(self, image):
-        """
-        Takes a depth map with depth values ranging from 0 to 755, and
-        returns a color image, with the sum of the colour values equalling the input depth
-        for each pixel
-
-        Parameters
-        ----------
-        image: [int, int]
-
-        Returns
-        -------
-        [int, int, int]
-            a 3d array representation of the depth map, with the previous depth value now being
-            split accross 3 colour channels
-        # """
-        # b_channel = np.clip(image, 0, 255)
-        # image = image - 255
-
-        # g_channel = np.clip(image, 0, 255)
-        # image = image - 255
-
-        # r_channel = np.clip(image, 0, 255)
-        b_channel = image
-        g_channel = image
-        r_channel = image
-        return np.dstack((b_channel, g_channel, r_channel))
 
     def encode_bgr_channels_color(self, image):
         """
@@ -384,101 +325,6 @@ class camera(ABC):
                 y_j = min(dim[0]-1, y +(j*y_inc))
 
                 self.face_samples.append((y_j, x_k))
-    
-    def process_frame_set(self, color_image):
-        """
-        Takes an image, crops it to a certain size
-
-        Parameters
-        ----------
-        image: [int, int]
-        
-        Returns
-        -------
-        [int, int, int]
-            a 3d array containing the image data, enoded as BRGA
-        """
-        color_image = self.crop(color_image)
-
-        if (self.transpose): color_image = cv2.transpose(color_image)
-
-        return color_image
-    
-
-    def process_depth(self, depth_image):
-        """
-        Removes background noise, normalises the data around a central point, 
-        and returns a slice of the result encoded as an BRGA image.
-
-        Parameters
-        ----------
-        image: [int, int]
-        
-        Returns
-        -------
-        [int, int, int]
-            a 3d array containing the depth data, enoded as BRGA
-        """
-        depth_image = self.crop(depth_image)
-
-        # cv2.imshow("depth before processing", depth_image)
-        # cv2.waitKey(0)
-
-        # if(self.transpose): depth_image = cv2.transpose(depth_image)
-
-        # depth_image = self.set_focal_window(depth_image)
-
-        # depth_image = self.sharpen_edges(depth_image)
-
-        # # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
-
-        # # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
-        # # cv2.waitKey(0)
-        # if(self.bgr):
-        #     depth_image = self.encode_bgr_channels(depth_image)
-        # else:
-        #     depth_image = self.encode_bgr_channels_color(depth_image)
-            
-        #depth_image = self.remove_background_noise(depth_image)
-        # alpha = ((2 * range)/self.mapRes)
-        # beta = (self.point - range) / alpha
-        #depth_image = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=alpha, beta=beta), cv2.COLORMAP_JET)
-
-        # # cv2.imshow("after processing", depth_image)
-        # # cv2.waitKey(0)
-
-        return depth_image
-
-    def process_depth_set(self, depth_image):
-        """
-        Parameters
-        ----------
-        image: [int, int]
-        
-        Returns
-        -------
-        [int, int]
-            a 3d array containing the depth data, enoded as BRGA
-        """
-        depth_image = self.crop(depth_image)
-
-        if(self.transpose): depth_image = cv2.transpose(depth_image)
-
-        return depth_image
-
-    def get_frame_bgr(self):
-
-        frame = self.get_frame()
-        depth = self.get_depth()
-
-        # print(frames[0])
-        ret = self.remove_background(depth, frame)
-
-        # cv2.imshow("bgrimg", ret)
-        # cv2.waitKey(0)
-        # print(ret.shape)
-        
-        return ret
         
     def setPoint(self, newPoint):
         print('we want to change point')
@@ -555,18 +401,8 @@ class camera_wrapper(camera):
         """
         return self.cam.get_depth()
 
-    def get_frame_bgr(self):
-
-        frame = self.cam.get_frame()
-        depth = self.cam.get_depth()
-
-        ret = self.remove_background(depth, frame)
-        
-        return ret
-
-    def get_frame_bgr_encoded(self):
-        return self.cam.get_frame_bgr()
 
 
-    def get_unproc_frame(self):
-        return self.crop(self.cam.get_frame_unproc()[:,:,:3])
+
+
+
