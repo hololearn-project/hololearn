@@ -84,7 +84,7 @@ window.onerror = function(error, url, line) {
 const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
 const URL_DEPTHFEED_PYTHON = 'http://localhost:5000/depth_feed';
 const CLASSROOM_SCENE_LOCATION = '/assets/scene.gltf';
-const MODEL_LOCATION = '/assets/scaledModel.gltf';
+const MODEL_LOCATION = '/assets/models/manModel.gltf';
 const SOCKET_ADDRESS = 'http://localhost:8080';
 const CLASSROOM_BLACKBOARD_IMAGE = '/assets/fourier.png';
 const WEBCAM_FRAMES_PER_SECOND = 20;
@@ -215,33 +215,33 @@ async function load3DEnvironment() {
           console.log( 'An error happened' );
         },
     );
-    // loader.load(
-    //     // resource URL
-    //     MODEL_LOCATION,
-    //     // called when the resource is loaded
-    //     function( gltf ) {
-    //       gltf.scene.name = 'humanModel';
-    //       console.log('model loaded');
-    //       addVR( gltf.scene );
-    //       gltf.scene.scale.set(0.2, 0.2, 0.2);
-    //       // gltf.scene.position.x = -18.8;
-    //       // gltf.scene.position.y = 0.8;
-    //       // gltf.scene.position.z = 13.7;
-    //       gltf.scene.position.set(-18.8, 0.8, 13.7);
-    //       gltf.scene.rotation.y = 0.7;
+    loader.load(
+        // resource URL
+        MODEL_LOCATION,
+        // called when the resource is loaded
+        function( gltf ) {
+          gltf.scene.name = 'humanModel';
+          console.log('model loaded');
+          addVR( gltf.scene );
+          gltf.scene.scale.set(0.07, 0.07, 0.07);
+          // gltf.scene.position.x = -18.8;
+          // gltf.scene.position.y = 0.8;
+          // gltf.scene.position.z = 13.7;
+          gltf.scene.position.set(-18.7, -3.5, 12);
+          gltf.scene.rotation.y = 0.75;
 
 
-    //       gltf.animations; // Array<THREE.AnimationClip>
-    //       gltf.scene; // THREE.Group
-    //       gltf.scenes; // Array<THREE.Group>
-    //       gltf.cameras; // Array<THREE.Camera>
-    //       gltf.asset; // Object
-    //     },
-    //     // called while loading is progressing
-    //     function( xhr ) {
-    //     },
-    //     // called when loading has errors
-    // );
+          gltf.animations; // Array<THREE.AnimationClip>
+          gltf.scene; // THREE.Group
+          gltf.scenes; // Array<THREE.Group>
+          gltf.cameras; // Array<THREE.Camera>
+          gltf.asset; // Object
+        },
+        // called while loading is progressing
+        function( xhr ) {
+        },
+        // called when loading has errors
+    );
 
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
