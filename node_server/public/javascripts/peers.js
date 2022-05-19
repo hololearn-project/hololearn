@@ -249,30 +249,30 @@ function startConnecting(teacher, name) {
     }
     newPeer.on('data', (data) => {
       // got a data channel message
-      const string = utf8ArrayToStr(data);
-      switch (string) {
-        case 'streamId received':
-          newPeer.addStream(teacherStreamRemovedBackground);
-          break;
-        case 'screenShareId Received':
-          newPeer.addStream(teacherProjectorScreenShare);
-          break;
-        default:
-          if (string.includes(' ')) {
-            splitted = string.split(' ');
-            switch (splitted[0]) {
-              case 'mute':
-                panners[splitted[1]].coneInnerAngle = 0;
-                break;
-              case 'unmute':
-                panners[splitted[1]].coneInnerAngle = 360;
-                break;
-            }
-          } else {
-            removedBackgroundStream = string;
-            newPeer.send('streamId received');
-          }
-      }
+      // const string = utf8ArrayToStr(data);
+      // switch (string) {
+      //   case 'streamId received':
+      //     newPeer.addStream(teacherStreamRemovedBackground);
+      //     break;
+      //   case 'screenShareId Received':
+      //     newPeer.addStream(teacherProjectorScreenShare);
+      //     break;
+      //   default:
+      //     if (string.includes(' ')) {
+      //       splitted = string.split(' ');
+      //       switch (splitted[0]) {
+      //         case 'mute':
+      //           panners[splitted[1]].coneInnerAngle = 0;
+      //           break;
+      //         case 'unmute':
+      //           panners[splitted[1]].coneInnerAngle = 360;
+      //           break;
+      //       }
+      //     } else {
+      //       removedBackgroundStream = string;
+      //       newPeer.send('streamId received');
+      //     }
+      // }
     });
     newPeer.on('signal', (data) => {
       socket.emit('signal', id, data);
@@ -386,8 +386,8 @@ function startConnecting(teacher, name) {
       }
     }
     if ((!isTeacher) && !(seat < 0) && table != -4) {
-      outputStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
-      newPeer.addStream(outputStream);
+      // outputStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
+      // newPeer.addStream(outputStream);
     }
     if (seat == -1) {
       const speakerStream = new MediaStream();

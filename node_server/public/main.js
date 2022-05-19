@@ -268,7 +268,7 @@ async function load3DEnvironment() {
     // controls.addEventListener( 'dragend', dragendCallback );
 
     // Starts the webcam or screen sharing
-    await startWebcam(a, b, c, scene, objects, isTeacher, camera);
+    // await startWebcam(a, b, c, scene, objects, isTeacher, camera);
   }
 
   /**
