@@ -1,3 +1,4 @@
+/* eslint-disable valid-jsdoc */
 let inVR = false;
 /* eslint-disable no-unused-vars */
 /**
@@ -24,9 +25,10 @@ function moveSceneFromVR() {
 }
 
 /**
- * dssdfsdf
- * @param {float} num 
- * @returns {boolean} boolean
+ * For is basically zero
+ * @param {*} num one number to compare
+ * @param {*} comp other number to compare
+ * @returns
  */
 function isBasically(num, comp) {
   return (num > comp-0.01 && num < comp+0.01);

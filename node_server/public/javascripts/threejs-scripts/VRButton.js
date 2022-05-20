@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable require-jsdoc */
 
+let xrCamera = undefined;
+
 class VRButton {
   static createButton( renderer, options ) {
     if ( options ) {
@@ -21,6 +23,7 @@ class VRButton {
         button.textContent = 'EXIT VR';
 
         currentSession = session;
+        console.log(renderer.xr.getCamera.cameras.length);
 
         // set the scale for VR
         scene.scale.set(0.2, 0.2, 0.2);
