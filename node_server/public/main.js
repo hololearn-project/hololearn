@@ -291,16 +291,13 @@ async function load3DEnvironment() {
         textures[i].needsUpdate = true;
       }
     }
-    let lookAtVector = new THREE.Vector3();
-    camera.getWorldDirection(lookAtVector);
     if (inVR) {
-      console.log('in the if statement');
       let xrCamera = renderer.xr.getCamera(camera);
       xrCamera.getWorldDirection(cameraVector);
-      console.log(cameraVector.x + ', ' + cameraVector.y + ', ' + cameraVector.z);
+    } else {
+      camera.getWorldDirection(cameraVector);
     }
-    // console.log(lookAtVector.x + ', ' + lookAtVector.y + ', ' + lookAtVector.z);
-    rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
+    rotation = Math.atan2(cameraVector.x, cameraVector.z);
     if (!isTeacher) {
       if (student_canvas != null) {
         student_canvas.rotation.y = rotation;
