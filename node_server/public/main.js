@@ -298,6 +298,9 @@ async function load3DEnvironment() {
       camera.getWorldDirection(cameraVector);
     }
     rotation = Math.atan2(cameraVector.x, cameraVector.z);
+    if (inVR) {
+      console.log(rotation);
+    }
     if (!isTeacher) {
       if (student_canvas != null) {
         student_canvas.rotation.y = rotation;
@@ -310,7 +313,6 @@ async function load3DEnvironment() {
         students[i].rotation.y = rotations[i];
       }
       if (rotations[i] != undefined & humanModels[i] != undefined) {
-        console.log('rotation to be set');
         humanModels[i].rotation.y = rotations[i];
       }
     }
@@ -397,7 +399,6 @@ async function load3DEnvironment() {
   }));
   me2.rotation.y = Math.PI;
   me2.position.set(0, 15, 32);
-  console.log('Position should be set');
   addVR( me2 );
   objects.push( me2 );
 
