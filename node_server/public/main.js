@@ -299,6 +299,8 @@ async function load3DEnvironment() {
     }
     rotation = Math.atan2(cameraVector.x, cameraVector.z);
     if (inVR) {
+      console.log('in vr');
+      console.log(cameraVector.x);
       console.log(rotation);
     }
     if (!isTeacher) {
