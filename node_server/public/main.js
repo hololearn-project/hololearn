@@ -294,14 +294,10 @@ async function load3DEnvironment() {
     if (inVR) {
       let xrCamera = renderer.xr.getCamera(camera);
       xrCamera.getWorldDirection(cameraVector);
+      rotation = Math.atan2(cameraVector.x, cameraVector.z) + Math.PI;
     } else {
       camera.getWorldDirection(cameraVector);
-    }
-    rotation = Math.atan2(cameraVector.x, cameraVector.z);
-    if (inVR) {
-      console.log('in vr');
-      console.log(cameraVector.x);
-      console.log(rotation);
+      rotation = Math.atan2(cameraVector.x, cameraVector.z);
     }
     if (!isTeacher) {
       if (student_canvas != null) {
