@@ -293,6 +293,11 @@ async function load3DEnvironment() {
     }
     let lookAtVector = new THREE.Vector3();
     camera.getWorldDirection(lookAtVector);
+    if (inVR) {
+      let xrCamera = renderer.xr.getCamera(camera);
+      xrCamera.getWorldDirection(cameraVector);
+      console.log(cameraVector.x + ', ' + cameraVector.y + ', ' + cameraVector.z);
+    }
     // console.log(lookAtVector.x + ', ' + lookAtVector.y + ', ' + lookAtVector.z);
     rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
     if (!isTeacher) {

@@ -28,7 +28,7 @@ class VRButton {
         // set the scale for VR
         scene.scale.set(0.2, 0.2, 0.2);
 
-        camera.lookAt(20, -10, 20);
+        camera.lookAt(0, 0, 0);
         // camera.lookAt(0, 8, 27); //should be teacher position
       }
 
