@@ -39,6 +39,8 @@ let vertexMarker = 0;
 
 let renderer = new THREE.WebGLRenderer();
 
+const loader = new THREE.GLTFLoader();
+
 let scene = new THREE.Scene();
 let teacherModel = new THREE.BufferGeometry();
 let userClassroomId = 'defaultClassroom';
@@ -166,8 +168,6 @@ async function load3DEnvironment() {
   const map = new THREE.Texture(canvas2d);
   scene.background = new THREE.Color( 0x87ceeb );
 
-  const loader = new THREE.GLTFLoader();
-
   /**
    * Window resizer
    */
@@ -214,33 +214,6 @@ async function load3DEnvironment() {
         function( error ) {
           console.log( 'An error happened' );
         },
-    );
-    loader.load(
-        // resource URL
-        MODEL_LOCATION,
-        // called when the resource is loaded
-        function( gltf ) {
-          gltf.scene.name = 'humanModel';
-          console.log('model loaded');
-          addVR( gltf.scene );
-          gltf.scene.scale.set(0.07, 0.07, 0.07);
-          // gltf.scene.position.x = -18.8;
-          // gltf.scene.position.y = 0.8;
-          // gltf.scene.position.z = 13.7;
-          gltf.scene.position.set(-18.7, -3.5, 12);
-          gltf.scene.rotation.y = 0.75;
-
-
-          gltf.animations; // Array<THREE.AnimationClip>
-          gltf.scene; // THREE.Group
-          gltf.scenes; // Array<THREE.Group>
-          gltf.cameras; // Array<THREE.Camera>
-          gltf.asset; // Object
-        },
-        // called while loading is progressing
-        function( xhr ) {
-        },
-        // called when loading has errors
     );
 
     // createLightWeightPointCloudModel()
@@ -331,6 +304,10 @@ async function load3DEnvironment() {
     for (let i = 0; i < rotations.length; i++) {
       if (students[i] != undefined && rotations[i] != undefined) {
         students[i].rotation.y = rotations[i];
+      }
+      if (rotations[i] != undefined & humanModels[i] != undefined) {
+        console.log('rotation to be set');
+        humanModels[i].rotation.y = rotations[i];
       }
     }
 

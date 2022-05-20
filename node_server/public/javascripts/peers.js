@@ -343,27 +343,37 @@ function startConnecting(teacher, name) {
           newPeer.addStream(document.getElementById('webcam').srcObject);
         }
       }
-      console.log('Connected!');
-      if (positionalHearing) {
-        activeconnections.forEach((connection) => {
-          if (unmutedSeats.includes(connection.seat) && connection.seat != 0 &! isTeacher) {
-            connection.peerObject.send(String('unmute ' + selectedPosition));
-          }
-        });
-        const mutedPositions = [1, 2, 3, 4, 5];
-        unmutedSeats.forEach((seat) => {
-          const index = mutedPositions.indexOf(seat);
-          if (index > -1) {
-            mutedPositions.splice(index, 1);
-          }
-        });
-        activeconnections.forEach((connection) => {
-          if (mutedPositions.includes(parseInt(connection.seat)) && connection.seat != 0 &! isTeacher) {
-            connection.peerObject.send(String('mute ' + selectedPosition));
-          }
-        });
-        setPositionalHearing(rotationNow);
+      console.log(seat);
+      console.log(seat < 6 & seat > 0);
+      if (seat < 6 & seat > 0) {
+        switch (parseInt(seat)) {
+          case 4:
+            console.log('going to load model');
+            loadModel4();
+            break;
+        }
       }
+      console.log('Connected!');
+      // if (positionalHearing) {
+      //   activeconnections.forEach((connection) => {
+      //     if (unmutedSeats.includes(connection.seat) && connection.seat != 0 &! isTeacher) {
+      //       connection.peerObject.send(String('unmute ' + selectedPosition));
+      //     }
+      //   });
+      //   const mutedPositions = [1, 2, 3, 4, 5];
+      //   unmutedSeats.forEach((seat) => {
+      //     const index = mutedPositions.indexOf(seat);
+      //     if (index > -1) {
+      //       mutedPositions.splice(index, 1);
+      //     }
+      //   });
+      //   activeconnections.forEach((connection) => {
+      //     if (mutedPositions.includes(parseInt(connection.seat)) && connection.seat != 0 &! isTeacher) {
+      //       connection.peerObject.send(String('mute ' + selectedPosition));
+      //     }
+      //   });
+      // setPositionalHearing(rotationNow);
+      // }
     });
     newPeer.on('error', (err) => {
       console.log('error with teacherPeer: ', err);
@@ -460,10 +470,10 @@ function startConnecting(teacher, name) {
   setInterval(function() {
     if (rotationNow != lastRotation && socket.connected) {
       socket.emit('rotated', selectedPosition, rotationNow);
-      setPositionalHearing(rotationNow);
+      // setPositionalHearing(rotationNow);
       lastRotation = rotationNow;
 
-      update3DAudioPosition();
+      // update3DAudioPosition();
     }
   }, 1000/10);
 
