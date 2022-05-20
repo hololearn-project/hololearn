@@ -293,7 +293,7 @@ async function load3DEnvironment() {
     }
     let lookAtVector = new THREE.Vector3();
     camera.getWorldDirection(lookAtVector);
-    console.log(lookAtVector.x + ', ' + lookAtVector.y + ', ' + lookAtVector.z);
+    // console.log(lookAtVector.x + ', ' + lookAtVector.y + ', ' + lookAtVector.z);
     rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
     if (!isTeacher) {
       if (student_canvas != null) {
