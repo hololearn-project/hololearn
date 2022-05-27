@@ -86,7 +86,6 @@ window.onerror = function(error, url, line) {
 const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
 const URL_DEPTHFEED_PYTHON = 'http://localhost:5000/depth_feed';
 const CLASSROOM_SCENE_LOCATION = '/assets/scene.gltf';
-const MODEL_LOCATION = '/assets/models/manModel.gltf';
 const SOCKET_ADDRESS = 'http://localhost:8080';
 const CLASSROOM_BLACKBOARD_IMAGE = '/assets/fourier.png';
 const WEBCAM_FRAMES_PER_SECOND = 20;

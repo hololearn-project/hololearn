@@ -343,13 +343,22 @@ function startConnecting(teacher, name) {
           newPeer.addStream(document.getElementById('webcam').srcObject);
         }
       }
-      console.log(seat);
-      console.log(seat < 6 & seat > 0);
       if (seat < 6 & seat > 0) {
         switch (parseInt(seat)) {
+          case 1:
+            loadModel1();
+            break;
+          case 2:
+            loadModel2();
+            break;
+          case 3:
+            loadModel3();
+            break;
           case 4:
-            console.log('going to load model');
             loadModel4();
+            break;
+          case 5:
+            loadModel5();
             break;
         }
       }
