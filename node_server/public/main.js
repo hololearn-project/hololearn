@@ -400,7 +400,7 @@ async function load3DEnvironment() {
   objects.push( me2 );
 
   document.getElementById('teacherRecording').play();
-  document.getElementById('screenShareStream').play();
+  document.getElementById('screenshare').play();
 
   // const teacherRecording = document.getElementById('teacherRecording');
   // teacherRecording.muted = false;
