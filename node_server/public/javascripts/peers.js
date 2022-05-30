@@ -27,6 +27,10 @@ let teacherIncomingMediaStream = null;
 let teacherTracks = [];
 
 socket = io.connect(window.location.origin);
+document.getElementById('lectureButton').onclick = function() {
+  console.log('printing out');
+  socket.emit('runLecture');
+};
 
 socket.emit('getUsers');
 

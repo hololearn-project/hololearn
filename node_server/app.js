@@ -390,6 +390,10 @@ console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
   let screenLectureUploadTeacher = undefined;
   let screenLectureUploadScreenShare = undefined;
+  socket.on('runLecture', () => {
+    console.log('running lecture!');
+    io.sockets.emit('runLecture');
+  });
   socket.on('console', (message) => {
     console.log('------------------------');
     console.log('USER LOG: ' + message);

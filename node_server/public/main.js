@@ -118,6 +118,17 @@ async function loadNet() { // this one is more efficient
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
+  function runLecture() {
+    document.getElementById('teacherRecording').play();
+    document.getElementById('screenshare').play();
+    document.getElementById('screenshare').currentTime = 15;
+    console.log('running that lecture');
+  }
+
+  socket.on('runLecture', () => {
+    console.log('going to run lecture');
+    runLecture();
+  });
   // document.getElementById('connectButton').style.display = 'none';
 
   if (isTeacher) {
@@ -398,12 +409,6 @@ async function load3DEnvironment() {
   me2.position.set(0, 15, 32);
   addVR( me2 );
   objects.push( me2 );
-
-
-  document.getElementById('teacherRecording').play();
-  document.getElementById('screenshare').play();
-  document.getElementById('screenshare').currentTime = 15;
-
 
   // const teacherRecording = document.getElementById('teacherRecording');
   // teacherRecording.muted = false;
