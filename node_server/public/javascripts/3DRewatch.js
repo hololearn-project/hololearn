@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 let depthStreamDataBase = undefined;
 let imageStreamDataBase = undefined;
 let screenShareStreamDataBase = undefined;
 let lecturesLoaded = false;
+let videosReady = 0;
 
 /**
  * Displays all lectures that can be watched.
@@ -78,4 +80,15 @@ function startRewatch() {
   document.getElementById('lidarVideoStream2').play();
 
   addScreenShare(URL.createObjectURL(new Blob([screenShareStreamDataBase])), true);
+}
+
+/**
+ * Plays recording if both the slides as well as the teacher videos are loaded in.
+ */
+function replayVideoLoaded() {
+  videosReady++;
+  if (videosReady == 2) {
+    document.getElementById('teacherRecording').play();
+    document.getElementById('screenshare').play();
+  }
 }

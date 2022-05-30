@@ -280,6 +280,8 @@ async function load3DEnvironment() {
   }
 
   function animate() {
+    document.getElementById('teacherRecording').play();
+
     // requestAnimationFrame( animate );
     renderer.setAnimationLoop( animate );
     map.needsUpdate = true;
@@ -399,7 +401,15 @@ async function load3DEnvironment() {
   addVR( me2 );
   objects.push( me2 );
 
-  document.getElementById('teacherRecording').play();
+  document.getElementById('teacherRecording').onload = function() {
+    document.getElementById('teacherRecording').play();
+  };
+  document.getElementById('teacherRecording').load();
+
+  document.getElementById('screenshare').onload = function() {
+    document.getElementById('screenshare').play();
+  };
+  document.getElementById('screenshare').load();
 
   // const teacherRecording = document.getElementById('teacherRecording');
   // teacherRecording.muted = false;
