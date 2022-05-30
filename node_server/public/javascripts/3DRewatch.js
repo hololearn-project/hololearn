@@ -81,14 +81,3 @@ function startRewatch() {
 
   addScreenShare(URL.createObjectURL(new Blob([screenShareStreamDataBase])), true);
 }
-
-/**
- * Plays recording if both the slides as well as the teacher videos are loaded in.
- */
-function replayVideoLoaded() {
-  videosReady++;
-  if (videosReady == 2) {
-    document.getElementById('teacherRecording').play();
-    document.getElementById('screenshare').play();
-  }
-}

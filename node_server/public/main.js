@@ -399,8 +399,11 @@ async function load3DEnvironment() {
   addVR( me2 );
   objects.push( me2 );
 
+
   document.getElementById('teacherRecording').play();
   document.getElementById('screenshare').play();
+  document.getElementById('screenshare').currentTime = 15;
+
 
   // const teacherRecording = document.getElementById('teacherRecording');
   // teacherRecording.muted = false;

@@ -79,18 +79,6 @@ const playback = true;
 /* Flag to indicate wether or not the next frame should be rendered */
 let goAndRender = true;
 
-document.getElementById('screenshare').addEventListener('ended', myHandler, false);
-
-function myHandler(e) {
-  document.getElementById('screenshare').pause();
-  document.getElementById('screenshare').currentTime = '0';
-  document.getElementById('screenshare').play();
-
-  document.getElementById('teacherRecording').pause();
-  document.getElementById('teacherRecording').currentTime = '0';
-  document.getElementById('teacherRecording').play();
-}
-
 const staticModels = ['M4', 'M5', 'M6', 'M7'];
 
 const dynamicModels = ['M1', 'M2'];
