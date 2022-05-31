@@ -321,7 +321,11 @@ async function load3DEnvironment() {
         students[i].rotation.y = rotations[i];
       }
       if (rotations[i] != undefined & humanModels[i] != undefined) {
-        humanModels[i].rotation.y = rotations[i];
+        if (i == 2) {
+          humanModels[parseInt(selectedPosition)].rotation.y = rotations[i];
+        } else {
+          humanModels[i].rotation.y = rotations[i];
+        }
       }
     }
 

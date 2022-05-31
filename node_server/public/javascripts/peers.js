@@ -353,7 +353,20 @@ function startConnecting(teacher, name) {
             loadModel1();
             break;
           case 2:
-            loadModel2();
+            switch (parseInt(selectedPosition)) {
+              case 1:
+                loadModel1();
+                break;
+              case 3:
+                loadModel3();
+                break;
+              case 4:
+                loadModel4();
+                break;
+              case 5:
+                loadModel5();
+                break;
+            }
             break;
           case 3:
             loadModel3();
@@ -588,7 +601,7 @@ function startConnecting(teacher, name) {
   });
   socket.on('rotate', (seat, rotation, tableRotate) => {
     // Perform seat rotation.
-    if (tableRotate == table) {
+    if (tableRotate == table && seat != selectedPosition) {
       rotations[seat] = rotation;
     }
   });

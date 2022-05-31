@@ -124,9 +124,9 @@ const submitAnswer = async function() {
     div.parentNode.removeChild(div);
     switch (selectedPosition) {
       case '1':
-        a = -5;
+        a = 0;
         b = 7;
-        c = 5;
+        c = 6;
         await checkMedia(false);
         return;
       case '2':
@@ -136,23 +136,23 @@ const submitAnswer = async function() {
         await checkMedia(false);
         return;
       case '3':
-        a = 5;
+        a = 0;
         b = 7;
-        c = 5;
+        c = 6;
         await checkMedia(false);
         return;
 
       case '4':
-        a = -16;
+        a = 0;
         b = 7;
-        c = 14;
+        c = 6;
         await checkMedia(false);
         return;
 
       case '5':
-        a = 16;
+        a = 0;
         b = 7;
-        c = 14;
+        c = 6;
         await checkMedia(false);
         return;
     }
