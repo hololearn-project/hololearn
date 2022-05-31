@@ -602,7 +602,11 @@ function startConnecting(teacher, name) {
   socket.on('rotate', (seat, rotation, tableRotate) => {
     // Perform seat rotation.
     if (tableRotate == table && seat != selectedPosition) {
-      rotations[seat] = rotation;
+      if (seat == 2) {
+        rotations[parseInt(selectedPosition)] = rotation;
+      } else {
+        rotations[seat] = rotation;
+      }
     }
   });
 
