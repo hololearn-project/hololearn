@@ -110,6 +110,8 @@ async function loadNet() { // this one is more efficient
   });
 }
 
+
+let pausing = false;
 /**
  * Loads the steve.obj model
  */
@@ -122,12 +124,36 @@ async function load3DEnvironment() {
     document.getElementById('teacherRecording').play();
     document.getElementById('screenshare').play();
     document.getElementById('screenshare').currentTime = 15;
-    console.log('running that lecture');
+    setInterval(function() {
+      if (!pausing) {
+        document.getElementById('teacherRecording').play();
+        document.getElementById('screenshare').play();
+      }
+    }, 500);
   }
+
+  function pauseLecture() {
+    document.getElementById('teacherRecording').pause();
+    document.getElementById('screenshare').pause();
+    pausing = true;
+  }
+
+  function playLecture() {
+    document.getElementById('teacherRecording').play();
+    document.getElementById('screenshare').play();
+  }
+
+  socket.on('pauseLecture', () => {
+    pauseLecture();
+  });
 
   socket.on('runLecture', () => {
     console.log('going to run lecture');
     runLecture();
+  });
+
+  socket.on('playLectureVR', () => {
+    playLecture();
   });
   // document.getElementById('connectButton').style.display = 'none';
 

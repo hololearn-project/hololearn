@@ -394,6 +394,13 @@ io.sockets.on('connection', (socket) => {
     console.log('running lecture!');
     io.sockets.emit('runLecture');
   });
+  socket.on('pauseLecture', () => {
+    io.sockets.emit('pauseLecture');
+  });
+  socket.on('playLectureVR', () => {
+    console.log('playlecturevr');
+    io.sockets.emit('playLectureVR');
+  });
   socket.on('console', (message) => {
     console.log('------------------------');
     console.log('USER LOG: ' + message);

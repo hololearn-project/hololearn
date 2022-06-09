@@ -28,8 +28,16 @@ let teacherTracks = [];
 
 socket = io.connect(window.location.origin);
 document.getElementById('lectureButton').onclick = function() {
-  console.log('printing out');
   socket.emit('runLecture');
+};
+
+document.getElementById('pauseButton').onclick = function() {
+  socket.emit('pauseLecture');
+};
+
+document.getElementById('playButton').onclick = function() {
+  socket.emit('playLectureVR');
+  console.log('play 40');
 };
 
 socket.emit('getUsers');
