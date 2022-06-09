@@ -124,6 +124,8 @@ async function load3DEnvironment() {
     document.getElementById('teacherRecording').play();
     document.getElementById('screenshare').play();
     document.getElementById('screenshare').currentTime = 15;
+    document.getElementById('teacherRecording').currentTime = 0;
+
     setInterval(function() {
       if (!pausing) {
         document.getElementById('teacherRecording').play();
