@@ -621,7 +621,6 @@ async function model2DNoDepth() {
   const twod = document.getElementById('2d');
   if (!justOnce) {
     await new Promise(r => setTimeout(r, 6000));
-    justOnce = true;
   }
   ctx.drawImage(document.getElementById('teacherRecording'), 0, 0, imgWidth, imgLength);
 
