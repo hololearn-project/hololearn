@@ -620,7 +620,6 @@ function modelFromIndexes(dctx) {
 async function model2DNoDepth() {
   const twod = document.getElementById('2d');
   if (!justOnce) {
-    console.log('justOnce');
     await new Promise(r => setTimeout(r, 6000));
     justOnce = true;
   }
