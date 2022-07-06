@@ -115,7 +115,6 @@ async function load3DEnvironment() {
 
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
-    // console.log(localMediaStreamWebcam);
     if (localMediaStreamWebcam != null) {
       cameraMesh.start();
       teacherWebcamOn = true;

@@ -160,22 +160,13 @@ function createRtcConnectionToPython(id, classroomId) {
   let trackCounterUserAdd = 0;
   const trackNames = ['videostream', 'depthstream'];
   pc.addEventListener('track', function(track) {
-    console.log('Track recieved.');
-    console.log(track);
-    console.log(track.streams[0]);
-
     // Add the track to the python connections map.
     pythonConnectionsMap.get(id).tracks.push(track);
 
     // See currently connected users.
     const users = getUsers();
-    console.log('current list of users: ' + users);
-    console.log('my classroom: ' + classroomId);
-    console.log('users classrooms: ');
+
     users.forEach((user) => console.log(user.id + '  ' + user.classroomId));
-    for (const user of users) {
-      console.log(user.id + '   ' + user.classroomId);
-    };
 
     // Filter all the students who are associated with the classroomID.
     const studentsinclassroom = getStudentsOfSameClassroom(classroomId);
@@ -196,7 +187,6 @@ function createRtcConnectionToPython(id, classroomId) {
           // For every user in the given classroom,
           // add teacher's video track to the peer connection.
           user.peer.addStream(newStream);
-          console.log('Added track ' + track + ' to user ' + user.id);
         } else {
           // Tell the client to create a new peer connection.
           user.socket.emit('teacher-presence');
@@ -386,7 +376,6 @@ function getUsers() {
   return users;
 };
 // socket.io connection here...
-console.log('Trying to connect ..');
 io.sockets.on('connection', (socket) => {
   socket.on('console', (message) => {
     console.log(message);
@@ -590,7 +579,6 @@ io.sockets.on('connection', (socket) => {
             console.log('error while retrieving the teacherStream: ' + error);
           } else {
             if (rows.screemShareStreamId == -1) {
-              console.log('only teacher stream');
               socket.on('getNextChunkTeacher', (start) => {
                 if (teacherStream[0].stream.length <= start) {
                   teacherUploaded = true;
@@ -1062,14 +1050,11 @@ io.sockets.on('connection', (socket) => {
           socket.emit('teacher-stream-emitter-signal', data);
         });
         user.peer.on('connect', () => {
-          console.log('teacher peer connected to web client');
           // console.log(Array.from(pythonConnectionsMap.values()));
           if (isPythonStreamInClassroom(user.classroomId)) {
             // Get existing stream and add to connection
             // once the connection is made
             const pyid = getPythonIdInClassroom(user.classroomId);
-            console.log('python stream was in the classroom' +
-                ' when student joined! -> with id ' + pyid);
             const videostream = new wrtc.MediaStream({id: 'videostream'});
             const depthstream = new wrtc.MediaStream({id: 'depthstream'});
             user.rtcStream.push(videostream);
@@ -1110,11 +1095,8 @@ io.sockets.on('connection', (socket) => {
           }
         });
         user.peer.on('stream', (stream) => {
-          console.log('RECEIVED STREAM FROM A BROWSER CLIENT');
           let savedstream;
-          console.log(stream.getAudioTracks().length);
           if (stream.getAudioTracks().length == 0) {
-            console.log('webcam');
             globalWebcam = stream;
             savedstream = new wrtc.MediaStream({id: 'webcamstream'});
           } else {

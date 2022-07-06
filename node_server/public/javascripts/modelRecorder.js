@@ -24,18 +24,11 @@ let countTemp = 0;
  * Starts the 3D recording if all components are ready and record is clicked.
  */
 function start3DRecording() {
-  console.log('depth stream:');
-  console.log(depthStream);
-  console.log('image stream:');
-  console.log(imageStream);
   if (recFlag && depthStream != undefined && imageStream != undefined) {
     const options = {mimeType: 'video/webm'};
-    console.log('startingRecording!!!!!');
     mediaRecorderDepthStream = new MediaRecorder(depthStream, options);
     mediaRecorderDepthStream.ondataavailable = function(e) {
       handleDataAvailable3DRecorder(e, {chunks: recordedChunksDepthStream, name: 'depth'});
-    // mediaRecorderDepthStream.ondataavailable = function(e) {
-    //   console.log('flag!!!');
     };
 
     mediaRecorderImageStream = new MediaRecorder(imageStream, options);
@@ -44,9 +37,6 @@ function start3DRecording() {
     };
     mediaRecorderImageStream.start();
     mediaRecorderDepthStream.start();
-    // mediaRecorderDepthStream.ondataavailable = function(e) {
-    //   console.log('vidFlag!!!');
-    // };
   }
 }
 /**
@@ -120,8 +110,6 @@ function download3DRecorder(recordedChunksMethod) {
     const downloadBlob2 = {blob: blob, name: 'imageStream'};
     blobs.push(downloadBlob2);
   }
-  console.log(blobs);
-  console.log(blobs.length);
   if (blobs.length >= 2) {
     document.getElementById('recordingNameInputDiv').style.display = 'block';
   }

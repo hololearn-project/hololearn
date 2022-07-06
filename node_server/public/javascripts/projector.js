@@ -154,7 +154,6 @@ function hideShowInput() {
  * Removes the background of the teacher with both lidar streams.
  */
 async function removeBackgroundWithDepth() {
-  // console.log('In the loop')
   requestAnimationFrame( removeBackgroundWithDepth );
   pictureCtx.drawImage(document.getElementById('lidarVideoStream1'),
       0, 0, 400, 540);

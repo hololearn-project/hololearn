@@ -5,7 +5,6 @@ let inVR = false;
  * perspective of the VR user
  */
 function moveSceneToVR() {
-  console.log('moving scene into vr');
   for (let i = 0; i < scene.children.length; i++) {
     moveObjectToVR(scene.children[i]);
   }
