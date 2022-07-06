@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable require-jsdoc */
 /* eslint-disable no-unused-vars */
 /* eslint-disable valid-jsdoc */
@@ -27,7 +28,7 @@ const thresh = 40;
 incoming video data. */
 const imgWidth = 400;
 const imgLength = 540;
-
+const demo = false;
 /* Specifies the number of sampling points per row and column
 respectively. These variables depend on the value of subSample as it
 determines the frequency of sampling on both axes. */
@@ -56,11 +57,14 @@ the scene. */
 let modelPresent = false;
 
 /* Specificies which method to use when constructing the 3D model
-[mesh, index, point cloud, point cloud with shaders, hidden] */
-let modelType = 'M1';
+[mesh, point cloud, point cloud with shaders, hidden] */
+let modelType = 'M2';
 
 /* X position of the model. */
 let teacherX = -6;
+let teacherY = 2;
+let teacherZ = 23;
+
 
 /* Flag for toggling the visibility of the advanced options menu
 on the webpage. */
@@ -70,13 +74,13 @@ let advOpts = false;
 const playback = true;
 
 /* Flag to indicate wether or not the next frame should be rendered */
-let render = true;
+let goAndRender = true;
 
 const staticModels = ['M4', 'M5', 'M6'];
 
 const dynamicModels = ['M1', 'M2'];
 
-
+const blueMan = true;
 /*
 M1 = mesh
 M2 = index
@@ -204,12 +208,14 @@ function filterIndices(vertices) {
     const z1 = vertices[(i1 * 3) + 2];
     const z2 = vertices[(i2 * 3) + 2];
     const z3 = vertices[(i3 * 3) + 2];
-
-    // if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
-    //   newIndices.push(i1, i2, i3);
-    // }
-    if ((z1 > thresh && z2 > thresh && z3 > thresh)) {
+    if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
       newIndices.push(i1, i2, i3);
+    }
+    if (blueMan) {
+    } else {
+      if ((z1 < 255 - thresh && z2 < 255 - thresh && z3 < 255 - thresh)) {
+        newIndices.push(i1, i2, i3);
+      }
     }
   }
 
@@ -230,14 +236,14 @@ function createMeshModel(vertices) {
   teacherModel.setAttribute('uv',
       new THREE.BufferAttribute(vertices[1], 2));
   teacherModel.scale(0.03, 0.03, 0.05);
-  teacherModel.translate(teacherX, 2, 18);
+  teacherModel.translate(teacherX, teacherY, teacherZ);
   const material = new THREE.MeshBasicMaterial({map: texture});
   const mesh = new THREE.Mesh(teacherModel, material);
 
   modelPresent = true;
   mesh.name = 'model';
 
-  scene.add(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -253,14 +259,14 @@ function createIndexedModel(indices) {
 
   const texture = new THREE.VideoTexture(pictureVideo);
   teacherModel.scale(0.03, 0.03, 0.05);
-  teacherModel.translate(teacherX, 2, 18);
+  teacherModel.translate(teacherX, teacherY, teacherZ);
 
   const material = new THREE.MeshBasicMaterial({map: texture});
   const mesh = new THREE.Mesh(teacherModel, material);
 
   modelPresent = true;
   mesh.name = 'model';
-  scene.add(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -272,14 +278,14 @@ function createIndexedModel(indices) {
  */
 function createPointCloudModel() {
   teacherModel.scale(0.03, 0.03, 0.06);
-  teacherModel.translate(teacherX, 2, 18);
+  teacherModel.translate(teacherX, teacherY, teacherZ);
   const material = new THREE.PointsMaterial(
       {vertexColors: true, size: pointSize});
   const mesh = new THREE.Points(teacherModel, material);
 
   modelPresent = true;
   mesh.name = 'model';
-  scene.add(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -340,9 +346,9 @@ function createLightWeightPointCloudModel() {
 
   pointsModel.name = 'model';
   modelPresent = true;
-  scene.add(pointsModel);
+  addVR(pointsModel);
 
-  render = false;
+  goAndRender = false;
 
   depthVideo.play();
 }
@@ -362,14 +368,17 @@ function updatePoints(dctx) {
   const depthData = dctx.getImageData(0, 0, imgWidth, imgLength).data;
   let x;
   let y;
+  let z;
   let i = 0;
 
   for (y = 0; y < imgLength; y+= subSample) {
     for (x = 0; x < imgWidth; x+= subSample) {
-      const z = 255 - (depthData[getLoc(x, y)] +
+      z = (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2])/3;
-
+      if (blueMan) {
+        z = 255 - z;
+      }
       points[i] = x;
       points[i + 1] = imgLength - y;
       points[i + 2] = z;
@@ -403,13 +412,15 @@ function updatePointsAndColors(dctx, ctx) {
 
   let x;
   let y;
+  let z;
   let i = 0;
 
   for (y = 0; y < imgLength; y += subSample) {
     for (x = 0; x < imgWidth; x += subSample) {
-      const z = 255 - (depthData[getLoc(x, y)] +
+      z = (depthData[getLoc(x, y)] +
       depthData[getLoc(x, y) + 1] +
       depthData[getLoc(x, y) + 2]) / 3;
+      if (blueMan) z = 255 - z;
       points[i] = x;
       points[i + 1] = imgLength - y;
       points[i + 2] = z;
@@ -471,7 +482,11 @@ function initTriangles(dctx) {
       depthData[getLoc(x + subSample, y + subSample) + 1] +
       depthData[getLoc(x + subSample, y + subSample) + 2])/3;
 
-      if (tl > 255 - thresh || tr > 255 - thresh || br > 255 - thresh) continue;
+      if (blueMan) {
+        if (tl > 255 - thresh || tr > 255 - thresh || br > 255 - thresh) continue;
+      } else {
+        if (tl < thresh || tr < thresh || br < thresh) continue;
+      }
 
       verts.push(x + subSample);
       verts.push(imgLength - y);
@@ -493,8 +508,11 @@ function initTriangles(dctx) {
 
       UVs.push(getUVx(x));
       UVs.push(getUVy(y));
-
-      if (bl > 255 - thresh) continue;
+      if (blueMan) {
+        if (bl > 255 - thresh) continue;
+      } else {
+        if (bl < thresh) continue;
+      }
 
       verts.push(x + subSample);
       verts.push(imgLength - y - subSample);
@@ -586,7 +604,7 @@ function model2DNoDepth(ctx) {
   mesh.name = 'model';
   modelPresent = true;
 
-  scene.add(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -629,7 +647,7 @@ function model2DWithDepth(ctx, dctx) {
   mesh.name = 'model';
   modelPresent = true;
 
-  scene.add(mesh);
+  addVR(mesh);
 }
 
 /**
@@ -650,6 +668,7 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
 
   dctx.drawImage(depthVideo, 0, 0, imgWidth, imgLength);
 
+
   switch (modelType) {
     case 'M1': // index
       modelFromIndexes(dctx);
@@ -660,7 +679,7 @@ function createDynamicModel(dctx, ctx, depthCanvas, imageCanvas) {
       break;
   }
 
-  render = true;
+  goAndRender = true;
 }
 /**
  * Will add jdoc later
@@ -683,7 +702,7 @@ function createStaticModel() {
  */
 function hideModel() {
   removeModel();
-  render = false;
+  goAndRender = false;
 }
 
 /**
@@ -786,7 +805,7 @@ function okToModel() {
  * which the picture image will be drawn.
  */
 function animateTeacher(dctx, ctx, depthCanvas, imageCanvas) {
-  if (render) { // Add okToModel() == 2 back when you're done
+  if (goAndRender) { // Add okToModel() == 2 back when you're done
     removeModel();
     if (dynamicModels.includes(modelType)) {
       createDynamicModel(dctx, ctx, depthCanvas, imageCanvas);
@@ -833,7 +852,7 @@ function updateType() {
       bodyGroup.visible = false;
       teacherModel = new THREE.BufferGeometry();
       initModel();
-      render = true;
+      goAndRender = true;
   }
 
   modelType = newType;

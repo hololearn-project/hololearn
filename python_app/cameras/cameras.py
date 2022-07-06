@@ -20,23 +20,26 @@ if(not os.path.isfile(filepath + filename)):
 
 class camera(ABC):
     debug = False
+    frame_cnt = 0
     edge_tracking = False
+    multi_face_sampling = False
     near_plane = 500
     far_plane = 100000
     point = 1500
     face = (0, 0)
+    face_samples = []
     mapRes = 255
     mapResRemovalThres = mapRes - 10
     dimX = 576
     dimY = 640
-    cropdimX = 548
-    cropdimY = 300
+    cropdimX = 500
+    cropdimY = 500
     open_kernel = np.ones((5, 5), np.uint8)
     erosion_kernel = np.ones((2, 2), np.uint8)
     default_format=".jpg"
     faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
     dist_image = []
-    transpose = True
+    transpose = False
     bgr = True
     totalTime = 0
     steps = 1
@@ -81,7 +84,7 @@ class camera(ABC):
         ret = image[int(midY-height/2):int(midY+height/2), int(midX-width/2):int(midX+width/2)]
         return ret
         
-    def set_focal_window(self, image, range=400):
+    def set_focal_window(self, image, range=1200):
         """
         takes the depth map and normalises the values in the given range around
         the object's point attribute
@@ -102,7 +105,15 @@ class camera(ABC):
             a 2d array, containing a depth map centered around the point attribute
 
         """
-        new_point = image[self.face] #1300
+        if not self.multi_face_sampling:
+        
+            new_point = image[self.face] #1300
+        else:
+            new_depths = [image[int(i[0]), int(i[1])] for i in self.face_samples]
+
+            new_point = np.mean(new_depths)
+
+        print(new_point)
 
         if(self.near_plane < new_point < self.far_plane):
             self.point = new_point
@@ -362,19 +373,58 @@ class camera(ABC):
             a 3d array containing the image data, enoded as BRGA
         """
         color_image = self.crop(color_image)
-
         if (self.transpose): color_image = cv2.transpose(color_image)
 
         gray = cv2.cvtColor(color_image, cv2.COLOR_BGR2GRAY)
 
-        self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
+        self.frame_cnt += 1
 
-        for (x,y,w,h) in self.faces:
-            if(w*h > 400):
-                cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
-                self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
-                break
+        if self.frame_cnt % 5 == 0:
+
+            self.faces = self.faceCascade.detectMultiScale(gray, 1.3, 5)
+
+            for (x,y,w,h) in self.faces:
+                if(w*h > 400):
+                    cv2.rectangle(color_image, (x, y), (x + w, y + h), 0xff0000 )
+
+                    self.face = (min((int)(y+(h/2)), color_image.shape[0]-1), min((int)(x+(w/2)), color_image.shape[1]-1))
+
+                    self.face_samples = []
+
+                    self.face_samples.append(self.face + (0,10))
+                    self.face_samples.append(self.face + (0,-10))
+                    self.face_samples.append(self.face + (10,0))
+                    self.face_samples.append(self.face + (-10,0))
+
+                    #self.face_grid(x, w, y, h, (color_image.shape[0]-1, color_image.shape[1]-1))
+                    
+                    break
+        
         return color_image
+
+    def face_grid(self, x, w, y, h, dim):
+
+        GRID_SAMPLE_GAP_PCT = 0.2
+
+        # Starts at 25% into the box area and stops at 75%, thus 50% coverage
+
+        x_grid = x + 0.25*w
+        y_grid = y + 0.25*h
+
+        x_inc = GRID_SAMPLE_GAP_PCT*(0.5*w)
+        y_inc = GRID_SAMPLE_GAP_PCT*(0.5*h)
+
+        self.face_samples = []
+
+        for k in range(int(1/GRID_SAMPLE_GAP_PCT)):
+
+            x_k = min(dim[1]-1, x + (k*x_inc))
+
+            for j in range(int(1/GRID_SAMPLE_GAP_PCT)):
+
+                y_j = min(dim[0]-1, y +(j*y_inc))
+
+                self.face_samples.append((y_j, x_k))
     
     def process_frame_set(self, color_image):
         """
@@ -415,27 +465,28 @@ class camera(ABC):
         # cv2.imshow("depth before processing", depth_image)
         # cv2.waitKey(0)
 
-        if(self.transpose): depth_image = cv2.transpose(depth_image)
+        # if(self.transpose): depth_image = cv2.transpose(depth_image)
 
-        depth_image = self.set_focal_window(depth_image)
+        # depth_image = self.set_focal_window(depth_image)
 
         # depth_image = self.sharpen_edges(depth_image)
 
-        # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
+        # # x_0, x_n, y_0, y_n = self.find_min_max_non_zero(depth_image)
 
-        # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
-        # cv2.waitKey(0)
-        if(self.bgr):
-            depth_image = self.encode_bgr_channels(depth_image)
-        else:
-            depth_image = self.encode_bgr_channels_color(depth_image)
+        # # cv2.imshow('depth', self.encode_bgr_channels_color(depth_image))
+        # # cv2.waitKey(0)
+        # if(self.bgr):
+        #     depth_image = self.encode_bgr_channels(depth_image)
+        # else:
+        #     depth_image = self.encode_bgr_channels_color(depth_image)
             
-        # depth_image = self.remove_background_noise(depth_image)
+        #depth_image = self.remove_background_noise(depth_image)
+        # alpha = ((2 * range)/self.mapRes)
+        # beta = (self.point - range) / alpha
+        #depth_image = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=alpha, beta=beta), cv2.COLORMAP_JET)
 
-        # cv2.imshow("after processing", depth_image)
-        # cv2.waitKey(0)
-
-
+        # # cv2.imshow("after processing", depth_image)
+        # # cv2.waitKey(0)
 
         return depth_image
 

@@ -183,7 +183,7 @@ function startConnecting(teacher, name) {
     studentCanvas2.position.set( a, b, c);
     studentCanvas2.matrixAutoUpdate = true;
     studentCanvas2.name = 'Student' + seat;
-    scene.add( studentCanvas2 );
+    addVR( studentCanvas2 );
     objects.push( studentCanvas2 );
 
     students[seat] = studentCanvas2;
@@ -278,7 +278,6 @@ function startConnecting(teacher, name) {
       socket.emit('signal', id, data);
     });
     newPeer.on('stream', (stream) => {
-      console.log('new stream: ' + stream);
       // peer is the teacher
       if (seat == -5) {
         // selectedPosition -7 -> you are the slides player.
@@ -381,7 +380,6 @@ function startConnecting(teacher, name) {
         if (localMediaStreamWebcam.getAudioTracks()[0] != undefined) {
           teacherStream.addTrack(localMediaStreamWebcam.getAudioTracks()[0]);
         }
-        console.log(seat);
         newPeer.addStream(teacherStream);
       }
     }
@@ -642,18 +640,6 @@ function startConnecting(teacher, name) {
         }
         start3DAudioUser(0, stream);
       }
-      // if (table == -4 && document.getElementById('lidarVideoStream1').srcObject !=
-      //    undefined && document.getElementById('lidarVideoStream2').srcObject != undefined) {
-      //   removeBackgroundWithDepth();
-
-      // }
-      // if (sid == 'webcamstream') {
-      //   webcamStream = stream;
-      //   cameraMesh.start();
-      //   document.getElementById('webcamVid').srcObject = stream;
-      //   console.log('set it correctly');
-      //   teacherWebcamOn = true;
-      // }
     });
 
     teacherPeer.on('track', (track, stream) => {
@@ -669,7 +655,6 @@ function startConnecting(teacher, name) {
         teacherPeer.addStream(localMediaStream);
       }
       // Add the webam of the teacher for the face mesh if there is one.
-      // console.log(localMediaStreamWebcam);
       // if (teacher && localMediaStreamWebcam != null) {
       //   const faceStream = new MediaStream();
       //   faceStream.addTrack(localMediaStreamWebcam.getVideoTracks()[0]);
@@ -735,7 +720,7 @@ function addScreenShare(stream, replay) {
     side: THREE.DoubleSide,
   }));
   me2.rotation.y = Math.PI;
-  scene.add( me2 );
+  addVR( me2 );
   objects.push( me2 );
 }
 

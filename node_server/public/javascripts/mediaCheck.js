@@ -58,9 +58,9 @@ async function getCamerasAndMics() {
   await getCameraPermission();
   await getMicPermission();
   navigator.mediaDevices.enumerateDevices().then((devices) => {
-    // if (!isTeacher) {
-    gotDevicesCamera(devices);
-    // }
+    if (select != undefined) {
+      gotDevicesCamera(devices);
+    }
     gotDevicesMic(devices);
   });
 }
