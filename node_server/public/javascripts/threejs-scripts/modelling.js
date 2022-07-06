@@ -3,8 +3,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable valid-jsdoc */
 
-justOnce = false;
-
 /* Imports used for running tests on modelling,
 These imports should be commented out unless running tests
 */
@@ -619,9 +617,7 @@ function modelFromIndexes(dctx) {
  */
 async function model2DNoDepth() {
   const twod = document.getElementById('2d');
-  if (!justOnce) {
-    await new Promise(r => setTimeout(r, 6000));
-  }
+  await new Promise(r => setTimeout(r, 6000));
   ctx.drawImage(document.getElementById('teacherRecording'), 0, 0, imgWidth, imgLength);
 
   ctxFlatCanvas.putImageData(removeBlackBackgroundTeacherRecording(ctx.getImageData(0, 0, imgWidth, imgLength)), 0, 0);
