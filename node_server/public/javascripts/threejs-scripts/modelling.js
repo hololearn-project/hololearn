@@ -615,9 +615,8 @@ function modelFromIndexes(dctx) {
  * performs backgorund removal with sensor flow.
  * @param {HTMLCanvasElement} ctx The canvas containing the picture image
  */
-async function model2DNoDepth() {
+function model2DNoDepth() {
   const twod = document.getElementById('2d');
-  await new Promise(r => setTimeout(r, 6000));
   ctx.drawImage(document.getElementById('teacherRecording'), 0, 0, imgWidth, imgLength);
 
   ctxFlatCanvas.putImageData(removeBlackBackgroundTeacherRecording(ctx.getImageData(0, 0, imgWidth, imgLength)), 0, 0);
