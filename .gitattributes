@@ -1,0 +1,2 @@
+*teacherRecording.webm filter=lfs diff=lfs merge=lfs -text
+*screenShareStream.webm filter=lfs diff=lfs merge=lfs -text
