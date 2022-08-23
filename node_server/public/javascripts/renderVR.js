@@ -1,4 +1,6 @@
 let inVR = false;
+const cameraVector = new THREE.Vector3();
+
 /* eslint-disable no-unused-vars */
 /**
  * Iterates through every object in the scene and transforms it to accomodate the
