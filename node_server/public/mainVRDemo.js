@@ -25,6 +25,12 @@ let objects = [];
 let faceMeshFlag = false;
 let bodyTrackFlag = false;
 
+const canvas2d = document.getElementById('2d');
+const ctx = canvas2d.getContext('2d');
+
+const depth_canvas = document.getElementById('dm');
+const dctx = depth_canvas.getContext('2d');
+
 const UNIQUE_USER_ID = Math.random().toString(36).substring(7);
 const N_RECONNECT_TO_PEER_ATTEMPTS = 5;
 const FACE_MESH_LANDMARK_COUNT = 468;
@@ -32,6 +38,8 @@ const FACE_MESH_LANDMARK_COUNT = 468;
 let vertexMarker = 0;
 
 let renderer = new THREE.WebGLRenderer();
+
+const loader = new THREE.GLTFLoader();
 
 let scene = new THREE.Scene();
 let teacherModel = new THREE.BufferGeometry();
@@ -78,7 +86,6 @@ window.onerror = function(error, url, line) {
 const URL_VIDEOFEED_PYTHON = 'http://localhost:5000/video_feed';
 const URL_DEPTHFEED_PYTHON = 'http://localhost:5000/depth_feed';
 const CLASSROOM_SCENE_LOCATION = '/assets/scene.gltf';
-const MODEL_LOCATION = '/assets/scaledModel.gltf';
 const SOCKET_ADDRESS = 'http://localhost:8080';
 const CLASSROOM_BLACKBOARD_IMAGE = '/assets/fourier.png';
 const WEBCAM_FRAMES_PER_SECOND = 20;
@@ -103,18 +110,71 @@ async function loadNet() { // this one is more efficient
   });
 }
 
-/**
- * Loads the steve.obj model
- */
+
+let pausing = false;
+
+function playPauseLecture() {
+  if (document.getElementById('screenshare').currentTime == 0) {
+    document.getElementById('screenshare').currentTime = 15;
+  }
+  if (document.getElementById('pauseIcon').style.display == 'none') {
+    document.getElementById('teacherRecording').play();
+    document.getElementById('screenshare').play();
+    document.getElementById('pauseIcon').style.display = 'block';
+    document.getElementById('3DReplayIcon').style.display = 'none';
+  } else {
+    document.getElementById('teacherRecording').pause();
+    document.getElementById('screenshare').pause();
+    document.getElementById('pauseIcon').style.display = 'none';
+    document.getElementById('3DReplayIcon').style.display = 'block';
+  }
+}
 
 /**
  * Loads the 3D environment
  */
 async function load3DEnvironment() {
+  function runLecture() {
+    document.getElementById('teacherRecording').play();
+    document.getElementById('screenshare').play();
+    document.getElementById('teacherRecording').currentTime = 0;
+
+    setInterval(function() {
+      if (!pausing) {
+        document.getElementById('teacherRecording').play();
+        document.getElementById('screenshare').play();
+      }
+    }, 500);
+  }
+
+  function pauseLecture() {
+    document.getElementById('teacherRecording').pause();
+    document.getElementById('screenshare').pause();
+    pausing = true;
+  }
+
+  function playLecture() {
+    document.getElementById('teacherRecording').play();
+    document.getElementById('screenshare').play();
+  }
+
+  socket.on('pauseLecture', () => {
+    pauseLecture();
+  });
+
+  socket.on('runLecture', () => {
+    console.log('going to run lecture');
+    runLecture();
+  });
+
+  socket.on('playLectureVR', () => {
+    playLecture();
+  });
   // document.getElementById('connectButton').style.display = 'none';
 
   if (isTeacher) {
     mapScreen = new THREE.VideoTexture(localMediaStream);
+    // console.log(localMediaStreamWebcam);
     if (localMediaStreamWebcam != null) {
       cameraMesh.start();
       teacherWebcamOn = true;
@@ -138,13 +198,14 @@ async function load3DEnvironment() {
 
   updateSubSample();
 
-  initModel();
+  initFlatModel();
+
   renderer.setSize( width, height - 1);
 
   renderer.xr.enabled = true;
   document.body.appendChild( renderer.domElement );
 
-  // document.body.appendChild(VRButton.createButton(renderer));
+  document.body.appendChild(VRButton.createButton(renderer));
 
   const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
   camera.near = 0.01;
@@ -154,16 +215,9 @@ async function load3DEnvironment() {
   camera.position.z = c;
 
   let startColor;
-  const canvas2d = document.getElementById('2d');
-  const ctx = canvas2d.getContext('2d');
-
-  const depth_canvas = document.getElementById('dm');
-  const dctx = depth_canvas.getContext('2d');
 
   const map = new THREE.Texture(canvas2d);
   scene.background = new THREE.Color( 0x87ceeb );
-
-  const loader = new THREE.GLTFLoader();
 
   /**
    * Window resizer
@@ -212,33 +266,6 @@ async function load3DEnvironment() {
           console.log( 'An error happened' );
         },
     );
-    // loader.load(
-    //     // resource URL
-    //     MODEL_LOCATION,
-    //     // called when the resource is loaded
-    //     function( gltf ) {
-    //       gltf.scene.name = 'humanModel';
-    //       console.log('model loaded');
-    //       addVR( gltf.scene );
-    //       gltf.scene.scale.set(0.2, 0.2, 0.2);
-    //       // gltf.scene.position.x = -18.8;
-    //       // gltf.scene.position.y = 0.8;
-    //       // gltf.scene.position.z = 13.7;
-    //       gltf.scene.position.set(-18.8, 0.8, 13.7);
-    //       gltf.scene.rotation.y = 0.7;
-
-
-    //       gltf.animations; // Array<THREE.AnimationClip>
-    //       gltf.scene; // THREE.Group
-    //       gltf.scenes; // Array<THREE.Group>
-    //       gltf.cameras; // Array<THREE.Camera>
-    //       gltf.asset; // Object
-    //     },
-    //     // called while loading is progressing
-    //     function( xhr ) {
-    //     },
-    //     // called when loading has errors
-    // );
 
     // createLightWeightPointCloudModel()
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -248,7 +275,7 @@ async function load3DEnvironment() {
     //   setRecordedDepthSource();
     // }
 
-    await loadAssets();
+    // await loadAssets();
 
     // sets the target of the camera
     if (isTeacher) {
@@ -265,7 +292,7 @@ async function load3DEnvironment() {
     // controls.addEventListener( 'dragend', dragendCallback );
 
     // Starts the webcam or screen sharing
-    await startWebcam(a, b, c, scene, objects, isTeacher, camera);
+    // await startWebcam(a, b, c, scene, objects, isTeacher, camera);
   }
 
   /**
@@ -315,9 +342,14 @@ async function load3DEnvironment() {
         textures[i].needsUpdate = true;
       }
     }
-    let lookAtVector = new THREE.Vector3();
-    camera.getWorldDirection(lookAtVector);
-    rotation = Math.atan2(lookAtVector.x, lookAtVector.z);
+    if (inVR) {
+      let xrCamera = renderer.xr.getCamera(camera);
+      xrCamera.getWorldDirection(cameraVector);
+      rotation = Math.atan2(cameraVector.x, cameraVector.z) + Math.PI;
+    } else {
+      camera.getWorldDirection(cameraVector);
+      rotation = Math.atan2(cameraVector.x, cameraVector.z);
+    }
     if (!isTeacher) {
       if (student_canvas != null) {
         student_canvas.rotation.y = rotation;
@@ -329,19 +361,27 @@ async function load3DEnvironment() {
       if (students[i] != undefined && rotations[i] != undefined) {
         students[i].rotation.y = rotations[i];
       }
+      if (rotations[i] != undefined & humanModels[i] != undefined) {
+        if (i == 2) {
+          humanModels[parseInt(selectedPosition)].rotation.y = rotations[i];
+        } else {
+          humanModels[i].rotation.y = rotations[i];
+        }
+      }
     }
 
-    if (faceMeshFlag) {
-      updateFaceMesh();
-    } else if (bodyTrackFlag) {
-      updateSkeleton();
-    }
+    // if (faceMeshFlag) {
+    //   updateFaceMesh();
+    // } else if (bodyTrackFlag) {
+    //   updateSkeleton();
+    // }
 
 
     updateScreenAndWebcams(isTeacher, camera);
 
-    // if (!isTeacher)
+    // if (!isTeacher) {
     animateTeacher(dctx, ctx, depth_canvas, canvas2d);
+    // }
     renderer.render(scene, camera);
   };
 
@@ -357,12 +397,16 @@ async function load3DEnvironment() {
   // set UI buttons visable if not a recorder
   if (table >= 0) {
     document.getElementById('buttonGroup').style.display = 'block';
+    document.getElementById('buttonGroup').style.width = '180px';
+    const left = (window.innerWidth - 180) / 2;
+    document.getElementById('buttonGroup').style.marginLeft = left + 'px';
     document.getElementById('advOptBtn').style.display = 'block';
+    document.getElementById('muteButton').style.display = 'none';
 
 
     if (!isTeacher) {
-      document.getElementById('speakButton').style.display = 'block';
-      document.getElementById('cameraButton').style.display = 'block';
+      // document.getElementById('speakButton').style.display = 'block';
+      // document.getElementById('cameraButton').style.display = 'block';
       // document.getElementById('usersButton').style.display = 'none';
     } else {
       document.getElementById('usersButton').style.display = 'block';
@@ -375,11 +419,10 @@ async function load3DEnvironment() {
     if (table == -1) {
       document.getElementById('recordButton').style.display = 'block';
     } else {
-      document.getElementById('muteButton').style.display = 'none';
       document.getElementById('chatButton').style.display = 'none';
       document.getElementById('buttonGroup').style.display = 'block';
-      document.getElementById('buttonGroup').style.width = '120px';
-      const left = (window.innerWidth - 120) / 2;
+      document.getElementById('buttonGroup').style.width = '72px';
+      const left = (window.innerWidth - 72) / 2;
       document.getElementById('buttonGroup').style.marginLeft = left + 'px';
       if (table == -2) {
         document.getElementById('3DRecordButton').style.display = 'block';
@@ -392,5 +435,27 @@ async function load3DEnvironment() {
   }
 
   animate();
-  // simpleVerticies()
+
+  const screenshareScreen = document.getElementById('screenshare');
+  // screenshareScreen.muted = false;
+
+  screenshareScreen.src = 'screenShareStream.webm';
+
+
+  mapScreen = new THREE.VideoTexture(screenshareScreen);
+
+
+  const geometry2 = new THREE.PlaneGeometry(48, 24);
+  const me2 = new THREE.Mesh( geometry2, new THREE.MeshPhongMaterial( {
+    color: 'white',
+    map: mapScreen,
+    alphaTest: 0.5,
+    transparent: true,
+    side: THREE.DoubleSide,
+  }));
+  me2.rotation.y = Math.PI;
+  me2.position.set(0, 15, 32);
+  addVR( me2 );
+  objects.push( me2 );
 }
+
