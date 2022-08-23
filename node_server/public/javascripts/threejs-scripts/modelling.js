@@ -91,6 +91,31 @@ M6 = hidden
 M7 = flat (background removed with depth)
 */
 
+function initFlatModel() {
+  console.log('initsflatmodel');
+  // imgWidth = document.getElementById('teacherRecording').src.width;
+  // console.log(document.getElementById('teacherRecording').src.width);
+  // imgLength = document.getElementById('teacherRecording').src.getVideoTracks()[0].getSettings().height;
+  const flatCanvas = document.getElementById('flatCanvas');
+  teacherTexture = new THREE.VideoTexture(flatCanvas);
+  teacherTexture.format = THREE.RGBAFormat;
+  const plane= new THREE.PlaneGeometry(20, 10);
+  const mesh = new THREE.Mesh( plane, new THREE.MeshPhongMaterial( {
+    color: 'white',
+    map: teacherTexture,
+    alphaTest: 0.5,
+    transparent: true,
+    side: THREE.FrontSide,
+  }));
+  mesh.rotation.y = Math.PI;
+  mesh.position.set(-5, 8.5, 27);
+  modelPresent = true;
+  mesh.name = 'model';
+
+  addVR(mesh);
+  objects.push( mesh );
+}
+
 /**
  * calls several other initialization methods,
  * necessary for the creating of the teacher model
