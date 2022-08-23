@@ -35,7 +35,6 @@ node_server/public/color_video.mp4
 *.mp4
 *.mp4
 node_server/public/color_video.mp4
-*.webm
 node_server/public/color_video.webm
 python_app/venv1
 virtualenv/
